@@ -3053,11 +3053,11 @@ function _toWorkDay(d){
 function _nextThu(today){var day=today.getDay();var diff=(4-day+7)%7||7;return _addD(today,diff);}
 function calcDelivery(catKey){
   var today=new Date();today.setHours(0,0,0,0);
-  var spotDays={spot_wikuk:18,spot_ceylan:14,spot_taberner:7,spot_campana:21,spot_merkapack:10};
+  var spotDays={spot_wikuk:18,spot_ceylan:14,spot_taberner:7,spot_campana:21,spot_merkapack:10,spot_frumen:15,spot_sierra:18,spot_cui:15,spot_el_carmen:16};
   if(spotDays[catKey]){var thu=_nextThu(today);return '📦 '+_fmtD(_addWorkDays(thu,spotDays[catKey]));}
   return '📦 '+_fmtD(_addWorkDays(today,3));
 }
-function isSpot(k){return ['spot_wikuk','spot_ceylan','spot_taberner','spot_campana','spot_merkapack'].indexOf(k)!==-1;}
+function isSpot(k){return ['spot_wikuk','spot_ceylan','spot_taberner','spot_campana','spot_merkapack','spot_frumen','spot_sierra','spot_cui','spot_el_carmen'].indexOf(k)!==-1;}
 function isPromo(k){return k==='promo_tripas'||k==='promo_especias'||k==='promo_envases';}
 
 
