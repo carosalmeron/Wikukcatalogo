@@ -838,6 +838,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <div class="admin-tab-bar">
     <div class="admin-tab active" id="atab-users" onclick="showAdminTab('users')">👥 Usuarios</div>
     <div class="admin-tab" id="atab-admins" onclick="showAdminTab('admins')">🔐 Administradores</div>
+    <div class="admin-tab" id="atab-accesos" onclick="showAdminTab('accesos')">📊 Accesos</div>
   </div>
 
   <!-- PANEL: USERS -->
@@ -900,6 +901,25 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
           <button onclick="cancelUserForm()" style="padding:11px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;">Cancelar</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- PANEL: ACCESOS -->
+  <div class="admin-panel" id="apanel-accesos" style="display:none;">
+    <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--white);flex-shrink:0;">
+      <div style="font-size:.9rem;font-weight:700">Registro de accesos</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="accesos-filter-user" onchange="renderAccesos()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:Inter,sans-serif;font-size:.78rem;background:var(--bg);outline:none;">
+          <option value="">Todos los usuarios</option>
+        </select>
+        <button onclick="clearAccesos()" style="padding:6px 12px;background:#FEE2E2;color:#991B1B;border:none;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">🗑 Borrar</button>
+      </div>
+    </div>
+    <!-- Stats row -->
+    <div id="accesos-stats" style="display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--white);flex-shrink:0;"></div>
+    <!-- Table -->
+    <div style="overflow-y:auto;flex:1;padding:12px;">
+      <div id="accesos-list" style="font-size:.83rem;"></div>
     </div>
   </div>
 
@@ -3156,6 +3176,151 @@ var JSONBIN_KEY = '$2a$10$7CwtKpd.KHsd0jz8xyGJqe437zEj0pvow/WSQQfe1TqlY7nWq1Xw6'
 var APP_USERS = [];       // loaded from JSONBin
 var ACTIVE_USER = null;   // logged in user
 
+// ═══ ACCESOS JSONBin ═══ (usa el mismo bin que usuarios)
+var ACCESOS_LOG = [];
+var SESSION_START = null;
+var SESSION_TIMER = null;
+
+async function loadAccesos() {
+  try {
+    var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
+    if (!r.ok) { ACCESOS_LOG = []; return; }
+    var data = JSON.parse(await r.text());
+    ACCESOS_LOG = (data.record && data.record.accesos) ? data.record.accesos : [];
+  } catch(e) { ACCESOS_LOG = []; }
+}
+
+async function saveAccesos() {
+  try {
+    if (ACCESOS_LOG.length > 500) ACCESOS_LOG = ACCESOS_LOG.slice(-500);
+    var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
+    var data = r.ok ? JSON.parse(await r.text()) : { record: { usuarios: APP_USERS } };
+    var body = Object.assign({}, data.record, { accesos: ACCESOS_LOG });
+    await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+      body: JSON.stringify(body)
+    });
+  } catch(e) { console.error('Error saving accesos:', e); }
+}
+
+function registrarAcceso(usuario, nombre) {
+  SESSION_START = new Date();
+  var registro = {
+    id: Date.now(),
+    usuario: usuario,
+    nombre: nombre || usuario,
+    entrada: SESSION_START.toISOString(),
+    salida: null,
+    duracion: null,
+    dispositivo: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'Móvil' : 'Escritorio'
+  };
+  ACCESOS_LOG.push(registro);
+  saveAccesos();
+
+  // Update duration every minute
+  SESSION_TIMER = setInterval(function() {
+    var idx = ACCESOS_LOG.findIndex(function(a){ return a.id === registro.id; });
+    if (idx === -1) return;
+    var mins = Math.round((new Date() - SESSION_START) / 60000);
+    ACCESOS_LOG[idx].duracion = mins + ' min';
+    saveAccesos();
+  }, 60000);
+
+  // On page close/hide
+  document.addEventListener('visibilitychange', function onHide() {
+    if (document.hidden) {
+      var idx = ACCESOS_LOG.findIndex(function(a){ return a.id === registro.id; });
+      if (idx !== -1) {
+        var salida = new Date();
+        ACCESOS_LOG[idx].salida = salida.toISOString();
+        ACCESOS_LOG[idx].duracion = Math.round((salida - SESSION_START) / 60000) + ' min';
+        saveAccesos();
+      }
+      document.removeEventListener('visibilitychange', onHide);
+    }
+  });
+}
+
+function renderAccesos() {
+  var filterUser = document.getElementById('accesos-filter-user') ? document.getElementById('accesos-filter-user').value : '';
+  var logs = ACCESOS_LOG.slice().reverse(); // most recent first
+  if (filterUser) logs = logs.filter(function(a){ return a.usuario === filterUser; });
+
+  // Populate user filter
+  var sel = document.getElementById('accesos-filter-user');
+  if (sel) {
+    var usuarios = [...new Set(ACCESOS_LOG.map(function(a){ return a.usuario; }))].sort();
+    var current = sel.value;
+    sel.innerHTML = '<option value="">Todos los usuarios</option>'
+      + usuarios.map(function(u){ return '<option value="'+u+'"'+(u===current?' selected':'')+'>'+u+'</option>'; }).join('');
+  }
+
+  // Stats
+  var statsEl = document.getElementById('accesos-stats');
+  if (statsEl) {
+    var total = ACCESOS_LOG.length;
+    var hoy = ACCESOS_LOG.filter(function(a){
+      return new Date(a.entrada).toDateString() === new Date().toDateString();
+    }).length;
+    var unicos = new Set(ACCESOS_LOG.map(function(a){ return a.usuario; })).size;
+    var duraciones = ACCESOS_LOG.filter(function(a){ return a.duracion; })
+      .map(function(a){ return parseInt(a.duracion); });
+    var avgDur = duraciones.length ? Math.round(duraciones.reduce(function(s,v){return s+v;},0)/duraciones.length) : 0;
+    statsEl.innerHTML = [
+      ['📋', 'Total accesos', total],
+      ['📅', 'Hoy', hoy],
+      ['👤', 'Usuarios únicos', unicos],
+      ['⏱', 'Duración media', avgDur + ' min']
+    ].map(function(s){
+      return '<div style="flex:1;text-align:center;padding:12px 6px;border-right:1px solid var(--border);">'
+        + '<div style="font-size:1.1rem">'+s[0]+'</div>'
+        + '<div style="font-size:1.1rem;font-weight:700;color:var(--accent)">'+s[2]+'</div>'
+        + '<div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">'+s[1]+'</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Table
+  var list = document.getElementById('accesos-list');
+  if (!list) return;
+  if (!logs.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay registros de acceso</div>';
+    return;
+  }
+
+  list.innerHTML = '<table style="width:100%;border-collapse:collapse;background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;">'
+    + '<thead><tr style="background:var(--bg);">'
+    + '<th style="padding:9px 14px;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;border-bottom:1px solid var(--border)">Usuario</th>'
+    + '<th style="padding:9px 14px;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;border-bottom:1px solid var(--border)">Fecha</th>'
+    + '<th style="padding:9px 14px;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;border-bottom:1px solid var(--border)">Hora entrada</th>'
+    + '<th style="padding:9px 14px;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;border-bottom:1px solid var(--border)">Duración</th>'
+    + '<th style="padding:9px 14px;font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;border-bottom:1px solid var(--border)">Dispositivo</th>'
+    + '</tr></thead><tbody>'
+    + logs.map(function(a, i){
+        var dt = new Date(a.entrada);
+        var fecha = dt.toLocaleDateString('es-ES', {day:'2-digit',month:'2-digit',year:'numeric'});
+        var hora  = dt.toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'});
+        var isHoy = dt.toDateString() === new Date().toDateString();
+        return '<tr style="border-bottom:1px solid var(--border);">'
+          + '<td style="padding:10px 14px;"><strong>'+a.nombre+'</strong><br><span style="font-size:.72rem;color:var(--muted)">@'+a.usuario+'</span></td>'
+          + '<td style="padding:10px 14px;font-size:.83rem;">'+(isHoy?'<span style="background:#D1FAE5;color:#065F46;padding:2px 7px;border-radius:4px;font-size:.72rem;font-weight:700">HOY</span> ':'') + fecha+'</td>'
+          + '<td style="padding:10px 14px;font-size:.83rem;">'+hora+'</td>'
+          + '<td style="padding:10px 14px;font-size:.83rem;color:'+(a.duracion?'var(--text)':'var(--muted)')+'">'+( a.duracion || 'En curso...')+'</td>'
+          + '<td style="padding:10px 14px;font-size:.78rem;">'+( a.dispositivo==='Móvil'?'📱':'🖥️')+' '+a.dispositivo+'</td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table>';
+}
+
+async function clearAccesos() {
+  if (!confirm('¿Seguro que quieres borrar todos los registros de acceso?')) return;
+  ACCESOS_LOG = [];
+  await saveAccesos();
+  renderAccesos();
+}
+
+
 // ── Load users from JSONBin ──
 async function loadUsers() {
   try {
@@ -3229,6 +3394,7 @@ async function doUserLogin() {
 
   ACTIVE_USER = found;
   ACTIVE_VENDOR_CATS = found.categorias === 'todas' ? null : found.categorias;
+  registrarAcceso(found.usuario, found.nombre);
 
   document.getElementById('loginScreen').style.display = 'none';
   // Show user badge
@@ -3989,14 +4155,15 @@ function closeAdminPanel() {
   document.getElementById('entryScreen').style.display = 'flex';
 }
 function showAdminTab(tab) {
-  ['users','admins'].forEach(function(t){
+  ['users','admins','accesos'].forEach(function(t){
     var tabEl   = document.getElementById('atab-'+t);
     var panelEl = document.getElementById('apanel-'+t);
     if (tabEl)   tabEl.classList.toggle('active', t===tab);
-    if (panelEl) { panelEl.classList.toggle('active', t===tab); panelEl.style.display = t===tab ? 'block' : 'none'; }
+    if (panelEl) { panelEl.classList.toggle('active', t===tab); panelEl.style.display = t===tab ? 'flex' : 'none'; }
   });
-  if (tab==='users')  renderUserList();
-  if (tab==='admins') renderAdminList();
+  if (tab==='users')   renderUserList();
+  if (tab==='admins')  renderAdminList();
+  if (tab==='accesos') { loadAccesos().then(renderAccesos); }
 }
 
 // ── Agent list ──
