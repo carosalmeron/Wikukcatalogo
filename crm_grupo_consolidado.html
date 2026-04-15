@@ -7331,17 +7331,19 @@ const root = ReactDOM.createRoot(container);
   }
 
   function getAutoUser(){
-    // Vía 1: URL hash
+    // Vía 1: URL hash — formato: #crmId  o  #crmId|catalogoVendedor
     try{
       var hash=window.location.hash.replace('#','');
       if(hash){
         var decoded=decodeURIComponent(hash);
-        var u=findCrmUser(decoded);
+        // Separar crmId del vendedor si viene con pipe
+        var crmId=decoded.includes('|')?decoded.split('|')[0]:decoded;
+        var u=findCrmUser(crmId.trim());
         if(u) return u;
       }
     }catch(e){}
 
-    // Vía 2: localStorage (se comparte entre parent e iframe mismo origen)
+    // Vía 2: localStorage
     try{
       var stored=localStorage.getItem('gc_portal_user');
       if(stored){
