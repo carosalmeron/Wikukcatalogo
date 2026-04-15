@@ -3193,14 +3193,13 @@ async function loadAccesos() {
 async function saveAccesos() {
   try {
     if (ACCESOS_LOG.length > 500) ACCESOS_LOG = ACCESOS_LOG.slice(-500);
-    var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
-    var data = r.ok ? JSON.parse(await r.text()) : { record: { usuarios: APP_USERS } };
-    var body = Object.assign({}, data.record, { accesos: ACCESOS_LOG });
-    await fetch(JSONBIN_URL, {
+    var body = { usuarios: APP_USERS, accesos: ACCESOS_LOG };
+    var r = await fetch(JSONBIN_URL, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
       body: JSON.stringify(body)
     });
+    if (!r.ok) console.error('saveAccesos error:', r.status);
   } catch(e) { console.error('Error saving accesos:', e); }
 }
 
