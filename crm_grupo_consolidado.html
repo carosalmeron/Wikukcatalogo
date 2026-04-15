@@ -5463,10 +5463,19 @@ function GestorClientes({usuario, actividad, onActividad, onBack, clientesFB}){
   // clientes efectivos (pueden tener rutas asignadas localmente)
   const clientesEfectivos=clientesLocal||clientes;
 
-  // El campo "semana" de Firebase ES la ruta
+  // El campo "semana" o "semanas" (array) de Firebase ES la ruta
   const getRouteNum=(c)=>{
-    const v=c.semana||c.ruta;
-    if(v&&Number(v)>0) return Number(v);
+    // Primero semana como número
+    if(c.semana&&Number(c.semana)>0) return Number(c.semana);
+    if(c.ruta&&Number(c.ruta)>0) return Number(c.ruta);
+    // semanas como array [1] o [1,2,3]
+    if(Array.isArray(c.semanas)&&c.semanas.length>0){
+      const n=Number(c.semanas[0]);
+      if(n>0) return n;
+    }
+    // semanaVisita u otros nombres posibles
+    if(c.semanaVisita&&Number(c.semanaVisita)>0) return Number(c.semanaVisita);
+    if(c.SEMANAVISITA&&Number(c.SEMANAVISITA)>0) return Number(c.SEMANAVISITA);
     return 0;
   };
 
@@ -5974,6 +5983,7 @@ function GestorClientes({usuario, actividad, onActividad, onBack, clientesFB}){
         <p style={{margin:"0 0 12px",fontSize:22,fontWeight:800,color:"#fff"}}>📋 Mis clientes</p>
         <div style={{display:"flex",gap:8}}>
           {[
+            {label:"Total",value:clientesEfectivos.length,color:"#60A5FA"},
             {label:"Visitados",value:totalVisitados,total:clientesEfectivos.length,color:"#4ADE80"},
             {label:"Muestras",value:totalMuestras,color:"#C4B5FD"},
           ].map(k=>(
@@ -5988,6 +5998,11 @@ function GestorClientes({usuario, actividad, onActividad, onBack, clientesFB}){
       </div>
 
       <div style={{padding:"16px"}}>
+        {/* DEBUG — eliminar cuando funcione */}
+        <div style={{background:"#EFF6FF",border:"1px solid #93C5FD",borderRadius:8,padding:"8px 12px",marginBottom:12,fontSize:11}}>
+          <span style={{fontWeight:700,color:"#1D4ED8"}}>🔍 Debug: </span>
+          <span style={{color:"#1E40AF"}}>{clientesEfectivos.length} clientes cargados · {rutasNums.length} rutas · {sinRuta.length} sin ruta</span>
+        </div>
         <p style={{margin:"0 0 12px",fontSize:11,fontWeight:700,color:T.muted,
           textTransform:"uppercase",letterSpacing:".08em"}}>
           {rutasNums.length>0?"Selecciona una ruta":`${clientesEfectivos.length} clientes`}
