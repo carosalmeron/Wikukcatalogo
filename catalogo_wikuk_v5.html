@@ -3343,7 +3343,7 @@ async function loadUsers() {
 // ── Save users to JSONBin ──
 async function saveUsers() {
   try {
-    var body = JSON.stringify({usuarios: APP_USERS});
+    var body = JSON.stringify({usuarios: APP_USERS, accesos: ACCESOS_LOG});
     console.log('Saving to JSONBin:', body.substring(0, 200));
     var r = await fetch(JSONBIN_URL, {
       method: 'PUT',
@@ -4760,6 +4760,8 @@ function closeModal() {
 document.addEventListener('DOMContentLoaded', function() {
   var sel = document.getElementById('modal-estado');
   if (sel) sel.addEventListener('change', onModalEstadoChange);
+  // Pre-load accesos so ACCESOS_LOG is populated before any save
+  loadAccesos();
 });
 
 function onModalEstadoChange() {
