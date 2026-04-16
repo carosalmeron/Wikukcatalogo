@@ -2810,7 +2810,7 @@ const DATA = {
     {c:'C5.8R', n:'MAD.CERDO EUR P.150 A', f1:'Cal. 34/36', f2:'75 m', p:'1279 uds.', cat:'Promoción'}
     ],
     'Cerdo United Caro':[
-    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'187 uds.', cat:'Promoción'}
+    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'68 uds.', cat:'Promoción'}
     ],
     'Culares':[
     {c:'CU42', n:'CULAR P.70 AAB 0.65', f1:'Cal. 62/67', f2:'65 m', p:'21 uds.', cat:'Promoción'}
@@ -2840,11 +2840,15 @@ const DATA = {
     {c:'MX240.20R2', n:'MAEXTRA+ (1x20metros) T2550 2L', f1:'Cal. 40', f2:'20 m', p:'3425 uds.', cat:'Promoción'},
     {c:'MX250.20R3', n:'MAEXTRA+ (1x20metros) T3045 2L', f1:'Cal. 47', f2:'20 m', p:'702 uds.', cat:'Promoción'}
     ],
-    'CERDO CK':[
-    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'240 uds.', cat:'Promoción'},
-    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'1040 uds.', cat:'Promoción'},
-    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3640 uds.', cat:'Promoción'},
+    'Cerdo CK XXL TF':[
+    {c:'CX50.9KF3', n:'MAD.CERDO CK P.189 XXL 14/+ TF 1T', f1:'Cal. 34/36', f2:'90 m', p:'188 uds.', cat:'Promoción'}
+  ],
+  'CERDO CK':[
+    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'480 uds.', cat:'Promoción'},
+    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'480 uds.', cat:'Promoción'},
+    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'720 uds.', cat:'Promoción'},
     {c:'CL50.8KF3', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3400 uds.', cat:'Promoción'},
+    {c:'CX50.9KF3', n:'MAD.CERDO CK P.189 XL 14/+', f1:'Cal. 34/36', f2:'90 m', p:'1.000 uds.', cat:'Promoción'},
     {c:'CL60.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 36/38', f2:'80 m', p:'1820 uds.', cat:'Promoción'}
     ]
   }},
@@ -2910,6 +2914,10 @@ promo_tripas:{label:'Tripas',subs:{
     {c:'GA48.9N', n:'MAD.CORDERO BC', f1:'Cal. 24/26', f2:'90 m', p:'589 uds.', cat:'Promoción'},
     {c:'IR32.8N', n:'MAD.CORDERO P.500 AB', f1:'Cal. 19/21', f2:'80 m', p:'2464 uds.', cat:'Promoción'}
   ],
+  'Vejigas':[
+    {c:'VG1', n:'VEJIGAS FRESCAS LIMPIAS PEQUEÑAS', f1:'Cal. 15/20', f2:'—', p:'6.395 uds.', cat:'Promoción'},
+    {c:'VG2', n:'VEJIGAS FRESCAS LIMPIAS 20/25', f1:'Cal. 20/25', f2:'—', p:'10.650 uds.', cat:'Promoción'}
+  ],
   'Vacuno':[
     {c:'V13.5G', n:'MAD.BUEY EX P.70', f1:'Cal. 38/40', f2:'50 m', p:'2022 uds.', cat:'Promoción'}
   ],
@@ -2918,7 +2926,7 @@ promo_tripas:{label:'Tripas',subs:{
     {c:'C5.8R', n:'MAD.CERDO EUR P.150 A', f1:'Cal. 34/36', f2:'75 m', p:'1279 uds.', cat:'Promoción'}
   ],
   'Cerdo United Caro':[
-    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'187 uds.', cat:'Promoción'}
+    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'68 uds.', cat:'Promoción'}
   ],
   'Culares':[
     {c:'CU42', n:'CULAR P.70 AAB 0.65', f1:'Cal. 62/67', f2:'65 m', p:'21 uds.', cat:'Promoción'}
@@ -2928,6 +2936,9 @@ promo_tripas:{label:'Tripas',subs:{
   ],
   'Ciegos Vacuno':[
     {c:'CI2.50', n:'CIEGOS DE VACUNO', f1:'Cal. 95/115', f2:'0.50 m', p:'12673 uds.', cat:'Promoción'}
+  ],
+  'Ciegos Cerdo':[
+    {c:'CIP3', n:'CIEGOS DE CERDO GRANDES', f1:'—', f2:'—', p:'13.873 uds.', cat:'Promoción'}
   ],
   'Semicular':[
     {c:'TR1503', n:'PIEZA DE SEMICULAR CA 0.35', f1:'Cal. 70/+', f2:'35 m', p:'60 uds.', cat:'Liquidación'}
@@ -2944,15 +2955,19 @@ promo_tripas:{label:'Tripas',subs:{
     {c:'TR1045', n:'T.SECA LM UNITED CARO', f1:'Cal. 55', f2:'0.90 m', p:'4930 uds.', cat:'Liquidación'},
     {c:'TR1118', n:'T.SECA LM UNITED CARO', f1:'Cal. 70', f2:'0.60 m', p:'3297 uds.', cat:'Liquidación'}
   ],
+  'Tripa Seca Buey':[
+    {c:'TR1296', n:'TRIPA SECA DE BUEY CAL. 55/60', f1:'Cal. 55/60', f2:'18 m', p:'1.936 uds.', cat:'Promoción'}
+  ],
   'Maextra+':[
     {c:'MX240.20R2', n:'MAEXTRA+ (1x20metros) T2550 2L', f1:'Cal. 40', f2:'20 m', p:'3425 uds.', cat:'Promoción'},
     {c:'MX250.20R3', n:'MAEXTRA+ (1x20metros) T3045 2L', f1:'Cal. 47', f2:'20 m', p:'702 uds.', cat:'Promoción'}
   ],
   'CERDO CK':[
-    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'240 uds.', cat:'Promoción'},
-    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'1040 uds.', cat:'Promoción'},
-    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3640 uds.', cat:'Promoción'},
+    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'480 uds.', cat:'Promoción'},
+    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'480 uds.', cat:'Promoción'},
+    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'720 uds.', cat:'Promoción'},
     {c:'CL50.8KF3', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3400 uds.', cat:'Promoción'},
+    {c:'CX50.9KF3', n:'MAD.CERDO CK P.189 XL 14/+', f1:'Cal. 34/36', f2:'90 m', p:'1.000 uds.', cat:'Promoción'},
     {c:'CL60.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 36/38', f2:'80 m', p:'1820 uds.', cat:'Promoción'}
   ]
 }},
