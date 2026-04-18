@@ -3209,6 +3209,7 @@ async function saveAccesos() {
       body: JSON.stringify(body)
     });
     if (!r.ok) console.error('saveAccesos error:', r.status);
+    else _dataLoaded = false;
   } catch(e) { console.error('Error saving accesos:', e); }
 }
 
@@ -3330,24 +3331,33 @@ async function clearAccesos() {
 
 
 // ── Load users from JSONBin ──
-async function loadUsers() {
-  try {
-    var r = await fetch(JSONBIN_URL + '/latest', {
-      headers: {
-        'X-Master-Key': JSONBIN_KEY
-      }
-    });
-    var responseText = await r.text();
-    console.log('loadUsers response:', r.status, responseText.substring(0, 300));
-    if (!r.ok) throw new Error('HTTP ' + r.status + ': ' + responseText);
-    var data = JSON.parse(responseText);
-    APP_USERS = (data.record && data.record.usuarios) ? data.record.usuarios : [];
-    console.log('Loaded', APP_USERS.length, 'users');
-  } catch(e) {
-    console.error('Error loading users:', e);
-    APP_USERS = [];
-  }
+// ── Carga única: usuarios + accesos en una sola llamada ──
+var _dataLoaded = false;
+var _dataLoading = null;
+
+async function loadAllData() {
+  if (_dataLoaded) return;
+  if (_dataLoading) return _dataLoading; // evita llamadas simultáneas
+  _dataLoading = (async function() {
+    try {
+      var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var data = JSON.parse(await r.text());
+      APP_USERS   = (data.record && data.record.usuarios) ? data.record.usuarios : [];
+      ACCESOS_LOG = (data.record && data.record.accesos)  ? data.record.accesos  : [];
+      _dataLoaded = true;
+    } catch(e) {
+      console.error('Error loading data:', e);
+      APP_USERS = []; ACCESOS_LOG = [];
+    }
+    _dataLoading = null;
+  })();
+  return _dataLoading;
 }
+
+async function loadUsers()   { await loadAllData(); }
+async function loadAccesos() { await loadAllData(); }
+
 
 // ── Save users to JSONBin ──
 async function saveUsers() {
@@ -3373,6 +3383,7 @@ async function saveUsers() {
     alert('Error al guardar: ' + e.message);
     return false;
   }
+  _dataLoaded = false; // fuerza recarga en próxima operación
 }
 
 // ── Login ──
