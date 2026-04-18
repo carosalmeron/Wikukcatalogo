@@ -3386,7 +3386,10 @@ async function doUserLogin() {
 
   btn.textContent = 'Entrando...';
   btn.disabled = true;
-  await loadUsers();
+
+  // Si aún no se han cargado los usuarios (carga lenta), esperamos un momento
+  if (!APP_USERS.length) await loadUsers();
+
   btn.textContent = 'Entrar';
   btn.disabled = false;
 
@@ -4769,7 +4772,8 @@ function closeModal() {
 document.addEventListener('DOMContentLoaded', function() {
   var sel = document.getElementById('modal-estado');
   if (sel) sel.addEventListener('change', onModalEstadoChange);
-  // Pre-load accesos so ACCESOS_LOG is populated before any save
+  // Pre-load users AND accesos at startup so login is instant
+  loadUsers();
   loadAccesos();
 });
 
