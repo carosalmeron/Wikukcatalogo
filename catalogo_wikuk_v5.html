@@ -3202,6 +3202,8 @@ async function loadAccesos() {
 async function saveAccesos() {
   try {
     if (ACCESOS_LOG.length > 500) ACCESOS_LOG = ACCESOS_LOG.slice(-500);
+    // Nunca guardar si APP_USERS está vacío — evita borrar usuarios
+    if (!APP_USERS.length) { console.warn('saveAccesos: APP_USERS vacío, abortando'); return; }
     var body = { usuarios: APP_USERS, accesos: ACCESOS_LOG };
     var r = await fetch(JSONBIN_URL, {
       method: 'PUT',
@@ -3209,7 +3211,7 @@ async function saveAccesos() {
       body: JSON.stringify(body)
     });
     if (!r.ok) console.error('saveAccesos error:', r.status);
-    else _dataLoaded = false;
+    else console.log('Acceso guardado OK. Total:', ACCESOS_LOG.length);
   } catch(e) { console.error('Error saving accesos:', e); }
 }
 
@@ -3225,7 +3227,7 @@ function registrarAcceso(usuario, nombre) {
     dispositivo: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'Móvil' : 'Escritorio'
   };
   ACCESOS_LOG.push(registro);
-  saveAccesos();
+  saveAccesos(); // async — se ejecuta en background pero no bloquea el login
 
   // Update duration every minute
   SESSION_TIMER = setInterval(function() {
@@ -3330,13 +3332,10 @@ async function clearAccesos() {
 }
 
 
-// ── Load users from JSONBin ──
 // ── Carga única: usuarios + accesos en una sola llamada ──
-var _dataLoaded = false;
 var _dataLoading = null;
 
 async function loadAllData() {
-  if (_dataLoaded) return;
   if (_dataLoading) return _dataLoading; // evita llamadas simultáneas
   _dataLoading = (async function() {
     try {
@@ -3345,17 +3344,22 @@ async function loadAllData() {
       var data = JSON.parse(await r.text());
       APP_USERS   = (data.record && data.record.usuarios) ? data.record.usuarios : [];
       ACCESOS_LOG = (data.record && data.record.accesos)  ? data.record.accesos  : [];
-      _dataLoaded = true;
     } catch(e) {
       console.error('Error loading data:', e);
-      APP_USERS = []; ACCESOS_LOG = [];
+      if (!APP_USERS.length) APP_USERS = [];
+      if (!ACCESOS_LOG.length) ACCESOS_LOG = [];
     }
     _dataLoading = null;
   })();
   return _dataLoading;
 }
 
-async function loadUsers()   { await loadAllData(); }
+// loadUsers: usa datos en memoria si ya están cargados, si no carga
+async function loadUsers() {
+  if (!APP_USERS.length) await loadAllData();
+}
+
+// loadAccesos: siempre recarga frescos desde JSONBin (para el panel admin)
 async function loadAccesos() { await loadAllData(); }
 
 
@@ -3383,7 +3387,6 @@ async function saveUsers() {
     alert('Error al guardar: ' + e.message);
     return false;
   }
-  _dataLoaded = false; // fuerza recarga en próxima operación
 }
 
 // ── Login ──
@@ -3398,8 +3401,8 @@ async function doUserLogin() {
   btn.textContent = 'Entrando...';
   btn.disabled = true;
 
-  // Si aún no se han cargado los usuarios (carga lenta), esperamos un momento
-  if (!APP_USERS.length) await loadUsers();
+  // Siempre aseguramos datos cargados antes de validar
+  await loadUsers();
 
   btn.textContent = 'Entrar';
   btn.disabled = false;
