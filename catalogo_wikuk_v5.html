@@ -3801,8 +3801,10 @@ function checkClientToken() {
     return true;
   }
   CLIENT_MODE = true;
-  CLIENT_CATS = u.categoriasCliente === 'todas' ? null : u.categoriasCliente;
-  ACTIVE_USER = { nombre: 'Cliente', usuario: 'cliente', categorias: u.categoriasCliente || 'todas', esCliente: true };
+  // Si categoriasCliente es null (no configurado), no mostrar nada
+  var catsCliente = u.categoriasCliente;
+  CLIENT_CATS = (!catsCliente || catsCliente === 'todas') ? null : catsCliente;
+  ACTIVE_USER = { nombre: 'Cliente', usuario: 'cliente', categorias: catsCliente || 'todas', esCliente: true };
   ACTIVE_VENDOR_CATS = CLIENT_CATS;
 
   // Hide everything except the catalog
@@ -3824,6 +3826,7 @@ function checkClientToken() {
   if (badge) badge.style.display = 'none';
 
   buildMenu();
+  applyVendorCatFilter();
   showScreen('catalog-screen');
   return true;
 }
