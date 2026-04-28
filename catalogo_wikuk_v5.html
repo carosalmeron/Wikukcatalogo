@@ -896,6 +896,43 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
             </div>
           </div>
         </div>
+        <!-- ENLACE CLIENTE -->
+        <div style="border:1.5px solid #D97706;border-radius:8px;padding:12px;background:#FFFBEB;">
+          <div style="font-size:.82rem;font-weight:700;color:#92400E;margin-bottom:10px;">🔗 Enlace para clientes</div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;margin-bottom:10px;">
+            <input type="checkbox" id="ucat-cliente-activo" onchange="toggleUserCatClienteSection()"> Activar enlace de cliente
+          </label>
+          <div id="ucatc-section" style="display:none;">
+            <div style="font-size:.76rem;color:var(--muted);margin-bottom:8px;">Categorías visibles para el cliente (sin precios):</div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:.83rem;cursor:pointer;margin-bottom:8px;">
+              <input type="checkbox" id="ucatc-todas" onchange="toggleClienteCatSection()"> Todas las categorías
+            </label>
+            <div id="ucatc-cats" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-wikuk_esp"> Wikuk Especias</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-wikuk_prep"> Wikuk Preparados</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-ceylan_gen"> Ceylan Especias</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-ceylan_prep"> Ceylan Preparados</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-taberner_esp"> Taberner Especias</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-taberner_prep"> Taberner Preparados</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-campana_gen"> La Campana</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_wikuk"> Spot Wikuk</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_ceylan"> Spot Ceylan</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_taberner"> Spot Taberner</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_campana"> Spot Campana</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_merkapack"> Spot Bolsas de Vacío</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_cui"> Spot CUI</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_frumen"> Spot Frumen</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_el_carmen"> Spot El Carmen</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_sierra"> Spot Sierra Nevada</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-envases"> Envases</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-accesorios"> Accesorios</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-aditivos"> Aditivos</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-promo_tripas"> Promo Tripas</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-promo_especias"> Promo Especias</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-promo_envases"> Promo Envases</label>
+            </div>
+          </div>
+        </div>
         <div style="display:flex;gap:8px;">
           <button onclick="saveUserForm()" style="flex:1;padding:11px;background:var(--accent);color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Guardar</button>
           <button onclick="cancelUserForm()" style="padding:11px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;">Cancelar</button>
@@ -2793,6 +2830,9 @@ const DATA = {
 
   promo_tripas: {label:'Tripas',subs:{
     'Cordero':[
+    {c:'GA34.7N', n:'MAD.CORDERO AB', f1:'Cal. 20/22', f2:'70 m', p:'436 uds.', cat:'Promoción'},
+    {c:'GA36.9L', n:'MAD.CORDERO AB TIRA LARGA', f1:'Cal. 22/24', f2:'90 m', p:'853 uds.', cat:'Promoción'},
+    {c:'GA38.8N', n:'MAD.CORDERO AB', f1:'Cal. 24/26', f2:'80 m', p:'282 uds.', cat:'Promoción'},
     {c:'GA42.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 19/21', f2:'90 m', p:'1744 uds.', cat:'Liquidación'},
     {c:'GA44.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 20/22', f2:'90 m', p:'3264 uds.', cat:'Promoción'},
     {c:'GA46.9N', n:'MAD.CORDERO P.600 BC 2/+', f1:'Cal. 22/24', f2:'90 m', p:'1258 uds.', cat:'Promoción'},
@@ -2807,7 +2847,7 @@ const DATA = {
     {c:'C5.8R', n:'MAD.CERDO EUR P.150 A', f1:'Cal. 34/36', f2:'75 m', p:'1279 uds.', cat:'Promoción'}
     ],
     'Cerdo United Caro':[
-    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'68 uds.', cat:'Promoción'}
+    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'187 uds.', cat:'Promoción'}
     ],
     'Culares':[
     {c:'CU42', n:'CULAR P.70 AAB 0.65', f1:'Cal. 62/67', f2:'65 m', p:'21 uds.', cat:'Promoción'}
@@ -2837,15 +2877,11 @@ const DATA = {
     {c:'MX240.20R2', n:'MAEXTRA+ (1x20metros) T2550 2L', f1:'Cal. 40', f2:'20 m', p:'3425 uds.', cat:'Promoción'},
     {c:'MX250.20R3', n:'MAEXTRA+ (1x20metros) T3045 2L', f1:'Cal. 47', f2:'20 m', p:'702 uds.', cat:'Promoción'}
     ],
-    'Cerdo CK XXL TF':[
-    {c:'CX50.9KF3', n:'MAD.CERDO CK P.189 XXL 14/+ TF 1T', f1:'Cal. 34/36', f2:'90 m', p:'188 uds.', cat:'Promoción'}
-  ],
-  'CERDO CK':[
-    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'480 uds.', cat:'Promoción'},
-    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'480 uds.', cat:'Promoción'},
-    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'720 uds.', cat:'Promoción'},
+    'CERDO CK':[
+    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'240 uds.', cat:'Promoción'},
+    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'1040 uds.', cat:'Promoción'},
+    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3640 uds.', cat:'Promoción'},
     {c:'CL50.8KF3', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3400 uds.', cat:'Promoción'},
-    {c:'CX50.9KF3', n:'MAD.CERDO CK P.189 XL 14/+', f1:'Cal. 34/36', f2:'90 m', p:'1.000 uds.', cat:'Promoción'},
     {c:'CL60.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 36/38', f2:'80 m', p:'1820 uds.', cat:'Promoción'}
     ]
   }},
@@ -2902,15 +2938,14 @@ const DATA = {
 
 promo_tripas:{label:'Tripas',subs:{
   'Cordero':[
+    {c:'GA34.7N', n:'MAD.CORDERO AB', f1:'Cal. 20/22', f2:'70 m', p:'436 uds.', cat:'Promoción'},
+    {c:'GA36.9L', n:'MAD.CORDERO AB TIRA LARGA', f1:'Cal. 22/24', f2:'90 m', p:'853 uds.', cat:'Promoción'},
+    {c:'GA38.8N', n:'MAD.CORDERO AB', f1:'Cal. 24/26', f2:'80 m', p:'282 uds.', cat:'Promoción'},
     {c:'GA42.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 19/21', f2:'90 m', p:'1744 uds.', cat:'Liquidación'},
     {c:'GA44.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 20/22', f2:'90 m', p:'3264 uds.', cat:'Promoción'},
     {c:'GA46.9N', n:'MAD.CORDERO P.600 BC 2/+', f1:'Cal. 22/24', f2:'90 m', p:'1258 uds.', cat:'Promoción'},
     {c:'GA48.9N', n:'MAD.CORDERO BC', f1:'Cal. 24/26', f2:'90 m', p:'589 uds.', cat:'Promoción'},
     {c:'IR32.8N', n:'MAD.CORDERO P.500 AB', f1:'Cal. 19/21', f2:'80 m', p:'2464 uds.', cat:'Promoción'}
-  ],
-  'Vejigas':[
-    {c:'VG1', n:'VEJIGAS FRESCAS LIMPIAS PEQUEÑAS', f1:'Cal. 15/20', f2:'—', p:'6.395 uds.', cat:'Promoción'},
-    {c:'VG2', n:'VEJIGAS FRESCAS LIMPIAS 20/25', f1:'Cal. 20/25', f2:'—', p:'10.650 uds.', cat:'Promoción'}
   ],
   'Vacuno':[
     {c:'V13.5G', n:'MAD.BUEY EX P.70', f1:'Cal. 38/40', f2:'50 m', p:'2022 uds.', cat:'Promoción'}
@@ -2920,7 +2955,7 @@ promo_tripas:{label:'Tripas',subs:{
     {c:'C5.8R', n:'MAD.CERDO EUR P.150 A', f1:'Cal. 34/36', f2:'75 m', p:'1279 uds.', cat:'Promoción'}
   ],
   'Cerdo United Caro':[
-    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'68 uds.', cat:'Promoción'}
+    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'187 uds.', cat:'Promoción'}
   ],
   'Culares':[
     {c:'CU42', n:'CULAR P.70 AAB 0.65', f1:'Cal. 62/67', f2:'65 m', p:'21 uds.', cat:'Promoción'}
@@ -2930,9 +2965,6 @@ promo_tripas:{label:'Tripas',subs:{
   ],
   'Ciegos Vacuno':[
     {c:'CI2.50', n:'CIEGOS DE VACUNO', f1:'Cal. 95/115', f2:'0.50 m', p:'12673 uds.', cat:'Promoción'}
-  ],
-  'Ciegos Cerdo':[
-    {c:'CIP3', n:'CIEGOS DE CERDO GRANDES', f1:'—', f2:'—', p:'13.873 uds.', cat:'Promoción'}
   ],
   'Semicular':[
     {c:'TR1503', n:'PIEZA DE SEMICULAR CA 0.35', f1:'Cal. 70/+', f2:'35 m', p:'60 uds.', cat:'Liquidación'}
@@ -2949,19 +2981,15 @@ promo_tripas:{label:'Tripas',subs:{
     {c:'TR1045', n:'T.SECA LM UNITED CARO', f1:'Cal. 55', f2:'0.90 m', p:'4930 uds.', cat:'Liquidación'},
     {c:'TR1118', n:'T.SECA LM UNITED CARO', f1:'Cal. 70', f2:'0.60 m', p:'3297 uds.', cat:'Liquidación'}
   ],
-  'Tripa Seca Buey':[
-    {c:'TR1296', n:'TRIPA SECA DE BUEY CAL. 55/60', f1:'Cal. 55/60', f2:'18 m', p:'1.936 uds.', cat:'Promoción'}
-  ],
   'Maextra+':[
     {c:'MX240.20R2', n:'MAEXTRA+ (1x20metros) T2550 2L', f1:'Cal. 40', f2:'20 m', p:'3425 uds.', cat:'Promoción'},
     {c:'MX250.20R3', n:'MAEXTRA+ (1x20metros) T3045 2L', f1:'Cal. 47', f2:'20 m', p:'702 uds.', cat:'Promoción'}
   ],
   'CERDO CK':[
-    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'480 uds.', cat:'Promoción'},
-    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'480 uds.', cat:'Promoción'},
-    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'720 uds.', cat:'Promoción'},
+    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'240 uds.', cat:'Promoción'},
+    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'1040 uds.', cat:'Promoción'},
+    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3640 uds.', cat:'Promoción'},
     {c:'CL50.8KF3', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3400 uds.', cat:'Promoción'},
-    {c:'CX50.9KF3', n:'MAD.CERDO CK P.189 XL 14/+', f1:'Cal. 34/36', f2:'90 m', p:'1.000 uds.', cat:'Promoción'},
     {c:'CL60.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 36/38', f2:'80 m', p:'1820 uds.', cat:'Promoción'}
   ]
 }},
@@ -3202,8 +3230,6 @@ async function loadAccesos() {
 async function saveAccesos() {
   try {
     if (ACCESOS_LOG.length > 500) ACCESOS_LOG = ACCESOS_LOG.slice(-500);
-    // Nunca guardar si APP_USERS está vacío — evita borrar usuarios
-    if (!APP_USERS.length) { console.warn('saveAccesos: APP_USERS vacío, abortando'); return; }
     var body = { usuarios: APP_USERS, accesos: ACCESOS_LOG };
     var r = await fetch(JSONBIN_URL, {
       method: 'PUT',
@@ -3211,7 +3237,6 @@ async function saveAccesos() {
       body: JSON.stringify(body)
     });
     if (!r.ok) console.error('saveAccesos error:', r.status);
-    else console.log('Acceso guardado OK. Total:', ACCESOS_LOG.length);
   } catch(e) { console.error('Error saving accesos:', e); }
 }
 
@@ -3227,7 +3252,7 @@ function registrarAcceso(usuario, nombre) {
     dispositivo: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'Móvil' : 'Escritorio'
   };
   ACCESOS_LOG.push(registro);
-  saveAccesos(); // async — se ejecuta en background pero no bloquea el login
+  saveAccesos();
 
   // Update duration every minute
   SESSION_TIMER = setInterval(function() {
@@ -3332,41 +3357,30 @@ async function clearAccesos() {
 }
 
 
-// ── Carga única: usuarios + accesos en una sola llamada ──
-var _dataLoading = null;
-
-async function loadAllData() {
-  if (_dataLoading) return _dataLoading; // evita llamadas simultáneas
-  _dataLoading = (async function() {
-    try {
-      var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      var data = JSON.parse(await r.text());
-      APP_USERS   = (data.record && data.record.usuarios) ? data.record.usuarios : [];
-      ACCESOS_LOG = (data.record && data.record.accesos)  ? data.record.accesos  : [];
-    } catch(e) {
-      console.error('Error loading data:', e);
-      if (!APP_USERS.length) APP_USERS = [];
-      if (!ACCESOS_LOG.length) ACCESOS_LOG = [];
-    }
-    _dataLoading = null;
-  })();
-  return _dataLoading;
-}
-
-// loadUsers: usa datos en memoria si ya están cargados, si no carga
+// ── Load users from JSONBin ──
 async function loadUsers() {
-  if (!APP_USERS.length) await loadAllData();
+  try {
+    var r = await fetch(JSONBIN_URL + '/latest', {
+      headers: {
+        'X-Master-Key': JSONBIN_KEY
+      }
+    });
+    var responseText = await r.text();
+    console.log('loadUsers response:', r.status, responseText.substring(0, 300));
+    if (!r.ok) throw new Error('HTTP ' + r.status + ': ' + responseText);
+    var data = JSON.parse(responseText);
+    APP_USERS = (data.record && data.record.usuarios) ? data.record.usuarios : [];
+    console.log('Loaded', APP_USERS.length, 'users');
+  } catch(e) {
+    console.error('Error loading users:', e);
+    APP_USERS = [];
+  }
 }
-
-// loadAccesos: siempre recarga frescos desde JSONBin (para el panel admin)
-async function loadAccesos() { await loadAllData(); }
-
 
 // ── Save users to JSONBin ──
 async function saveUsers() {
   try {
-    var body = JSON.stringify({usuarios: APP_USERS, accesos: ACCESOS_LOG});
+    var body = JSON.stringify({usuarios: APP_USERS});
     console.log('Saving to JSONBin:', body.substring(0, 200));
     var r = await fetch(JSONBIN_URL, {
       method: 'PUT',
@@ -3400,10 +3414,7 @@ async function doUserLogin() {
 
   btn.textContent = 'Entrando...';
   btn.disabled = true;
-
-  // Siempre aseguramos datos cargados antes de validar
   await loadUsers();
-
   btn.textContent = 'Entrar';
   btn.disabled = false;
 
@@ -3454,13 +3465,18 @@ async function renderUserList() {
   }
   container.innerHTML = APP_USERS.map(function(u, i) {
     var cats = u.categorias === 'todas' ? 'Todas las categorías' : Object.keys(u.categorias||{}).filter(function(k){return u.categorias[k];}).length + ' categorías';
+    var clienteActivo = u.activoCliente && u.tokenCliente;
     return '<div class="agent-card" style="margin-bottom:10px;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;">'
-      + '<div><strong>' + u.nombre + '</strong> <span style="color:var(--muted);font-size:.8rem">@' + u.usuario + '</span></div>'
-      + '<div style="display:flex;gap:8px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'
+      + '<div><strong>' + u.nombre + '</strong> <span style="color:var(--muted);font-size:.8rem">@' + u.usuario + '</span>'
+      + (clienteActivo ? ' <span style="background:#D1FAE5;color:#065F46;font-size:.68rem;padding:2px 7px;border-radius:4px;font-weight:700">🔗 ENLACE ACTIVO</span>' : '')
+      + '</div>'
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
       + '<span style="font-size:.75rem;padding:2px 8px;border-radius:4px;background:' + (u.activo!==false?'#D1FAE5':'#FEE2E2') + ';color:' + (u.activo!==false?'#065F46':'#991B1B') + '">' + (u.activo!==false?'Activo':'Inactivo') + '</span>'
       + '<button onclick="editUser(' + i + ')" style="background:var(--accent);color:white;border:none;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer">Editar</button>'
       + '<button onclick="deleteUser(' + i + ')" style="background:#DC2626;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer">✕</button>'
+      + '<button onclick="toggleEnlaceCliente(' + i + ')" style="background:' + (clienteActivo?'#D1FAE5':'#F3F4F6') + ';color:' + (clienteActivo?'#065F46':'#374151') + ';border:1px solid ' + (clienteActivo?'#6EE7B7':'#D1D5DB') + ';border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer" title="' + (clienteActivo?'Desactivar':'Activar') + ' enlace cliente">🔗 ' + (clienteActivo?'Desactivar':'Activar') + '</button>'
+      + (clienteActivo ? '<button onclick="copyEnlaceCliente(' + i + ')" style="background:#DBEAFE;color:#1E40AF;border:1px solid #93C5FD;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer" title="Copiar enlace">📋 Copiar</button>' : '')
       + '</div></div>'
       + '<div style="font-size:.78rem;color:var(--muted);margin-top:4px">' + cats + '</div>'
       + '</div>';
@@ -3500,6 +3516,18 @@ function editUser(idx) {
     if (el) el.checked = todasChecked || (u.categorias && u.categorias[cat.key]);
   });
   toggleUserCatSection();
+  // Client link fields
+  var clienteActivo = u.activoCliente && u.tokenCliente;
+  document.getElementById('ucat-cliente-activo').checked = !!clienteActivo;
+  document.getElementById('ucatc-section').style.display = clienteActivo ? 'block' : 'none';
+  var catsCliente = u.categoriasCliente;
+  var todasClienteChecked = catsCliente === 'todas';
+  document.getElementById('ucatc-todas').checked = todasClienteChecked;
+  document.getElementById('ucatc-cats').style.display = todasClienteChecked ? 'none' : 'grid';
+  ALL_CATS.forEach(function(cat) {
+    var el = document.getElementById('ucatc-' + cat.key);
+    if (el) el.checked = todasClienteChecked || (catsCliente && catsCliente[cat.key]);
+  });
 }
 
 function toggleUserCatSection() {
@@ -3526,7 +3554,28 @@ async function saveUserForm() {
     });
   }
 
-  var userObj = { nombre: nombre, usuario: usuario, clave: clave, activo: activo, categorias: categorias };
+  // Client link config
+  var clienteActivo = document.getElementById('ucat-cliente-activo').checked;
+  var todasCliente  = document.getElementById('ucatc-todas').checked;
+  var categoriasCliente = null;
+  if (clienteActivo) {
+    if (todasCliente) {
+      categoriasCliente = 'todas';
+    } else {
+      categoriasCliente = {};
+      ALL_CATS.forEach(function(cat) {
+        var el = document.getElementById('ucatc-' + cat.key);
+        if (el) categoriasCliente[cat.key] = el.checked;
+      });
+    }
+  }
+
+  // Keep existing token if already generated, create new one if enabling for first time
+  var existingToken = (idx !== -1 && APP_USERS[idx].tokenCliente) ? APP_USERS[idx].tokenCliente : null;
+  var tokenCliente = clienteActivo ? (existingToken || _genToken()) : null;
+
+  var userObj = { nombre: nombre, usuario: usuario, clave: clave, activo: activo, categorias: categorias,
+    activoCliente: clienteActivo, tokenCliente: tokenCliente, categoriasCliente: categoriasCliente };
 
   if (idx === -1) {
     APP_USERS.push(userObj);
@@ -3551,6 +3600,76 @@ async function deleteUser(idx) {
 
 function cancelUserForm() {
   document.getElementById('admin-user-form').style.display = 'none';
+}
+
+function toggleUserCatClienteSection() {
+  var activo = document.getElementById('ucat-cliente-activo').checked;
+  document.getElementById('ucatc-section').style.display = activo ? 'block' : 'none';
+}
+
+function toggleClienteCatSection() {
+  var todas = document.getElementById('ucatc-todas').checked;
+  document.getElementById('ucatc-cats').style.display = todas ? 'none' : 'grid';
+}
+
+function _genToken() {
+  return Math.random().toString(36).substring(2,10) + Math.random().toString(36).substring(2,10);
+}
+
+async function toggleEnlaceCliente(idx) {
+  var u = APP_USERS[idx];
+  if (u.activoCliente) {
+    if (!confirm('¿Desactivar el enlace de cliente para ' + u.nombre + '? Dejará de funcionar inmediatamente.')) return;
+    APP_USERS[idx].activoCliente = false;
+  } else {
+    if (!u.tokenCliente) APP_USERS[idx].tokenCliente = _genToken();
+    APP_USERS[idx].activoCliente = true;
+    // Set default categoriasCliente = same as user's categorias if not set
+    if (!APP_USERS[idx].categoriasCliente) APP_USERS[idx].categoriasCliente = u.categorias;
+  }
+  await saveUsers();
+  renderUserList();
+}
+
+function copyEnlaceCliente(idx) {
+  var u = APP_USERS[idx];
+  if (!u.tokenCliente || !u.activoCliente) { alert('El enlace no está activo'); return; }
+  var base = window.location.href.split('?')[0];
+  var url = base + '?cliente=' + encodeURIComponent(u.token || u.tokenCliente);
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('✅ Enlace copiado al portapapeles');
+  }).catch(function() {
+    prompt('Copia este enlace:', url);
+  });
+}
+
+// ── CLIENT MODE: acceso por token en URL ──
+var CLIENT_MODE = false;
+var CLIENT_CATS = null;
+
+function checkClientToken() {
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('cliente');
+  if (!token) return false;
+  var u = APP_USERS.find(function(u) { return u.tokenCliente === token && u.activoCliente; });
+  if (!u) {
+    // Token inválido o desactivado
+    document.getElementById('login-screen').innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;font-family:Inter,sans-serif;">'
+      + '<div style="font-size:3rem">🔒</div>'
+      + '<div style="font-size:1.1rem;font-weight:700">Enlace no disponible</div>'
+      + '<div style="font-size:.9rem;color:#6B7280">Este enlace ha sido desactivado o ha caducado.</div>'
+      + '</div>';
+    return true;
+  }
+  CLIENT_MODE = true;
+  CLIENT_CATS = u.categoriasCliente === 'todas' ? null : u.categoriasCliente;
+  // Skip login, go directly to catalog
+  document.getElementById('login-screen').style.display = 'none';
+  ACTIVE_USER = { nombre: 'Cliente', usuario: 'cliente', categorias: u.categoriasCliente || 'todas', esCliente: true };
+  ACTIVE_VENDOR_CATS = CLIENT_CATS;
+  buildMenu();
+  showScreen('catalog-screen');
+  return true;
 }
 // ═══ ENTRY & VENDOR/CLIENT FUNCTIONS ═══
 function goBackToEntry() {
@@ -3833,7 +3952,7 @@ function dRender() {
           +'<span style="margin-left:3px;font-size:.65rem;color:var(--accent);font-weight:600">-'+discResult.pct+'%</span>'
           +priceDiff;
       } else {
-        price=p.p+(p.cat?'':' €')+priceDiff;
+        price=CLIENT_MODE?'—':p.p+(p.cat?'':' €')+priceDiff;
       }
       let lastCell;
       if(p.cat){
@@ -3916,7 +4035,7 @@ function mGoSub(sub, el) {
           +'<span style="margin-left:3px;font-size:.65rem;color:var(--accent);font-weight:600">-'+discResult.pct+'%</span>'
           +priceDiff;
       } else {
-        price=p.p+(p.cat?'':' €')+priceDiff;
+        price=CLIENT_MODE?'—':p.p+(p.cat?'':' €')+priceDiff;
       }
       let lastLine='';
       if(p.cat){
@@ -3992,7 +4111,7 @@ function doSearch(q) {
       ?'<div style="text-align:center;padding:40px;color:var(--muted);font-size:.85rem">Sin resultados</div>'
       :results.map(function(p){
         return '<div class="m-search-card">'
-          +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+p.p+' €</div></div>'
+          +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+(CLIENT_MODE?'—':p.p+' €')+'</div></div>'
           +'<div class="m-card-bot">'
           +'<span class="m-card-code">'+p.c+'</span>'
           +'<span style="font-size:.7rem;padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--muted)">'+p.catLabel+'</span>'
@@ -4008,7 +4127,7 @@ function doSearch(q) {
           +'<span class="sr-name">'+p.n+'</span>'
           +'<span class="sr-tag">'+p.catLabel+'</span>'
           +'<span class="sr-tag">'+p.sub+'</span>'
-          +'<span class="sr-price">'+p.p+' €</span>'
+          +(CLIENT_MODE?'':+'<span class="sr-price">'+p.p+' €</span>')
           +'</div>';
       }).join('');
     document.getElementById('d-products').innerHTML=''
@@ -4786,9 +4905,8 @@ function closeModal() {
 document.addEventListener('DOMContentLoaded', function() {
   var sel = document.getElementById('modal-estado');
   if (sel) sel.addEventListener('change', onModalEstadoChange);
-  // Pre-load users AND accesos at startup so login is instant
-  loadUsers();
-  loadAccesos();
+  // Check if accessing via client token link
+  loadUsers().then(function() { checkClientToken(); });
 });
 
 function onModalEstadoChange() {
