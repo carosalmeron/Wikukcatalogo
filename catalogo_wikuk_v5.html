@@ -380,12 +380,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     <span id="clientBadgeText"></span>
     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
   </div>
-  <div class="search-wrap">
+  <div class="search-wrap" style="flex:1;">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input type="text" class="search-input" id="searchInput" placeholder="Buscar producto o código…" oninput="doSearch(this.value)">
   </div>
-  <button id="btnShareCliente" onclick="openShareModal()" style="display:none;flex-shrink:0;background:#D97706;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;display:none;align-items:center;gap:5px;">
-    🔗 Enlace cliente
+  <button id="btnShareCliente" onclick="openShareModal()" style="display:none;flex-shrink:0;background:#D97706;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;align-items:center;gap:5px;">
+    🔗 Enlace
   </button>
 </div>
 
@@ -3792,7 +3792,8 @@ function checkClientToken() {
   var u = APP_USERS.find(function(u) { return u.tokenCliente === token && u.activoCliente; });
   if (!u) {
     // Token inválido o desactivado
-    document.getElementById('login-screen').innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;font-family:Inter,sans-serif;">'
+    var es = document.getElementById('entryScreen');
+    if (es) es.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;font-family:Inter,sans-serif;">'
       + '<div style="font-size:3rem">🔒</div>'
       + '<div style="font-size:1.1rem;font-weight:700">Enlace no disponible</div>'
       + '<div style="font-size:.9rem;color:#6B7280">Este enlace ha sido desactivado o ha caducado.</div>'
@@ -3801,10 +3802,27 @@ function checkClientToken() {
   }
   CLIENT_MODE = true;
   CLIENT_CATS = u.categoriasCliente === 'todas' ? null : u.categoriasCliente;
-  // Skip login, go directly to catalog
-  document.getElementById('login-screen').style.display = 'none';
   ACTIVE_USER = { nombre: 'Cliente', usuario: 'cliente', categorias: u.categoriasCliente || 'todas', esCliente: true };
   ACTIVE_VENDOR_CATS = CLIENT_CATS;
+
+  // Hide everything except the catalog
+  var entryScreen = document.getElementById('entryScreen');
+  if (entryScreen) entryScreen.style.display = 'none';
+  // Hide all entry overlays
+  ['loginScreen','vendorScreen','clientScreen'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  // Hide back button and admin zone
+  var backBtn = document.getElementById('btnBackEntry');
+  if (backBtn) backBtn.style.display = 'none';
+  // Hide share button (clients don't share)
+  var shareBtn = document.getElementById('btnShareCliente');
+  if (shareBtn) shareBtn.style.display = 'none';
+  // Hide client badge (no client selector needed)
+  var badge = document.getElementById('clientBadge');
+  if (badge) badge.style.display = 'none';
+
   buildMenu();
   showScreen('catalog-screen');
   return true;
