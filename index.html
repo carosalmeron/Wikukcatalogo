@@ -3299,7 +3299,7 @@ async function loadAccesos() {
   } catch(e) { ACCESOS_LOG = []; }
 }
 
-async async function saveAccesos() {
+async function saveAccesos() {
   try {
     if (ACCESOS_LOG.length > 100) ACCESOS_LOG = ACCESOS_LOG.slice(-100);
     var body = { usuarios: APP_USERS, accesos: ACCESOS_LOG };
