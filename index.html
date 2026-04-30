@@ -278,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);margin-top:-8px;margin-bottom:4px;letter-spacing:.1em;">v7.1</div>
+  <div style="font-size:.65rem;color:var(--muted);margin-top:-8px;margin-bottom:4px;letter-spacing:.1em;">v7.2</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -890,16 +890,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 </div>
 
 <!-- ADMIN PIN SCREEN -->
-<div class="admin-pin-screen" id="adminPinScreen">
-  <div class="admin-pin-box">
+<div id="adminPinScreen" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9998;align-items:center;justify-content:center;">
+  <div style="background:#FFFFFF;color:#1A1816;border-radius:16px;padding:32px 28px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:320px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
     <div style="font-size:2rem">🔐</div>
-    <div style="font-size:1.1rem;font-weight:800">Zona Administrador</div>
-    <div style="font-size:.82rem;color:var(--muted);text-align:center">Introduce tu clave de acceso</div>
+    <div style="font-size:1.1rem;font-weight:800;color:#1A1816;font-family:Inter,sans-serif">Zona Administrador</div>
+    <div style="font-size:.82rem;color:#6B7280;text-align:center;font-family:Inter,sans-serif">Introduce tu clave de acceso</div>
     <input class="pin-input" id="adminPinInput" type="password" placeholder="••••••••"
       onkeydown="if(event.key==='Enter')submitAdminPin()">
-    <div id="adminPinError" style="color:#DC2626;font-size:.82rem;display:none">Clave incorrecta.</div>
-    <button onclick="submitAdminPin()" style="width:100%;padding:12px;background:#1A1816;color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>
-    <button onclick="closeAdminPin()" style="background:none;border:none;color:var(--muted);font-size:.85rem;cursor:pointer;font-family:Inter,sans-serif;">Cancelar</button>
+    <div id="adminPinError" style="color:#DC2626;font-size:.82rem;display:none;font-family:Inter,sans-serif">Clave incorrecta.</div>
+    <button onclick="submitAdminPin()" style="width:100%;padding:12px;background:#1A1816;color:#FFFFFF;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>
+    <button onclick="closeAdminPin()" style="background:none;border:none;color:#9CA3AF;font-size:.85rem;cursor:pointer;font-family:Inter,sans-serif;margin-top:4px;">Cancelar</button>
   </div>
 </div>
 
@@ -4461,15 +4461,14 @@ function saveAgentConf() {
 // ── PIN Screen ──
 function showAdminPin() {
   var el = document.getElementById('adminPinScreen');
-  if (!el) { console.error('adminPinScreen not found'); return; }
-  el.classList.add('visible');
-  el.style.display = 'flex'; // forzar display por si clase no funciona
+  if (!el) { alert('Error: panel no encontrado'); return; }
+  el.style.display = 'flex';
   document.getElementById('adminPinInput').value = '';
   document.getElementById('adminPinError').style.display = 'none';
   setTimeout(function(){ document.getElementById('adminPinInput').focus(); }, 100);
 }
 function closeAdminPin() {
-  document.getElementById('adminPinScreen').classList.remove('visible');
+  document.getElementById('adminPinScreen').style.display = 'none';
 }
 function submitAdminPin() {
   var pin = document.getElementById('adminPinInput').value.trim();
