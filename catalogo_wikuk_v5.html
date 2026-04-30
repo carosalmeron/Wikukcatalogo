@@ -259,6 +259,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 <body>
 
 
+<script>
+// Ocultar pantalla de entrada INMEDIATAMENTE si hay token de cliente en la URL
+// Esto evita que el cliente vea el login mientras JSONBin carga
+(function() {
+  if (window.location.search.indexOf('cliente=') !== -1) {
+    document.addEventListener('DOMContentLoaded', function() {
+      var es = document.getElementById('entryScreen');
+      if (es) es.style.display = 'none';
+    });
+    // También via inline style en el elemento directamente
+    document.write('<style>#entryScreen{display:none!important}</style>');
+  }
+})();
+</script>
+
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
@@ -492,19 +507,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <span class="i-badge" style="background:var(--teal-bg);color:var(--teal)">SPOT</span>
       </div>
       <div class="col-item" style="--item-color:var(--blue);--item-bg:var(--blue-bg)" id="ci-spot_cui" onclick="dSelectCat('spot_cui',this)">
-        <span class="i-icon">⭐</span><span class="i-label" id="dlbl-spot_cui">Spot CUI — Gastronorm</span>
+        <span class="i-icon">⭐</span><span class="i-label" id="dlbl-spot_cui">Spot Banquetas</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
       <div class="col-item" style="--item-color:var(--gold);--item-bg:var(--gold-bg)" id="ci-spot_frumen" onclick="dSelectCat('spot_frumen',this)">
-        <span class="i-icon">🍞</span><span class="i-label" id="dlbl-spot_frumen">Spot Frumen — Pan Rallado</span>
+        <span class="i-icon">🍞</span><span class="i-label" id="dlbl-spot_frumen">Spot Pan Rallado</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
       <div class="col-item" style="--item-color:var(--green);--item-bg:var(--green-bg)" id="ci-spot_el_carmen" onclick="dSelectCat('spot_el_carmen',this)">
-        <span class="i-icon">⭐</span><span class="i-label" id="dlbl-spot_el_carmen">Spot El Carmen</span>
+        <span class="i-icon">⭐</span><span class="i-label" id="dlbl-spot_el_carmen">Spot Embalaje 1</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
       <div class="col-item" style="--item-color:var(--purple);--item-bg:var(--purple-bg)" id="ci-spot_sierra" onclick="dSelectCat('spot_sierra',this)">
-        <span class="i-icon">🏔️</span><span class="i-label" id="dlbl-spot_sierra">Spot Sierra Nevada</span>
+        <span class="i-icon">🏔️</span><span class="i-label" id="dlbl-spot_sierra">Spot Embalaje 2</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
@@ -603,24 +618,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <span class="m-ilabel" id="mlbl-spot_merkapack">Spot Bolsas de Vacío</span>
         <span class="m-ibadge" style="background:var(--teal-bg);color:var(--teal)">SPOT</span>
       </div>
-      <div class="m-item" onclick="mGo('spot_cui',this,'⭐','Spot CUI','var(--blue-bg)')">
+      <div class="m-item" onclick="mGo('spot_cui',this,'⭐','Spot Banquetas','var(--blue-bg)')">
         <div class="m-iicon" style="background:var(--blue-bg)">⭐</div>
-        <span class="m-ilabel" id="mlbl-spot_cui">Spot CUI — Gastronorm</span>
+        <span class="m-ilabel" id="mlbl-spot_cui">Spot Banquetas</span>
         <span class="m-ibadge" style="background:var(--blue-bg);color:var(--blue)">SPOT</span>
       </div>
-      <div class="m-item" onclick="mGo('spot_frumen',this,'🍞','Spot Frumen','var(--gold-bg)')">
+      <div class="m-item" onclick="mGo('spot_frumen',this,'🍞','Spot Pan Rallado','var(--gold-bg)')">
         <div class="m-iicon" style="background:var(--gold-bg)">🍞</div>
-        <span class="m-ilabel" id="mlbl-spot_frumen">Spot Frumen — Pan Rallado</span>
+        <span class="m-ilabel" id="mlbl-spot_frumen">Spot Pan Rallado</span>
         <span class="m-ibadge" style="background:var(--gold-bg);color:var(--gold)">SPOT</span>
       </div>
-      <div class="m-item" onclick="mGo('spot_el_carmen',this,'⭐','Spot El Carmen','var(--green-bg)')">
+      <div class="m-item" onclick="mGo('spot_el_carmen',this,'⭐','Spot Embalaje 1','var(--green-bg)')">
         <div class="m-iicon" style="background:var(--green-bg)">⭐</div>
-        <span class="m-ilabel" id="mlbl-spot_el_carmen">Spot El Carmen</span>
+        <span class="m-ilabel" id="mlbl-spot_el_carmen">Spot Embalaje 1</span>
         <span class="m-ibadge" style="background:var(--green-bg);color:var(--green)">SPOT</span>
       </div>
-      <div class="m-item" onclick="mGo('spot_sierra',this,'🏔️','Spot Sierra Nevada','var(--purple-bg)')">
+      <div class="m-item" onclick="mGo('spot_sierra',this,'🏔️','Spot Embalaje 2','var(--purple-bg)')">
         <div class="m-iicon" style="background:var(--purple-bg)">🏔️</div>
-        <span class="m-ilabel" id="mlbl-spot_sierra">Spot Sierra Nevada</span>
+        <span class="m-ilabel" id="mlbl-spot_sierra">Spot Embalaje 2</span>
         <span class="m-ibadge" style="background:var(--purple-bg);color:var(--purple)">SPOT</span>
       </div>
     </div>
@@ -930,10 +945,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_taberner" checked> Spot Taberner</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_campana" checked> Spot Campana</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_merkapack" checked> Spot Bolsas de Vacío</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_cui" checked> Spot CUI</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_frumen" checked> Spot Frumen</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_el_carmen" checked> Spot El Carmen</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_sierra" checked> Spot Sierra Nevada</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_cui" checked> Spot Banquetas</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_frumen" checked> Spot Pan Rallado</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_el_carmen" checked> Spot Embalaje 1</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_sierra" checked> Spot Embalaje 2</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-envases" checked> Envases</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-accesorios" checked> Accesorios</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-aditivos" checked> Aditivos</label>
@@ -967,10 +982,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_taberner"> Spot Taberner</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_campana"> Spot Campana</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_merkapack"> Spot Bolsas de Vacío</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_cui"> Spot CUI</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_frumen"> Spot Frumen</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_el_carmen"> Spot El Carmen</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_sierra"> Spot Sierra Nevada</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_cui"> Spot Banquetas</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_frumen"> Spot Pan Rallado</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_el_carmen"> Spot Embalaje 1</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_sierra"> Spot Embalaje 2</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-envases"> Envases</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-accesorios"> Accesorios</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-aditivos"> Aditivos</label>
@@ -1165,17 +1180,17 @@ function applyLang(){
     'spot_taberner':{es:'Spot Taberner',       fr:'Spot Taberner',          pt:'Spot Taberner'},
     'spot_campana': {es:'Spot La Campana',     fr:'Spot La Campana',        pt:'Spot La Campana'},
     'spot_merkapack':{es:'Spot Bolsas de Vacío', fr:'Spot Sachets Sous-Vide', pt:'Spot Sacos de Vácuo'},
-    'spot_cui':     {es:'Spot CUI — Gastronorm',    fr:'Spot CUI — Gastronorm',     pt:'Spot CUI — Gastronorm'},
-    'spot_frumen':  {es:'Spot Frumen — Pan Rallado',fr:'Spot Frumen — Chapelure',   pt:'Spot Frumen — Pão Ralado'},
-    'spot_el_carmen':{es:'Spot El Carmen',           fr:'Spot El Carmen',            pt:'Spot El Carmen'},
-    'spot_sierra':  {es:'Spot Sierra Nevada',        fr:'Spot Sierra Nevada',        pt:'Spot Sierra Nevada'},
+    'spot_cui':     {es:'Spot Banquetas',    fr:'Spot Banquetas',     pt:'Spot Banquetas'},
+    'spot_frumen':  {es:'Spot Pan Rallado',fr:'Spot Pan Rallado — Chapelure',   pt:'Spot Pan Rallado — Pão Ralado'},
+    'spot_el_carmen':{es:'Spot Embalaje 1',           fr:'Spot Embalaje 1',            pt:'Spot Embalaje 1'},
+    'spot_sierra':  {es:'Spot Embalaje 2',        fr:'Spot Embalaje 2',        pt:'Spot Embalaje 2'},
     'envases':      {es:'Envases',                   fr:'Emballages',                pt:'Embalagens'},
     'accesorios':   {es:'Accesorios',                fr:'Accessoires',               pt:'Acessórios'},
     'aditivos':     {es:'Aditivos',                  fr:'Additifs',                  pt:'Aditivos'},
-    'spot_cui':      {es:'Spot CUI — Gastronorm',fr:'Spot CUI — Gastronorm',pt:'Spot CUI — Gastronorm'},
-    'spot_frumen':   {es:'Spot Frumen — Pan Rallado',fr:'Spot Frumen — Chapelure',pt:'Spot Frumen — Pão Ralado'},
-    'spot_el_carmen':{es:'Spot El Carmen',fr:'Spot El Carmen',pt:'Spot El Carmen'},
-    'spot_sierra':   {es:'Spot Sierra Nevada',fr:'Spot Sierra Nevada',pt:'Spot Sierra Nevada'},
+    'spot_cui':      {es:'Spot Banquetas',fr:'Spot Banquetas',pt:'Spot Banquetas'},
+    'spot_frumen':   {es:'Spot Pan Rallado',fr:'Spot Pan Rallado — Chapelure',pt:'Spot Pan Rallado — Pão Ralado'},
+    'spot_el_carmen':{es:'Spot Embalaje 1',fr:'Spot Embalaje 1',pt:'Spot Embalaje 1'},
+    'spot_sierra':   {es:'Spot Embalaje 2',fr:'Spot Embalaje 2',pt:'Spot Embalaje 2'},
     'envases':      {es:'Envases',             fr:'Emballages',             pt:'Embalagens'},
     'accesorios':   {es:'Accesorios',          fr:'Accessoires',            pt:'Acessórios'},
     'aditivos':     {es:'Aditivos',            fr:'Additifs',               pt:'Aditivos'},
@@ -1259,10 +1274,10 @@ var CAT_LABELS_FR = {
   '⭐ Spot Taberner':                      '⭐ Spot Taberner',
   '⭐ Spot La Campana':                    '⭐ Spot La Campana',
   '⭐ Spot Bolsas de Vacío':          '⭐ Spot Sachets Sous-Vide',
-  '⭐ Spot CUI — Gastronorm':         '⭐ Spot CUI — Gastronorm',
-  '⭐ Spot Frumen — Pan Rallado':     '⭐ Spot Frumen — Chapelure',
-  '⭐ Spot El Carmen':                     '⭐ Spot El Carmen',
-  '⭐ Spot Sierra Nevada':                 '⭐ Spot Sierra Nevada',
+  '⭐ Spot Banquetas':         '⭐ Spot Banquetas',
+  '⭐ Spot Pan Rallado':     '⭐ Spot Pan Rallado — Chapelure',
+  '⭐ Spot Embalaje 1':                     '⭐ Spot Embalaje 1',
+  '⭐ Spot Embalaje 2':                 '⭐ Spot Embalaje 2',
   'Envases':                                   'Emballages',
   'Accesorios':                                'Accessoires',
   'Aditivos':                                  'Additifs',
@@ -1368,10 +1383,10 @@ var CAT_LABELS_PT = {
   '⭐ Spot Taberner':                      '⭐ Spot Taberner',
   '⭐ Spot La Campana':                    '⭐ Spot La Campana',
   '⭐ Spot Bolsas de Vacío':          '⭐ Spot Sacos de Vácuo',
-  '⭐ Spot CUI — Gastronorm':         '⭐ Spot CUI — Gastronorm',
-  '⭐ Spot Frumen — Pan Rallado':     '⭐ Spot Frumen — Pão Ralado',
-  '⭐ Spot El Carmen':                     '⭐ Spot El Carmen',
-  '⭐ Spot Sierra Nevada':                 '⭐ Spot Sierra Nevada',
+  '⭐ Spot Banquetas':         '⭐ Spot Banquetas',
+  '⭐ Spot Pan Rallado':     '⭐ Spot Pan Rallado — Pão Ralado',
+  '⭐ Spot Embalaje 1':                     '⭐ Spot Embalaje 1',
+  '⭐ Spot Embalaje 2':                 '⭐ Spot Embalaje 2',
   'Envases':                                   'Embalagens',
   'Accesorios':                                'Acessórios',
   'Aditivos':                                  'Aditivos',
@@ -2592,7 +2607,7 @@ const DATA = {
     }
   },
   spot_cui: {
-    label:'⭐ Spot CUI — Gastronorm',
+    label:'⭐ Spot Banquetas',
     subs: {
       'Envases Bisagra':[
         {c:'1C0370/T',  n:'Envase Bisagra C 400',             f:'C.400 uds.',p:'183,33'}
@@ -2644,7 +2659,7 @@ const DATA = {
     }
   },
   spot_frumen: {
-    label:'Spot Frumen — Pan Rallado',
+    label:'Spot Pan Rallado',
     subs: {
       'Pan Rallado Natural':[
         {c:'V00127', n:'Pan Rallado Frumen G2 20kg Natural', p:'1,98'},
@@ -2682,7 +2697,7 @@ const DATA = {
     }
   },
   spot_el_carmen: {
-    label:'Spot El Carmen',
+    label:'Spot Embalaje 1',
     subs: {
       'Bolsas de Plástico':[
         {c:'165-0040', n:'Camisetablock 70% 40×50', p:'70,00'},
@@ -2710,7 +2725,7 @@ const DATA = {
     }
   },
   spot_sierra: {
-    label:'Spot Sierra Nevada',
+    label:'Spot Embalaje 2',
     subs: {
       'Envases Aluminio':[
         {c:'EAP2',  n:'Envase Aluminio Medio Pollo',        f:'Caja 600U', p:'95,88'},
@@ -4410,10 +4425,10 @@ var ALL_CATS = [
   {key:'promo_tripas', label:'Promociones — Tripas'},
   {key:'promo_especias',label:'Promociones — Especias'},
   {key:'promo_envases',label:'Promociones — Envases'},
-  {key:'spot_cui',     label:'Spot CUI — Gastronorm'},
-  {key:'spot_frumen',  label:'Spot Frumen — Pan Rallado'},
-  {key:'spot_el_carmen',label:'Spot El Carmen'},
-  {key:'spot_sierra',  label:'Spot Sierra Nevada'}
+  {key:'spot_cui',     label:'Spot Banquetas'},
+  {key:'spot_frumen',  label:'Spot Pan Rallado'},
+  {key:'spot_el_carmen',label:'Spot Embalaje 1'},
+  {key:'spot_sierra',  label:'Spot Embalaje 2'}
 ];
 
 // ── Load/Save ──
@@ -5076,6 +5091,21 @@ document.addEventListener('DOMContentLoaded', function() {
   if (sel) sel.addEventListener('change', onModalEstadoChange);
   // Check if accessing via client token link
   loadUsers().then(function() { checkClientToken(); });
+  // Si hay token cliente, mostrar spinner de carga mientras JSONBin responde
+  if (window.location.search.indexOf('cliente=') !== -1) {
+    var loader = document.createElement('div');
+    loader.id = 'client-loader';
+    loader.style.cssText = 'position:fixed;inset:0;background:#FAF9F7;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;font-family:Inter,sans-serif;gap:16px;';
+    loader.innerHTML = '<div style="font-size:2rem;font-weight:900;color:#B45309">WI<span style="color:#1a1a1a">KUK</span></div>'
+      + '<div style="width:36px;height:36px;border:3px solid #E5E7EB;border-top-color:#B45309;border-radius:50%;animation:spin .8s linear infinite;"></div>'
+      + '<div style="font-size:.82rem;color:#9CA3AF;">Cargando catálogo...</div>'
+      + '<style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(loader);
+    loadUsers().then(function() {
+      var l = document.getElementById('client-loader');
+      if (l) l.remove();
+    });
+  }
 });
 
 function onModalEstadoChange() {
