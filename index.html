@@ -5231,7 +5231,20 @@ document.addEventListener('DOMContentLoaded', function() {
       + '<div style="font-size:.82rem;color:#9CA3AF;">Cargando catálogo...</div>'
       + '<style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
     document.body.appendChild(loader);
-    loadUsers(true).then(function() {  // force remote - no cache for client links
+    // Limpiar caché para que el cliente siempre vea datos actualizados
+    try { localStorage.removeItem('wk_data_cache'); } catch(e) {}
+    var clientLoadTimeout = setTimeout(function() {
+      var l = document.getElementById('client-loader');
+      if (l) l.remove();
+      checkClientToken();
+    }, 8000); // fallback por si JSONBin no responde en 8s
+    loadUsers().then(function() {
+      clearTimeout(clientLoadTimeout);
+      var l = document.getElementById('client-loader');
+      if (l) l.remove();
+      checkClientToken();
+    }).catch(function() {
+      clearTimeout(clientLoadTimeout);
       var l = document.getElementById('client-loader');
       if (l) l.remove();
       checkClientToken();
