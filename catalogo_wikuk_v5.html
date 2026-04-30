@@ -3465,33 +3465,40 @@ async function loadUsers(forceRemote) {
 
 // ── Save users to JSONBin ──
 async function saveUsers() {
-  try {
-    var body = JSON.stringify({usuarios: APP_USERS, accesos: ACCESOS_LOG});
-    var r = await fetch(JSONBIN_URL, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': JSONBIN_KEY
-      },
-      body: body
-    });
-    var responseText = await r.text();
-    console.log('JSONBin response:', r.status, responseText.substring(0, 300));
-    // Actualizar caché local tras guardar
+  // Limitar accesos a los últimos 100 para no superar límite JSONBin (100KB)
+  var accesosToSave = ACCESOS_LOG.length > 100 ? ACCESOS_LOG.slice(-100) : ACCESOS_LOG;
+  var payload = {usuarios: APP_USERS, accesos: accesosToSave};
+  var body = JSON.stringify(payload);
+
+  // Reintentar hasta 3 veces si falla la red
+  for (var attempt = 1; attempt <= 3; attempt++) {
     try {
-      localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
-        usuarios: APP_USERS, accesos: ACCESOS_LOG,
-        expiry: Date.now() + _WK_CACHE_TTL
-      }));
-    } catch(e) {}
-    if (!r.ok) {
-      throw new Error('HTTP ' + r.status + ': ' + responseText);
+      var r = await fetch(JSONBIN_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+        body: body
+      });
+      if (!r.ok) {
+        var rt = await r.text();
+        throw new Error('HTTP ' + r.status + ': ' + rt.substring(0, 100));
+      }
+      // Solo actualizar caché DESPUÉS de confirmar save exitoso
+      try {
+        localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+          usuarios: APP_USERS, accesos: accesosToSave,
+          expiry: Date.now() + _WK_CACHE_TTL
+        }));
+      } catch(e) {}
+      return true;
+    } catch(e) {
+      console.warn('saveUsers intento ' + attempt + ' fallido:', e.message);
+      if (attempt === 3) {
+        alert('❌ Error al guardar (intento ' + attempt + '/3): ' + e.message + '\n\nComprueba tu conexión e inténtalo de nuevo.');
+        return false;
+      }
+      // Esperar antes de reintentar (1s, 2s)
+      await new Promise(function(res){ setTimeout(res, attempt * 1000); });
     }
-    return true;
-  } catch(e) {
-    console.error('Error saving users:', e);
-    alert('Error al guardar: ' + e.message);
-    return false;
   }
 }
 
