@@ -669,17 +669,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     </button>
     <div style="padding:13px 16px 5px;font-size:.98rem;font-weight:700" id="ms1b-title">Promociones y Liquidaciones</div>
     <div class="m-list">
-      <div class="m-item" onclick="mGo('promo_tripas',this,'🏷️','Tripas','#FFF0EB')">
+      <div class="m-item" id="m-promo_tripas" onclick="mGo('promo_tripas',this,'🏷️','Tripas','#FFF0EB')">
         <div class="m-iicon" style="background:#FFF0EB">🏷️</div>
         <span class="m-ilabel" id="ms1b-tripas">Tripas</span>
         <svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
-      <div class="m-item" onclick="mGo('promo_especias',this,'🏷️','Especias y Preparados','#FFF0EB')">
+      <div class="m-item" id="m-promo_especias" onclick="mGo('promo_especias',this,'🏷️','Especias y Preparados','#FFF0EB')">
         <div class="m-iicon" style="background:#FFF0EB">🏷️</div>
         <span class="m-ilabel" id="ms1b-especias">Especias y Preparados</span>
         <svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
-      <div class="m-item" onclick="mGo('promo_envases',this,'🏷️','Envases','#FFF0EB')">
+      <div class="m-item" id="m-promo_envases" onclick="mGo('promo_envases',this,'🏷️','Envases','#FFF0EB')">
         <div class="m-iicon" style="background:#FFF0EB">🏷️</div>
         <span class="m-ilabel" id="ms1b-envases">Envases</span>
         <svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
@@ -3960,6 +3960,11 @@ function applyVendorCatFilter() {
       item = item.parentNode;
     }
   }
+  // ── Promociones sub-items mobile ──
+  ['promo_tripas','promo_especias','promo_envases'].forEach(function(k) {
+    var el = document.getElementById('m-'+k);
+    if (el) el.style.display = (!ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[k] === true) ? '' : 'none';
+  });
 }
 
 function initApp() {
@@ -4153,7 +4158,11 @@ function renderPromoSections() {
     {key:'promo_especias', label:'Especias y Preparados'},
     {key:'promo_envases',  label:'Envases'}
   ];
-  document.getElementById('d-col2').innerHTML = sections.map(function(s){
+  // Filtrar según permisos del cliente/vendedor
+  var visible = sections.filter(function(s) {
+    return !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[s.key] === true;
+  });
+  document.getElementById('d-col2').innerHTML = visible.map(function(s){
     return '<div class="sub-item" onclick="dSelectPromoSection(\''+s.key+'\',this)">'
       +'<span class="sub-dot"></span>🏷️ '+s.label+'</div>';
   }).join('');
