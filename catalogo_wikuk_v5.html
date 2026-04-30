@@ -251,8 +251,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .toggle-sw::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;}
 .toggle-sw.on::after{left:23px;}
 /* Admin PIN screen */
-.admin-pin-screen{position:fixed;inset:0;background:rgba(250,249,247,0.98);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;}
+.admin-pin-screen{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;}
 .admin-pin-screen.visible{display:flex;}
+.admin-pin-box{background:white;border-radius:16px;padding:32px 28px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:320px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
 .pin-input{font-size:1.3rem;letter-spacing:.3em;text-align:center;padding:12px 20px;border:2px solid var(--border);border-radius:10px;width:100%;max-width:260px;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;}
 .pin-input:focus{border-color:var(--accent);}
 </style>
@@ -889,14 +890,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <!-- ADMIN PIN SCREEN -->
 <div class="admin-pin-screen" id="adminPinScreen">
-  <div style="font-size:2rem;margin-bottom:8px">🔐</div>
-  <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px">Zona Administrador</div>
-  <div style="font-size:.82rem;color:var(--muted);margin-bottom:20px;text-align:center">Introduce tu clave de acceso</div>
-  <input class="pin-input" id="adminPinInput" type="password" placeholder="••••••••"
-    onkeydown="if(event.key==='Enter')submitAdminPin()">
-  <div id="adminPinError" style="color:#DC2626;font-size:.82rem;display:none">Clave incorrecta.</div>
-  <button onclick="submitAdminPin()" style="width:100%;max-width:260px;padding:12px;background:#1A1816;color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>
-  <button onclick="closeAdminPin()" style="background:none;border:none;color:var(--muted);font-size:.85rem;cursor:pointer;font-family:Inter,sans-serif;margin-top:4px;">Cancelar</button>
+  <div class="admin-pin-box">
+    <div style="font-size:2rem">🔐</div>
+    <div style="font-size:1.1rem;font-weight:800">Zona Administrador</div>
+    <div style="font-size:.82rem;color:var(--muted);text-align:center">Introduce tu clave de acceso</div>
+    <input class="pin-input" id="adminPinInput" type="password" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter')submitAdminPin()">
+    <div id="adminPinError" style="color:#DC2626;font-size:.82rem;display:none">Clave incorrecta.</div>
+    <button onclick="submitAdminPin()" style="width:100%;padding:12px;background:#1A1816;color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>
+    <button onclick="closeAdminPin()" style="background:none;border:none;color:var(--muted);font-size:.85rem;cursor:pointer;font-family:Inter,sans-serif;">Cancelar</button>
+  </div>
 </div>
 
 <!-- ADMIN PANEL -->
