@@ -3016,7 +3016,6 @@ const DATA = {
     {c:'CO00316', n:'BOLSAS BLOCK TRANSPARENTES 30X43', f1:'—', f2:'—', p:'15 uds.', cat:'Liquidación'}
     ]
   }}
-};
 };// ═══ DELIVERY & HELPER FUNCTIONS ═══
 var _DAYS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 var _MTHS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -3332,6 +3331,7 @@ async function clearAccesos() {
 // ── Load users from JSONBin ──
 var _loadUsersPromise = null;
 var _WK_CACHE_KEY = 'wk_data_cache';
+var _WK_CACHE_VER = 'v3'; // incrementar para forzar recarga
 var _WK_CACHE_TTL = 12 * 60 * 60 * 1000; // 12 horas
 
 async function loadUsers(forceRemote) {
@@ -3342,13 +3342,17 @@ async function loadUsers(forceRemote) {
       var cached = localStorage.getItem(_WK_CACHE_KEY);
       if (cached) {
         var obj = JSON.parse(cached);
-        if (obj.expiry > Date.now()) {
-          APP_USERS   = obj.usuarios || [];
-          ACCESOS_LOG = obj.accesos  || [];
-          return; // datos válidos en caché, sin llamar a JSONBin
+        // Verificar versión y expiración
+        if (obj.ver === _WK_CACHE_VER && obj.expiry > Date.now() && Array.isArray(obj.usuarios) && obj.usuarios.length > 0) {
+          APP_USERS   = obj.usuarios;
+          ACCESOS_LOG = obj.accesos || [];
+          return;
+        } else {
+          // Caché inválida — borrar
+          localStorage.removeItem(_WK_CACHE_KEY);
         }
       }
-    } catch(e) {}
+    } catch(e) { localStorage.removeItem(_WK_CACHE_KEY); }
   }
   _loadUsersPromise = (async function() {
     try {
@@ -3395,6 +3399,7 @@ async function saveUsers() {
       // Solo actualizar caché DESPUÉS de confirmar save exitoso
       try {
         localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+          ver: _WK_CACHE_VER,
           usuarios: APP_USERS, accesos: accesosToSave,
           expiry: Date.now() + _WK_CACHE_TTL
         }));
