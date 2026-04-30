@@ -278,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);margin-top:-8px;margin-bottom:4px;letter-spacing:.1em;">v7.2</div>
+  <div style="font-size:.65rem;color:var(--muted);margin-top:-8px;margin-bottom:4px;letter-spacing:.1em;">v7.3</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -4462,7 +4462,10 @@ function saveAgentConf() {
 function showAdminPin() {
   var el = document.getElementById('adminPinScreen');
   if (!el) { alert('Error: panel no encontrado'); return; }
-  el.style.display = 'flex';
+  el.style.setProperty('display', 'flex', 'important');
+  el.style.setProperty('visibility', 'visible', 'important');
+  el.style.setProperty('opacity', '1', 'important');
+  el.style.setProperty('z-index', '99999', 'important');
   document.getElementById('adminPinInput').value = '';
   document.getElementById('adminPinError').style.display = 'none';
   setTimeout(function(){ document.getElementById('adminPinInput').focus(); }, 100);
