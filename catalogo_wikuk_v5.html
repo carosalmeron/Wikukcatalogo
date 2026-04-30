@@ -20,10 +20,10 @@ html,body{height:100%;overflow:hidden;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
 
 /* TOPBAR */
-.topbar{height:52px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:200;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);display:flex;flex-direction:column;padding:8px 16px 8px;gap:7px;flex-shrink:0;z-index:200;}
 .logo{font-size:1.05rem;font-weight:700;letter-spacing:.04em;flex-shrink:0;}
 .logo span{color:var(--accent);}
-.search-wrap{position:relative;flex:1;}
+.search-wrap{position:relative;width:100%;}
 .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
 .search-input{width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-family:'Inter',sans-serif;font-size:.85rem;color:var(--text);outline:none;}
 .search-input:focus{border-color:var(--accent);background:var(--white);}
@@ -387,21 +387,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <div class="eo-list" id="clientList"></div>
 </div>
 <div class="topbar">
-  <button id="btnBackEntry" onclick="goBackToEntry()" style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--accent);font-size:.8rem;font-weight:600;font-family:Inter,sans-serif;flex-shrink:0;">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-  </button>
-  <div class="logo">WI<span>KUK</span></div>
-  <div class="client-badge" id="clientBadge" onclick="showClientSelector()">
-    <span id="clientBadgeText"></span>
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+  <!-- Fila 1: nav + logo + badge + share -->
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button id="btnBackEntry" onclick="goBackToEntry()" style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--accent);font-size:.8rem;font-weight:600;font-family:Inter,sans-serif;flex-shrink:0;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="logo">WI<span>KUK</span></div>
+    <div class="client-badge" id="clientBadge" onclick="showClientSelector()">
+      <span id="clientBadgeText"></span>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div style="flex:1;"></div>
+    <button id="btnShareCliente" onclick="openShareModal()" style="display:none;flex-shrink:0;background:#D97706;color:white;border:none;border-radius:8px;padding:5px 12px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;align-items:center;gap:5px;">
+      🔗 Enlace
+    </button>
   </div>
-  <div class="search-wrap" style="flex:1;">
+  <!-- Fila 2: búsqueda a ancho completo -->
+  <div class="search-wrap">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input type="text" class="search-input" id="searchInput" placeholder="Buscar producto o código…" oninput="doSearch(this.value)">
   </div>
-  <button id="btnShareCliente" onclick="openShareModal()" style="display:none;flex-shrink:0;background:#D97706;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;align-items:center;gap:5px;">
-    🔗 Enlace
-  </button>
 </div>
 
 <!-- ══ MODAL SHARE CLIENTE ══ -->
