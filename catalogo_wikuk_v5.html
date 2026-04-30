@@ -3620,14 +3620,15 @@ function editUser(idx) {
   // Client link fields
   var clienteActivo = u.activoCliente && u.tokenCliente;
   document.getElementById('ucat-cliente-activo').checked = !!clienteActivo;
-  document.getElementById('ucatc-section').style.display = clienteActivo ? 'block' : 'none';
+  // Mostrar sección de categorías siempre (para configurar antes de activar)
+  document.getElementById('ucatc-section').style.display = 'block';
   var catsCliente = u.categoriasCliente;
-  var todasClienteChecked = catsCliente === 'todas';
+  var todasClienteChecked = !catsCliente || catsCliente === 'todas';
   document.getElementById('ucatc-todas').checked = todasClienteChecked;
   document.getElementById('ucatc-cats').style.display = todasClienteChecked ? 'none' : 'grid';
   ALL_CATS.forEach(function(cat) {
     var el = document.getElementById('ucatc-' + cat.key);
-    if (el) el.checked = todasClienteChecked || (catsCliente && catsCliente[cat.key]);
+    if (el) el.checked = todasClienteChecked || (catsCliente && catsCliente[cat.key] !== false);
   });
 }
 
@@ -3658,17 +3659,16 @@ async function saveUserForm() {
   // Client link config
   var clienteActivo = document.getElementById('ucat-cliente-activo').checked;
   var todasCliente  = document.getElementById('ucatc-todas').checked;
-  var categoriasCliente = null;
-  if (clienteActivo) {
-    if (todasCliente) {
-      categoriasCliente = 'todas';
-    } else {
-      categoriasCliente = {};
-      ALL_CATS.forEach(function(cat) {
-        var el = document.getElementById('ucatc-' + cat.key);
-        if (el) categoriasCliente[cat.key] = el.checked;
-      });
-    }
+  // Guardar categoriasCliente SIEMPRE (no solo si activo) para no perder la config al desactivar
+  var categoriasCliente;
+  if (todasCliente) {
+    categoriasCliente = 'todas';
+  } else {
+    categoriasCliente = {};
+    ALL_CATS.forEach(function(cat) {
+      var el = document.getElementById('ucatc-' + cat.key);
+      if (el) categoriasCliente[cat.key] = el.checked;
+    });
   }
 
   // Keep existing token if already generated, create new one if enabling for first time
