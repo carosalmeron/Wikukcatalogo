@@ -402,6 +402,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     <button id="btnShareCliente" onclick="openShareModal()" style="display:none;flex-shrink:0;background:#D97706;color:white;border:none;border-radius:8px;padding:5px 12px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;align-items:center;gap:5px;">
       🔗 Enlace
     </button>
+  <button id="btnAdminTopbar" onclick="showAdminPin()" style="display:none;flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 6px;font-size:1.1rem;" title="Administración">⚙️</button>
   </div>
   <!-- Fila 2: búsqueda a ancho completo -->
   <div class="search-wrap">
@@ -3445,7 +3446,7 @@ async function doUserLogin() {
   ACTIVE_USER = found;
   ACTIVE_VENDOR_CATS = found.categorias === 'todas' ? null : found.categorias;
   registrarAcceso(found.usuario, found.nombre);
-  setTimeout(_updateShareBtn, 300);
+  setTimeout(function() { _updateShareBtn(); _updateAdminBtn(); }, 300);
 
   // Guardar sesión 12 horas en localStorage
   try {
@@ -3761,15 +3762,24 @@ function copyShareUrl() {
 function _updateShareBtn() {
   var btn = document.getElementById('btnShareCliente');
   if (!btn) return;
-  // Show button only for logged-in users (not admin, not client mode)
   if (!ACTIVE_USER || ACTIVE_USER.esCliente || ACTIVE_USER.esAdmin) {
     btn.style.display = 'none'; return;
   }
   var u = APP_USERS.find(function(x){ return x.usuario === ACTIVE_USER.usuario; });
-  // Show if user has a tokenCliente configured (even if inactive, so they can activate)
   if (u && u.tokenCliente) {
     btn.style.display = 'flex';
     btn.style.background = u.activoCliente ? '#D97706' : '#6B7280';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function _updateAdminBtn() {
+  var btn = document.getElementById('btnAdminTopbar');
+  if (!btn) return;
+  // Show only for ADMIN users (not clients)
+  if (ACTIVE_USER && !ACTIVE_USER.esCliente) {
+    btn.style.display = 'flex';
   } else {
     btn.style.display = 'none';
   }
@@ -5110,7 +5120,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 badge.onclick = null;
               }
               applyVendorCatFilter();
-              setTimeout(_updateShareBtn, 100);
+              setTimeout(function() { _updateShareBtn(); _updateAdminBtn(); }, 100);
             } else {
               // Usuario desactivado o eliminado — borrar sesión
               localStorage.removeItem('wk_session');
