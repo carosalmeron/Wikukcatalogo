@@ -3420,30 +3420,29 @@ async function clearAccesos() {
 
 
 // ── Load users from JSONBin ──
+var _loadUsersPromise = null;
 async function loadUsers() {
-  try {
-    var r = await fetch(JSONBIN_URL + '/latest', {
-      headers: {
-        'X-Master-Key': JSONBIN_KEY
-      }
-    });
-    var responseText = await r.text();
-    console.log('loadUsers response:', r.status, responseText.substring(0, 300));
-    if (!r.ok) throw new Error('HTTP ' + r.status + ': ' + responseText);
-    var data = JSON.parse(responseText);
-    APP_USERS = (data.record && data.record.usuarios) ? data.record.usuarios : [];
-    console.log('Loaded', APP_USERS.length, 'users');
-  } catch(e) {
-    console.error('Error loading users:', e);
-    APP_USERS = [];
-  }
+  if (_loadUsersPromise) return _loadUsersPromise; // evita llamadas dobles
+  _loadUsersPromise = (async function() {
+    try {
+      var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var data = JSON.parse(await r.text());
+      APP_USERS   = (data.record && data.record.usuarios) ? data.record.usuarios : [];
+      ACCESOS_LOG = (data.record && data.record.accesos)  ? data.record.accesos  : [];
+    } catch(e) {
+      console.error('Error loading users:', e);
+      APP_USERS = []; ACCESOS_LOG = [];
+    }
+    _loadUsersPromise = null; // reset para próxima recarga
+  })();
+  return _loadUsersPromise;
 }
 
 // ── Save users to JSONBin ──
 async function saveUsers() {
   try {
-    var body = JSON.stringify({usuarios: APP_USERS});
-    console.log('Saving to JSONBin:', body.substring(0, 200));
+    var body = JSON.stringify({usuarios: APP_USERS, accesos: ACCESOS_LOG});
     var r = await fetch(JSONBIN_URL, {
       method: 'PUT',
       headers: {
@@ -3493,7 +3492,15 @@ async function doUserLogin() {
   ACTIVE_USER = found;
   ACTIVE_VENDOR_CATS = found.categorias === 'todas' ? null : found.categorias;
   registrarAcceso(found.usuario, found.nombre);
-  setTimeout(_updateShareBtn, 300); // Show share button if user has client link
+  setTimeout(_updateShareBtn, 300);
+
+  // Guardar sesión 12 horas en localStorage
+  try {
+    localStorage.setItem('wk_session', JSON.stringify({
+      usuario: found.usuario,
+      expiry: Date.now() + 12 * 60 * 60 * 1000
+    }));
+  } catch(e) {}
 
   document.getElementById('loginScreen').style.display = 'none';
   // Show user badge
@@ -3860,7 +3867,9 @@ function goBackToEntry() {
   ACTIVE_CLIENT = null;
   ACTIVE_VENDOR = null;
   ACTIVE_VENDOR_CATS = null;
+  ACTIVE_USER = null;
   CLIENTS = [];
+  try { localStorage.removeItem('wk_session'); } catch(e) {}
   document.getElementById('clientBadge').classList.remove('visible');
   // Hide mobile screens, show entry
   ['m-s1','ms1b','m-s2','m-s3','m-s4'].forEach(function(id){
@@ -3873,7 +3882,7 @@ function goBackToEntry() {
 
 function applyVendorCatFilter() {
   ALL_CATS.forEach(function(cat) {
-    var allowed = !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[cat.key];
+    var allowed = !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[cat.key] !== false;
 
     // ── Mobile menu: hide m-item parent of mlbl- span ──
     var el = document.getElementById('mlbl-'+cat.key);
@@ -5089,10 +5098,49 @@ function closeModal() {
 document.addEventListener('DOMContentLoaded', function() {
   var sel = document.getElementById('modal-estado');
   if (sel) sel.addEventListener('change', onModalEstadoChange);
-  // Check if accessing via client token link
-  loadUsers().then(function() { checkClientToken(); });
-  // Si hay token cliente, mostrar spinner de carga mientras JSONBin responde
-  if (window.location.search.indexOf('cliente=') !== -1) {
+  // Una sola llamada a loadUsers — deduplicada internamente
+  var isClientLink = window.location.search.indexOf('cliente=') !== -1;
+
+  // Intentar restaurar sesión guardada (válida 12h)
+  if (!isClientLink) {
+    try {
+      var saved = localStorage.getItem('wk_session');
+      if (saved) {
+        var sess = JSON.parse(saved);
+        if (sess.expiry > Date.now()) {
+          // Sesión válida — cargar usuarios y entrar directamente
+          loadUsers().then(function() {
+            var found = APP_USERS.find(function(u) {
+              return u.usuario === sess.usuario && u.activo !== false;
+            });
+            if (found) {
+              ACTIVE_USER = found;
+              ACTIVE_VENDOR_CATS = found.categorias === 'todas' ? null : found.categorias;
+              document.getElementById('entryScreen').style.display = 'none';
+              document.getElementById('loginScreen').style.display = 'none';
+              var badge = document.getElementById('clientBadge');
+              if (badge) {
+                document.getElementById('clientBadgeText').textContent = found.nombre || found.usuario;
+                badge.classList.add('visible');
+                badge.style.cursor = 'default';
+                badge.onclick = null;
+              }
+              applyVendorCatFilter();
+              setTimeout(_updateShareBtn, 100);
+            } else {
+              // Usuario desactivado o eliminado — borrar sesión
+              localStorage.removeItem('wk_session');
+            }
+          });
+        } else {
+          localStorage.removeItem('wk_session'); // caducada
+        }
+      }
+    } catch(e) {}
+  }
+
+  if (isClientLink) {
+    // Mostrar spinner inmediatamente
     var loader = document.createElement('div');
     loader.id = 'client-loader';
     loader.style.cssText = 'position:fixed;inset:0;background:#FAF9F7;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;font-family:Inter,sans-serif;gap:16px;';
@@ -5104,7 +5152,10 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUsers().then(function() {
       var l = document.getElementById('client-loader');
       if (l) l.remove();
+      checkClientToken();
     });
+  } else {
+    loadUsers(); // precarga en background para login rápido
   }
 });
 
