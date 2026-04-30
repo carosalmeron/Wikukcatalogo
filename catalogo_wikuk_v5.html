@@ -3777,9 +3777,11 @@ function _updateShareBtn() {
 function _updateAdminBtn() {
   var btn = document.getElementById('btnAdminTopbar');
   if (!btn) return;
-  // Show only for ADMIN users (not clients)
+  // Mostrar solo si hay usuario activo (no cliente)
+  // Cualquier usuario logado puede intentar acceder al admin con su PIN
   if (ACTIVE_USER && !ACTIVE_USER.esCliente) {
     btn.style.display = 'flex';
+    btn.style.alignItems = 'center';
   } else {
     btn.style.display = 'none';
   }
@@ -4476,14 +4478,20 @@ function submitAdminPin() {
 
 // ── Admin Panel ──
 function openAdminPanel() {
-  document.getElementById('entryScreen').style.display = 'none';
+  // Ocultar entryScreen si está visible (acceso desde pantalla entrada)
+  var es = document.getElementById('entryScreen');
+  if (es) es.style.display = 'none';
   document.getElementById('adminScreen').classList.add('visible');
   showAdminTab('users');
-  renderUserList();
 }
 function closeAdminPanel() {
   document.getElementById('adminScreen').classList.remove('visible');
-  document.getElementById('entryScreen').style.display = 'flex';
+  // Si hay usuario activo, volver al catálogo; si no, a la pantalla de entrada
+  if (ACTIVE_USER && !ACTIVE_USER.esCliente) {
+    // Ya estaba en el catálogo — no mostrar entryScreen
+  } else {
+    document.getElementById('entryScreen').style.display = 'flex';
+  }
 }
 function showAdminTab(tab) {
   ['users','admins','accesos'].forEach(function(t){
