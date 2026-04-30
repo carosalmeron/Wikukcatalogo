@@ -251,7 +251,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .toggle-sw::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;}
 .toggle-sw.on::after{left:23px;}
 /* Admin PIN screen */
-.admin-pin-screen{position:fixed;inset:0;background:var(--bg);z-index:1200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;}
+.admin-pin-screen{position:fixed;inset:0;background:rgba(250,249,247,0.98);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;}
 .admin-pin-screen.visible{display:flex;}
 .pin-input{font-size:1.3rem;letter-spacing:.3em;text-align:center;padding:12px 20px;border:2px solid var(--border);border-radius:10px;width:100%;max-width:260px;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;}
 .pin-input:focus{border-color:var(--accent);}
@@ -4456,7 +4456,10 @@ function saveAgentConf() {
 
 // ── PIN Screen ──
 function showAdminPin() {
-  document.getElementById('adminPinScreen').classList.add('visible');
+  var el = document.getElementById('adminPinScreen');
+  if (!el) { console.error('adminPinScreen not found'); return; }
+  el.classList.add('visible');
+  el.style.display = 'flex'; // forzar display por si clase no funciona
   document.getElementById('adminPinInput').value = '';
   document.getElementById('adminPinError').style.display = 'none';
   setTimeout(function(){ document.getElementById('adminPinInput').focus(); }, 100);
