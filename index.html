@@ -277,6 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.5</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -3298,9 +3299,9 @@ async function loadAccesos() {
   } catch(e) { ACCESOS_LOG = []; }
 }
 
-async function saveAccesos() {
+async async function saveAccesos() {
   try {
-    if (ACCESOS_LOG.length > 500) ACCESOS_LOG = ACCESOS_LOG.slice(-500);
+    if (ACCESOS_LOG.length > 100) ACCESOS_LOG = ACCESOS_LOG.slice(-100);
     var body = { usuarios: APP_USERS, accesos: ACCESOS_LOG };
     var r = await fetch(JSONBIN_URL, {
       method: 'PUT',
@@ -3323,7 +3324,7 @@ function registrarAcceso(usuario, nombre) {
     dispositivo: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'Móvil' : 'Escritorio'
   };
   ACCESOS_LOG.push(registro);
-  saveAccesos();
+  setTimeout(saveAccesos, 100); // fire & forget, no bloquea el login
 
   // Update duration every minute
   SESSION_TIMER = setInterval(function() {
@@ -4357,13 +4358,20 @@ function mGoPromo(){
 
 function mBack(from) {
   if(from===2){
-    if(isPromo(mCatKey)){
+    if(mCatKey && isPromo(mCatKey)){
       ['m-s1','ms1b','m-s2','m-s3','m-s4'].forEach(function(id){const el=document.getElementById(id);if(el)el.className='m-screen';});
       document.getElementById('m-s1').className='m-screen behind';
       document.getElementById('ms1b').className='m-screen visible';
     } else { mNav(1); }
   }
-  if(from===3){mNav(2);}
+  if(from===3){
+    if(mCatKey && isPromo(mCatKey)){
+      // desde productos de promo, volver a lista subcategorias promo
+      mNav(2);
+    } else {
+      mNav(2);
+    }
+  }
   if(from===4){document.getElementById('searchInput').value='';mNav(1);}
 }
 
