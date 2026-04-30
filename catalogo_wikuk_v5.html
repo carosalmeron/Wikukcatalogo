@@ -3920,7 +3920,9 @@ function goBackToEntry() {
 
 function applyVendorCatFilter() {
   ALL_CATS.forEach(function(cat) {
-    var allowed = !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[cat.key] !== false;
+    // Para clientes: solo mostrar si explícitamente true
+    // Para vendedores (ACTIVE_VENDOR_CATS=null): mostrar todo
+    var allowed = !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[cat.key] === true;
 
     // ── Mobile menu: hide m-item parent of mlbl- span ──
     var el = document.getElementById('mlbl-'+cat.key);
@@ -3940,14 +3942,12 @@ function applyVendorCatFilter() {
   });
 
   // ── Promociones: elemento único en desktop y mobile ──
-  // Solo mostrar si al menos una sub-categoría de promo está permitida
   var promoKeys = ['promo_tripas','promo_especias','promo_envases'];
   var promoAllowed = promoKeys.some(function(k) {
-    return !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[k] !== false;
+    return !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[k] === true;
   });
   var promoDesktop = document.getElementById('ci-promociones');
   if (promoDesktop) promoDesktop.style.display = promoAllowed ? '' : 'none';
-  // Mobile: ocultar sección entera si ninguna sub está permitida
   var promoMobile = document.getElementById('mlbl-promo-main');
   if (promoMobile) {
     var item = promoMobile.parentNode;
