@@ -221,7 +221,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .month-filter select{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:Inter,sans-serif;font-size:.85rem;background:var(--bg);outline:none;}
 
 /* ═══ ADMIN MODULE ═══ */
-.admin-screen{position:fixed;inset:0;background:var(--bg);z-index:1100;display:none;flex-direction:column;}
+.admin-screen{position:fixed;inset:0;background:#FAF9F7;z-index:1100;display:none;flex-direction:column;}
 .admin-screen.visible{display:flex;}
 .admin-topbar{background:#1A1816;color:white;padding:14px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .admin-topbar-title{font-size:1rem;font-weight:700;flex:1;letter-spacing:.02em;}
@@ -251,7 +251,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .toggle-sw::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;}
 .toggle-sw.on::after{left:23px;}
 /* Admin PIN screen */
-.admin-pin-screen{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;}
+.admin-pin-screen{position:fixed;inset:0;background:var(--bg);z-index:1200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;}
 .admin-pin-screen.visible{display:flex;}
 .pin-input{font-size:1.3rem;letter-spacing:.3em;text-align:center;padding:12px 20px;border:2px solid var(--border);border-radius:10px;width:100%;max-width:260px;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;}
 .pin-input:focus{border-color:var(--accent);}
@@ -3431,6 +3431,7 @@ async function clearAccesos() {
 // ── Load users from JSONBin ──
 var _loadUsersPromise = null;
 var _WK_CACHE_KEY = 'wk_data_cache';
+var _WK_CACHE_VER = 'v3';
 var _WK_CACHE_TTL = 12 * 60 * 60 * 1000; // 12 horas
 
 async function loadUsers(forceRemote) {
@@ -3441,13 +3442,15 @@ async function loadUsers(forceRemote) {
       var cached = localStorage.getItem(_WK_CACHE_KEY);
       if (cached) {
         var obj = JSON.parse(cached);
-        if (obj.expiry > Date.now()) {
-          APP_USERS   = obj.usuarios || [];
-          ACCESOS_LOG = obj.accesos  || [];
-          return; // datos válidos en caché, sin llamar a JSONBin
+        if (obj.ver === _WK_CACHE_VER && obj.expiry > Date.now() && Array.isArray(obj.usuarios) && obj.usuarios.length > 0) {
+          APP_USERS   = obj.usuarios;
+          ACCESOS_LOG = obj.accesos || [];
+          return;
+        } else {
+          localStorage.removeItem(_WK_CACHE_KEY);
         }
       }
-    } catch(e) {}
+    } catch(e) { localStorage.removeItem(_WK_CACHE_KEY); }
   }
   _loadUsersPromise = (async function() {
     try {
@@ -3494,6 +3497,7 @@ async function saveUsers() {
       // Solo actualizar caché DESPUÉS de confirmar save exitoso
       try {
         localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+          ver: _WK_CACHE_VER,
           usuarios: APP_USERS, accesos: accesosToSave,
           expiry: Date.now() + _WK_CACHE_TTL
         }));
