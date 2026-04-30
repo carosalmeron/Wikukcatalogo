@@ -5231,7 +5231,7 @@ document.addEventListener('DOMContentLoaded', function() {
       + '<div style="font-size:.82rem;color:#9CA3AF;">Cargando catálogo...</div>'
       + '<style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
     document.body.appendChild(loader);
-    loadUsers().then(function() {
+    loadUsers(true).then(function() {  // force remote - no cache for client links
       var l = document.getElementById('client-loader');
       if (l) l.remove();
       checkClientToken();
