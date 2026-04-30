@@ -3421,8 +3421,25 @@ async function clearAccesos() {
 
 // ── Load users from JSONBin ──
 var _loadUsersPromise = null;
-async function loadUsers() {
-  if (_loadUsersPromise) return _loadUsersPromise; // evita llamadas dobles
+var _WK_CACHE_KEY = 'wk_data_cache';
+var _WK_CACHE_TTL = 12 * 60 * 60 * 1000; // 12 horas
+
+async function loadUsers(forceRemote) {
+  if (_loadUsersPromise) return _loadUsersPromise;
+  // Si no es forzado, intentar desde caché local primero
+  if (!forceRemote) {
+    try {
+      var cached = localStorage.getItem(_WK_CACHE_KEY);
+      if (cached) {
+        var obj = JSON.parse(cached);
+        if (obj.expiry > Date.now()) {
+          APP_USERS   = obj.usuarios || [];
+          ACCESOS_LOG = obj.accesos  || [];
+          return; // datos válidos en caché, sin llamar a JSONBin
+        }
+      }
+    } catch(e) {}
+  }
   _loadUsersPromise = (async function() {
     try {
       var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
@@ -3430,11 +3447,18 @@ async function loadUsers() {
       var data = JSON.parse(await r.text());
       APP_USERS   = (data.record && data.record.usuarios) ? data.record.usuarios : [];
       ACCESOS_LOG = (data.record && data.record.accesos)  ? data.record.accesos  : [];
+      // Guardar en caché local
+      try {
+        localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+          usuarios: APP_USERS, accesos: ACCESOS_LOG,
+          expiry: Date.now() + _WK_CACHE_TTL
+        }));
+      } catch(e) {}
     } catch(e) {
       console.error('Error loading users:', e);
       APP_USERS = []; ACCESOS_LOG = [];
     }
-    _loadUsersPromise = null; // reset para próxima recarga
+    _loadUsersPromise = null;
   })();
   return _loadUsersPromise;
 }
@@ -3453,6 +3477,13 @@ async function saveUsers() {
     });
     var responseText = await r.text();
     console.log('JSONBin response:', r.status, responseText.substring(0, 300));
+    // Actualizar caché local tras guardar
+    try {
+      localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+        usuarios: APP_USERS, accesos: ACCESOS_LOG,
+        expiry: Date.now() + _WK_CACHE_TTL
+      }));
+    } catch(e) {}
     if (!r.ok) {
       throw new Error('HTTP ' + r.status + ': ' + responseText);
     }
@@ -3900,6 +3931,28 @@ function applyVendorCatFilter() {
     var colEl = document.getElementById('ci-'+cat.key);
     if (colEl) colEl.style.display = allowed ? '' : 'none';
   });
+
+  // ── Promociones: elemento único en desktop y mobile ──
+  // Solo mostrar si al menos una sub-categoría de promo está permitida
+  var promoKeys = ['promo_tripas','promo_especias','promo_envases'];
+  var promoAllowed = promoKeys.some(function(k) {
+    return !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[k] !== false;
+  });
+  var promoDesktop = document.getElementById('ci-promociones');
+  if (promoDesktop) promoDesktop.style.display = promoAllowed ? '' : 'none';
+  // Mobile: ocultar sección entera si ninguna sub está permitida
+  var promoMobile = document.getElementById('mlbl-promo-main');
+  if (promoMobile) {
+    var item = promoMobile.parentNode;
+    var safety = 0;
+    while (item && safety++ < 6) {
+      var cls = item.className || '';
+      if (cls.indexOf('m-item') !== -1 || cls.indexOf('m-group') !== -1) {
+        item.style.display = promoAllowed ? '' : 'none'; break;
+      }
+      item = item.parentNode;
+    }
+  }
 }
 
 function initApp() {
