@@ -3302,13 +3302,26 @@ async function loadAccesos() {
 async function saveAccesos() {
   try {
     if (ACCESOS_LOG.length > 100) ACCESOS_LOG = ACCESOS_LOG.slice(-100);
+    // Usar APP_USERS actual para no sobrescribir cambios del admin
     var body = { usuarios: APP_USERS, accesos: ACCESOS_LOG };
     var r = await fetch(JSONBIN_URL, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
       body: JSON.stringify(body)
     });
-    if (!r.ok) console.error('saveAccesos error:', r.status);
+    if (r.ok) {
+      // Actualizar caché con datos completos
+      try {
+        localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+          ver: _WK_CACHE_VER,
+          usuarios: APP_USERS,
+          accesos: ACCESOS_LOG,
+          expiry: Date.now() + _WK_CACHE_TTL
+        }));
+      } catch(e) {}
+    } else {
+      console.error('saveAccesos error:', r.status);
+    }
   } catch(e) { console.error('Error saving accesos:', e); }
 }
 
@@ -3708,7 +3721,13 @@ async function saveUserForm() {
   document.getElementById('admin-user-form').style.display = 'none';
   showToast('Guardando...');
   var ok = await saveUsers();
-  showToast(ok ? '✅ Usuario guardado' : '❌ Error al guardar');
+  if (ok) {
+    var cats = Object.keys(categoriasCliente || {}).filter(function(k){ return !categoriasCliente[k]; });
+    var msg = '✅ Guardado. Categorías ocultas al cliente: ' + (cats.length ? cats.join(', ') : 'ninguna (ve todo)');
+    showToast(msg);
+  } else {
+    showToast('❌ Error al guardar');
+  }
   if (ok) renderUserList();
 }
 
