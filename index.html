@@ -17,20 +17,21 @@
   --gold:#8A6B00;--gold-bg:#FBF6EC;
 }
 html,body{height:100%;overflow:hidden;}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh;}
 
 /* TOPBAR */
-.topbar{height:52px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:200;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);display:flex;flex-direction:column;padding:8px 16px 8px;gap:7px;flex-shrink:0;z-index:200;}
 .logo{font-size:1.05rem;font-weight:700;letter-spacing:.04em;flex-shrink:0;}
 .logo span{color:var(--accent);}
-.search-wrap{position:relative;flex:1;}
+.search-wrap{position:relative;width:100%;}
 .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
 .search-input{width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-family:'Inter',sans-serif;font-size:.85rem;color:var(--text);outline:none;}
 .search-input:focus{border-color:var(--accent);background:var(--white);}
 .search-input::placeholder{color:var(--muted);}
 
 /* LAYOUT */
-.app{display:flex;flex:1;overflow:hidden;}
+.app{display:flex;flex:1;overflow:hidden;min-height:0;}
 
 /* COLUMN 1 — CATEGORÍAS */
 .col-cats{width:230px;flex-shrink:0;border-right:3px solid #D5CEC5;background:var(--white);display:flex;flex-direction:column;overflow:hidden;}
@@ -92,7 +93,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .no-results{text-align:center;padding:40px;color:var(--muted);font-size:.85rem;background:var(--white);border-radius:8px;border:1px solid var(--border);}
 
 /* MOBILE */
-.mobile-app{display:none;flex:1;overflow:hidden;position:relative;}
+.mobile-app{display:none;flex:1;overflow:hidden;position:relative;min-height:0;}
 .m-screen{position:absolute;inset:0;background:var(--bg);transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .m-screen.visible{transform:translateX(0);}
 .m-screen.behind{transform:translateX(-28%);}
@@ -250,14 +251,30 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .toggle-sw::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:left .2s;}
 .toggle-sw.on::after{left:23px;}
 /* Admin PIN screen */
-.admin-pin-screen{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;}
+.admin-pin-screen{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;}
 .admin-pin-screen.visible{display:flex;}
+.admin-pin-box{background:white;border-radius:16px;padding:32px 28px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:320px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
 .pin-input{font-size:1.3rem;letter-spacing:.3em;text-align:center;padding:12px 20px;border:2px solid var(--border);border-radius:10px;width:100%;max-width:260px;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;}
 .pin-input:focus{border-color:var(--accent);}
 </style>
 </head>
 <body>
 
+
+<script>
+// Ocultar pantalla de entrada INMEDIATAMENTE si hay token de cliente en la URL
+// Esto evita que el cliente vea el login mientras JSONBin carga
+(function() {
+  if (window.location.search.indexOf('cliente=') !== -1) {
+    document.addEventListener('DOMContentLoaded', function() {
+      var es = document.getElementById('entryScreen');
+      if (es) es.style.display = 'none';
+    });
+    // También via inline style en el elemento directamente
+    document.write('<style>#entryScreen{display:none!important}</style>');
+  }
+})();
+</script>
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
@@ -372,17 +389,70 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <div class="eo-list" id="clientList"></div>
 </div>
 <div class="topbar">
-  <button id="btnBackEntry" onclick="goBackToEntry()" style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--accent);font-size:.8rem;font-weight:600;font-family:Inter,sans-serif;flex-shrink:0;">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-  </button>
-  <div class="logo">WI<span>KUK</span></div>
-  <div class="client-badge" id="clientBadge" onclick="showClientSelector()">
-    <span id="clientBadgeText"></span>
-    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+  <!-- Fila 1: nav + logo + badge + share -->
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button id="btnBackEntry" onclick="goBackToEntry()" style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--accent);font-size:.8rem;font-weight:600;font-family:Inter,sans-serif;flex-shrink:0;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="logo">WI<span>KUK</span></div>
+    <div class="client-badge" id="clientBadge" onclick="showClientSelector()">
+      <span id="clientBadgeText"></span>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+    <div style="flex:1;"></div>
+    <button id="btnShareCliente" onclick="openShareModal()" style="display:none;flex-shrink:0;background:#D97706;color:white;border:none;border-radius:8px;padding:5px 12px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;align-items:center;gap:5px;">
+      🔗 Enlace
+    </button>
+  <button id="btnAdminTopbar" onclick="showAdminPin()" style="display:none;flex-shrink:0;background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 6px;font-size:1.1rem;" title="Administración">⚙️</button>
   </div>
+  <!-- Fila 2: búsqueda a ancho completo -->
   <div class="search-wrap">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input type="text" class="search-input" id="searchInput" placeholder="Buscar producto o código…" oninput="doSearch(this.value)">
+  </div>
+</div>
+
+<!-- ══ MODAL SHARE CLIENTE ══ -->
+<div id="share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:24px;max-width:400px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:Inter,sans-serif;">
+    <div style="font-size:1rem;font-weight:700;margin-bottom:4px;">🔗 Enlace para cliente</div>
+    <div style="font-size:.8rem;color:#6B7280;margin-bottom:18px;">El cliente ve el catálogo sin precios.</div>
+
+    <!-- URL box activo -->
+    <div id="share-url-section">
+      <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:10px 13px;font-size:.74rem;color:#166534;word-break:break-all;margin-bottom:14px;line-height:1.5;" id="share-url-box"></div>
+
+      <!-- Botones envío -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+        <button onclick="shareWhatsApp()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#25D366;color:white;border:none;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Enviar por WhatsApp
+        </button>
+        <button onclick="shareEmail()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#4F46E5;color:white;border:none;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg>
+          Enviar por Email
+        </button>
+        <button onclick="copyShareUrl()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#F3F4F6;color:#374151;border:1px solid #E5E7EB;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
+          📋 Copiar enlace
+        </button>
+      </div>
+
+      <!-- Acciones peligrosas -->
+      <div style="border-top:1px solid #F3F4F6;padding-top:12px;display:flex;gap:8px;">
+        <button onclick="newShareUrl()" style="flex:1;padding:9px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">🔄 Nuevo enlace</button>
+        <button onclick="deactivateMyEnlace()" style="flex:1;padding:9px;background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">⛔ Desactivar</button>
+      </div>
+    </div>
+
+    <!-- Sección desactivado -->
+    <div id="share-inactive-section" style="display:none;text-align:center;padding:16px 0;">
+      <div style="font-size:2rem;margin-bottom:8px;">⛔</div>
+      <div style="font-size:.88rem;font-weight:700;color:#991B1B;margin-bottom:4px;">Enlace desactivado</div>
+      <div style="font-size:.78rem;color:#6B7280;margin-bottom:16px;">El cliente no puede acceder al catálogo.</div>
+      <button onclick="activateMyEnlace()" style="width:100%;padding:11px;background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">✅ Generar nuevo enlace y activar</button>
+    </div>
+
+    <button onclick="closeShareModal()" style="width:100%;padding:10px;background:#F3F4F6;border:none;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;margin-top:12px;">Cerrar</button>
   </div>
 </div>
 
@@ -445,19 +515,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <span class="i-badge" style="background:var(--teal-bg);color:var(--teal)">SPOT</span>
       </div>
       <div class="col-item" style="--item-color:var(--blue);--item-bg:var(--blue-bg)" id="ci-spot_cui" onclick="dSelectCat('spot_cui',this)">
-        <span class="i-icon">⭐</span><span class="i-label" id="dlbl-spot_cui">Spot CUI — Gastronorm</span>
+        <span class="i-icon">⭐</span><span class="i-label" id="dlbl-spot_cui">Spot Banquetas</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
       <div class="col-item" style="--item-color:var(--gold);--item-bg:var(--gold-bg)" id="ci-spot_frumen" onclick="dSelectCat('spot_frumen',this)">
-        <span class="i-icon">🍞</span><span class="i-label" id="dlbl-spot_frumen">Spot Frumen — Pan Rallado</span>
+        <span class="i-icon">🍞</span><span class="i-label" id="dlbl-spot_frumen">Spot Pan Rallado</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
       <div class="col-item" style="--item-color:var(--green);--item-bg:var(--green-bg)" id="ci-spot_el_carmen" onclick="dSelectCat('spot_el_carmen',this)">
-        <span class="i-icon">⭐</span><span class="i-label" id="dlbl-spot_el_carmen">Spot El Carmen</span>
+        <span class="i-icon">⭐</span><span class="i-label" id="dlbl-spot_el_carmen">Spot Embalaje 1</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
       <div class="col-item" style="--item-color:var(--purple);--item-bg:var(--purple-bg)" id="ci-spot_sierra" onclick="dSelectCat('spot_sierra',this)">
-        <span class="i-icon">🏔️</span><span class="i-label" id="dlbl-spot_sierra">Spot Sierra Nevada</span>
+        <span class="i-icon">🏔️</span><span class="i-label" id="dlbl-spot_sierra">Spot Embalaje 2</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
 
@@ -556,24 +626,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <span class="m-ilabel" id="mlbl-spot_merkapack">Spot Bolsas de Vacío</span>
         <span class="m-ibadge" style="background:var(--teal-bg);color:var(--teal)">SPOT</span>
       </div>
-      <div class="m-item" onclick="mGo('spot_cui',this,'⭐','Spot CUI','var(--blue-bg)')">
+      <div class="m-item" onclick="mGo('spot_cui',this,'⭐','Spot Banquetas','var(--blue-bg)')">
         <div class="m-iicon" style="background:var(--blue-bg)">⭐</div>
-        <span class="m-ilabel" id="mlbl-spot_cui">Spot CUI — Gastronorm</span>
+        <span class="m-ilabel" id="mlbl-spot_cui">Spot Banquetas</span>
         <span class="m-ibadge" style="background:var(--blue-bg);color:var(--blue)">SPOT</span>
       </div>
-      <div class="m-item" onclick="mGo('spot_frumen',this,'🍞','Spot Frumen','var(--gold-bg)')">
+      <div class="m-item" onclick="mGo('spot_frumen',this,'🍞','Spot Pan Rallado','var(--gold-bg)')">
         <div class="m-iicon" style="background:var(--gold-bg)">🍞</div>
-        <span class="m-ilabel" id="mlbl-spot_frumen">Spot Frumen — Pan Rallado</span>
+        <span class="m-ilabel" id="mlbl-spot_frumen">Spot Pan Rallado</span>
         <span class="m-ibadge" style="background:var(--gold-bg);color:var(--gold)">SPOT</span>
       </div>
-      <div class="m-item" onclick="mGo('spot_el_carmen',this,'⭐','Spot El Carmen','var(--green-bg)')">
+      <div class="m-item" onclick="mGo('spot_el_carmen',this,'⭐','Spot Embalaje 1','var(--green-bg)')">
         <div class="m-iicon" style="background:var(--green-bg)">⭐</div>
-        <span class="m-ilabel" id="mlbl-spot_el_carmen">Spot El Carmen</span>
+        <span class="m-ilabel" id="mlbl-spot_el_carmen">Spot Embalaje 1</span>
         <span class="m-ibadge" style="background:var(--green-bg);color:var(--green)">SPOT</span>
       </div>
-      <div class="m-item" onclick="mGo('spot_sierra',this,'🏔️','Spot Sierra Nevada','var(--purple-bg)')">
+      <div class="m-item" onclick="mGo('spot_sierra',this,'🏔️','Spot Embalaje 2','var(--purple-bg)')">
         <div class="m-iicon" style="background:var(--purple-bg)">🏔️</div>
-        <span class="m-ilabel" id="mlbl-spot_sierra">Spot Sierra Nevada</span>
+        <span class="m-ilabel" id="mlbl-spot_sierra">Spot Embalaje 2</span>
         <span class="m-ibadge" style="background:var(--purple-bg);color:var(--purple)">SPOT</span>
       </div>
     </div>
@@ -607,17 +677,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     </button>
     <div style="padding:13px 16px 5px;font-size:.98rem;font-weight:700" id="ms1b-title">Promociones y Liquidaciones</div>
     <div class="m-list">
-      <div class="m-item" onclick="mGo('promo_tripas',this,'🏷️','Tripas','#FFF0EB')">
+      <div class="m-item" id="m-promo_tripas" onclick="mGo('promo_tripas',this,'🏷️','Tripas','#FFF0EB')">
         <div class="m-iicon" style="background:#FFF0EB">🏷️</div>
         <span class="m-ilabel" id="ms1b-tripas">Tripas</span>
         <svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
-      <div class="m-item" onclick="mGo('promo_especias',this,'🏷️','Especias y Preparados','#FFF0EB')">
+      <div class="m-item" id="m-promo_especias" onclick="mGo('promo_especias',this,'🏷️','Especias y Preparados','#FFF0EB')">
         <div class="m-iicon" style="background:#FFF0EB">🏷️</div>
         <span class="m-ilabel" id="ms1b-especias">Especias y Preparados</span>
         <svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
-      <div class="m-item" onclick="mGo('promo_envases',this,'🏷️','Envases','#FFF0EB')">
+      <div class="m-item" id="m-promo_envases" onclick="mGo('promo_envases',this,'🏷️','Envases','#FFF0EB')">
         <div class="m-iicon" style="background:#FFF0EB">🏷️</div>
         <span class="m-ilabel" id="ms1b-envases">Envases</span>
         <svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
@@ -647,8 +717,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <!-- S4: SEARCH -->
   <div class="m-screen" id="m-s4">
     <button class="m-back" onclick="mBack(4)">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/>
-
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      <span id="m-s4-title">Resultados</span>
+    </button>
+    <div class="m-list" id="m-s4-results" style="overflow-y:auto;flex:1;padding:12px;"></div>
+  </div>
 
 <!-- MUESTRAS MODULE -->
 <div class="muestras-screen" id="muestrasScreen">
@@ -817,15 +890,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <!-- ADMIN PIN SCREEN -->
 <div class="admin-pin-screen" id="adminPinScreen">
-  <div style="background:white;border-radius:16px;padding:32px 28px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:320px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+  <div class="admin-pin-box">
     <div style="font-size:2rem">🔐</div>
-    <div style="font-size:1.1rem;font-weight:800;font-family:Inter,sans-serif">Zona Administrador</div>
-    <div style="font-size:.82rem;color:#6B7280;text-align:center;font-family:Inter,sans-serif">Introduce tu clave de acceso</div>
+    <div style="font-size:1.1rem;font-weight:800">Zona Administrador</div>
+    <div style="font-size:.82rem;color:var(--muted);text-align:center">Introduce tu clave de acceso</div>
     <input class="pin-input" id="adminPinInput" type="password" placeholder="••••••••"
       onkeydown="if(event.key==='Enter')submitAdminPin()">
     <div id="adminPinError" style="color:#DC2626;font-size:.82rem;display:none">Clave incorrecta.</div>
     <button onclick="submitAdminPin()" style="width:100%;padding:12px;background:#1A1816;color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>
-    <button onclick="closeAdminPin()" style="background:none;border:none;color:#9CA3AF;font-size:.85rem;cursor:pointer;font-family:Inter,sans-serif;">Cancelar</button>
+    <button onclick="closeAdminPin()" style="background:none;border:none;color:var(--muted);font-size:.85rem;cursor:pointer;font-family:Inter,sans-serif;">Cancelar</button>
   </div>
 </div>
 
@@ -885,16 +958,53 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_taberner" checked> Spot Taberner</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_campana" checked> Spot Campana</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_merkapack" checked> Spot Bolsas de Vacío</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_cui" checked> Spot CUI</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_frumen" checked> Spot Frumen</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_el_carmen" checked> Spot El Carmen</label>
-              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_sierra" checked> Spot Sierra Nevada</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_cui" checked> Spot Banquetas</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_frumen" checked> Spot Pan Rallado</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_el_carmen" checked> Spot Embalaje 1</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-spot_sierra" checked> Spot Embalaje 2</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-envases" checked> Envases</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-accesorios" checked> Accesorios</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-aditivos" checked> Aditivos</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-promo_tripas" checked> Promo Tripas</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-promo_especias" checked> Promo Especias</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-promo_envases" checked> Promo Envases</label>
+            </div>
+          </div>
+        </div>
+        <!-- ENLACE CLIENTE -->
+        <div style="border:1.5px solid #D97706;border-radius:8px;padding:12px;background:#FFFBEB;">
+          <div style="font-size:.82rem;font-weight:700;color:#92400E;margin-bottom:10px;">🔗 Enlace para clientes</div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;margin-bottom:10px;">
+            <input type="checkbox" id="ucat-cliente-activo" onchange="toggleUserCatClienteSection()"> Activar enlace de cliente
+          </label>
+          <div id="ucatc-section" style="display:none;">
+            <div style="font-size:.76rem;color:var(--muted);margin-bottom:8px;">Categorías visibles para el cliente (sin precios):</div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:.83rem;cursor:pointer;margin-bottom:8px;">
+              <input type="checkbox" id="ucatc-todas" onchange="toggleClienteCatSection()"> Todas las categorías
+            </label>
+            <div id="ucatc-cats" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-wikuk_esp"> Wikuk Especias</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-wikuk_prep"> Wikuk Preparados</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-ceylan_gen"> Ceylan Especias</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-ceylan_prep"> Ceylan Preparados</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-taberner_esp"> Taberner Especias</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-taberner_prep"> Taberner Preparados</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-campana_gen"> La Campana</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_wikuk"> Spot Wikuk</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_ceylan"> Spot Ceylan</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_taberner"> Spot Taberner</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_campana"> Spot Campana</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_merkapack"> Spot Bolsas de Vacío</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_cui"> Spot Banquetas</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_frumen"> Spot Pan Rallado</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_el_carmen"> Spot Embalaje 1</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-spot_sierra"> Spot Embalaje 2</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-envases"> Envases</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-accesorios"> Accesorios</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-aditivos"> Aditivos</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-promo_tripas"> Promo Tripas</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-promo_especias"> Promo Especias</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-promo_envases"> Promo Envases</label>
             </div>
           </div>
         </div>
@@ -1083,17 +1193,17 @@ function applyLang(){
     'spot_taberner':{es:'Spot Taberner',       fr:'Spot Taberner',          pt:'Spot Taberner'},
     'spot_campana': {es:'Spot La Campana',     fr:'Spot La Campana',        pt:'Spot La Campana'},
     'spot_merkapack':{es:'Spot Bolsas de Vacío', fr:'Spot Sachets Sous-Vide', pt:'Spot Sacos de Vácuo'},
-    'spot_cui':     {es:'Spot CUI — Gastronorm',    fr:'Spot CUI — Gastronorm',     pt:'Spot CUI — Gastronorm'},
-    'spot_frumen':  {es:'Spot Frumen — Pan Rallado',fr:'Spot Frumen — Chapelure',   pt:'Spot Frumen — Pão Ralado'},
-    'spot_el_carmen':{es:'Spot El Carmen',           fr:'Spot El Carmen',            pt:'Spot El Carmen'},
-    'spot_sierra':  {es:'Spot Sierra Nevada',        fr:'Spot Sierra Nevada',        pt:'Spot Sierra Nevada'},
+    'spot_cui':     {es:'Spot Banquetas',    fr:'Spot Banquetas',     pt:'Spot Banquetas'},
+    'spot_frumen':  {es:'Spot Pan Rallado',fr:'Spot Pan Rallado — Chapelure',   pt:'Spot Pan Rallado — Pão Ralado'},
+    'spot_el_carmen':{es:'Spot Embalaje 1',           fr:'Spot Embalaje 1',            pt:'Spot Embalaje 1'},
+    'spot_sierra':  {es:'Spot Embalaje 2',        fr:'Spot Embalaje 2',        pt:'Spot Embalaje 2'},
     'envases':      {es:'Envases',                   fr:'Emballages',                pt:'Embalagens'},
     'accesorios':   {es:'Accesorios',                fr:'Accessoires',               pt:'Acessórios'},
     'aditivos':     {es:'Aditivos',                  fr:'Additifs',                  pt:'Aditivos'},
-    'spot_cui':      {es:'Spot CUI — Gastronorm',fr:'Spot CUI — Gastronorm',pt:'Spot CUI — Gastronorm'},
-    'spot_frumen':   {es:'Spot Frumen — Pan Rallado',fr:'Spot Frumen — Chapelure',pt:'Spot Frumen — Pão Ralado'},
-    'spot_el_carmen':{es:'Spot El Carmen',fr:'Spot El Carmen',pt:'Spot El Carmen'},
-    'spot_sierra':   {es:'Spot Sierra Nevada',fr:'Spot Sierra Nevada',pt:'Spot Sierra Nevada'},
+    'spot_cui':      {es:'Spot Banquetas',fr:'Spot Banquetas',pt:'Spot Banquetas'},
+    'spot_frumen':   {es:'Spot Pan Rallado',fr:'Spot Pan Rallado — Chapelure',pt:'Spot Pan Rallado — Pão Ralado'},
+    'spot_el_carmen':{es:'Spot Embalaje 1',fr:'Spot Embalaje 1',pt:'Spot Embalaje 1'},
+    'spot_sierra':   {es:'Spot Embalaje 2',fr:'Spot Embalaje 2',pt:'Spot Embalaje 2'},
     'envases':      {es:'Envases',             fr:'Emballages',             pt:'Embalagens'},
     'accesorios':   {es:'Accesorios',          fr:'Accessoires',            pt:'Acessórios'},
     'aditivos':     {es:'Aditivos',            fr:'Additifs',               pt:'Aditivos'},
@@ -1177,10 +1287,10 @@ var CAT_LABELS_FR = {
   '⭐ Spot Taberner':                      '⭐ Spot Taberner',
   '⭐ Spot La Campana':                    '⭐ Spot La Campana',
   '⭐ Spot Bolsas de Vacío':          '⭐ Spot Sachets Sous-Vide',
-  '⭐ Spot CUI — Gastronorm':         '⭐ Spot CUI — Gastronorm',
-  '⭐ Spot Frumen — Pan Rallado':     '⭐ Spot Frumen — Chapelure',
-  '⭐ Spot El Carmen':                     '⭐ Spot El Carmen',
-  '⭐ Spot Sierra Nevada':                 '⭐ Spot Sierra Nevada',
+  '⭐ Spot Banquetas':         '⭐ Spot Banquetas',
+  '⭐ Spot Pan Rallado':     '⭐ Spot Pan Rallado — Chapelure',
+  '⭐ Spot Embalaje 1':                     '⭐ Spot Embalaje 1',
+  '⭐ Spot Embalaje 2':                 '⭐ Spot Embalaje 2',
   'Envases':                                   'Emballages',
   'Accesorios':                                'Accessoires',
   'Aditivos':                                  'Additifs',
@@ -1286,10 +1396,10 @@ var CAT_LABELS_PT = {
   '⭐ Spot Taberner':                      '⭐ Spot Taberner',
   '⭐ Spot La Campana':                    '⭐ Spot La Campana',
   '⭐ Spot Bolsas de Vacío':          '⭐ Spot Sacos de Vácuo',
-  '⭐ Spot CUI — Gastronorm':         '⭐ Spot CUI — Gastronorm',
-  '⭐ Spot Frumen — Pan Rallado':     '⭐ Spot Frumen — Pão Ralado',
-  '⭐ Spot El Carmen':                     '⭐ Spot El Carmen',
-  '⭐ Spot Sierra Nevada':                 '⭐ Spot Sierra Nevada',
+  '⭐ Spot Banquetas':         '⭐ Spot Banquetas',
+  '⭐ Spot Pan Rallado':     '⭐ Spot Pan Rallado — Pão Ralado',
+  '⭐ Spot Embalaje 1':                     '⭐ Spot Embalaje 1',
+  '⭐ Spot Embalaje 2':                 '⭐ Spot Embalaje 2',
   'Envases':                                   'Embalagens',
   'Accesorios':                                'Acessórios',
   'Aditivos':                                  'Aditivos',
@@ -2510,7 +2620,7 @@ const DATA = {
     }
   },
   spot_cui: {
-    label:'⭐ Spot CUI — Gastronorm',
+    label:'⭐ Spot Banquetas',
     subs: {
       'Envases Bisagra':[
         {c:'1C0370/T',  n:'Envase Bisagra C 400',             f:'C.400 uds.',p:'183,33'}
@@ -2562,7 +2672,7 @@ const DATA = {
     }
   },
   spot_frumen: {
-    label:'Spot Frumen — Pan Rallado',
+    label:'Spot Pan Rallado',
     subs: {
       'Pan Rallado Natural':[
         {c:'V00127', n:'Pan Rallado Frumen G2 20kg Natural', p:'1,98'},
@@ -2600,7 +2710,7 @@ const DATA = {
     }
   },
   spot_el_carmen: {
-    label:'Spot El Carmen',
+    label:'Spot Embalaje 1',
     subs: {
       'Bolsas de Plástico':[
         {c:'165-0040', n:'Camisetablock 70% 40×50', p:'70,00'},
@@ -2628,7 +2738,7 @@ const DATA = {
     }
   },
   spot_sierra: {
-    label:'Spot Sierra Nevada',
+    label:'Spot Embalaje 2',
     subs: {
       'Envases Aluminio':[
         {c:'EAP2',  n:'Envase Aluminio Medio Pollo',        f:'Caja 600U', p:'95,88'},
@@ -2792,73 +2902,83 @@ const DATA = {
       ],
     }
   },
-
   promo_tripas: {label:'Tripas',subs:{
     'Cordero':[
-    {c:'GA34.7N', n:'MAD.CORDERO AB', f1:'Cal. 20/22', f2:'70 m', p:'436 uds.', cat:'Promoción'},
-    {c:'GA36.9L', n:'MAD.CORDERO AB TIRA LARGA', f1:'Cal. 22/24', f2:'90 m', p:'853 uds.', cat:'Promoción'},
-    {c:'GA38.8N', n:'MAD.CORDERO AB', f1:'Cal. 24/26', f2:'80 m', p:'282 uds.', cat:'Promoción'},
-    {c:'GA42.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 19/21', f2:'90 m', p:'1744 uds.', cat:'Liquidación'},
-    {c:'GA44.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 20/22', f2:'90 m', p:'3264 uds.', cat:'Promoción'},
-    {c:'GA46.9N', n:'MAD.CORDERO P.600 BC 2/+', f1:'Cal. 22/24', f2:'90 m', p:'1258 uds.', cat:'Promoción'},
+    {c:'GA42.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 19/21', f2:'90 m', p:'1.744 uds.', cat:'Liquidación'},
+    {c:'GA44.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 20/22', f2:'90 m', p:'3.264 uds.', cat:'Promoción'},
+    {c:'GA46.9N', n:'MAD.CORDERO P.600 BC 2/+', f1:'Cal. 22/24', f2:'90 m', p:'1.258 uds.', cat:'Promoción'},
     {c:'GA48.9N', n:'MAD.CORDERO BC', f1:'Cal. 24/26', f2:'90 m', p:'589 uds.', cat:'Promoción'},
-    {c:'IR32.8N', n:'MAD.CORDERO P.500 AB', f1:'Cal. 19/21', f2:'80 m', p:'2464 uds.', cat:'Promoción'}
+    {c:'IR32.8N', n:'MAD.CORDERO P.500 AB', f1:'Cal. 19/21', f2:'80 m', p:'2.464 uds.', cat:'Promoción'}
+    ],
+    'Vejigas':[
+    {c:'VG1', n:'VEJIGAS FRESCAS LIMPIAS PEQUEÑAS', f1:'Cal. 15/20', f2:'—', p:'6.395 uds.', cat:'Promoción'},
+    {c:'VG2', n:'VEJIGAS FRESCAS LIMPIAS 20/25', f1:'Cal. 20/25', f2:'—', p:'10.650 uds.', cat:'Promoción'}
     ],
     'Vacuno':[
-    {c:'V13.5G', n:'MAD.BUEY EX P.70', f1:'Cal. 38/40', f2:'50 m', p:'2022 uds.', cat:'Promoción'}
+    {c:'V13.5G', n:'MAD.BUEY EX P.70', f1:'Cal. 38/40', f2:'50 m', p:'2.022 uds.', cat:'Promoción'}
     ],
     'Cerdo Raspado':[
     {c:'CP155', n:'MAD.CERDO EUR P.150 A', f1:'Cal. 34/36', f2:'40 m', p:'578 uds.', cat:'Promoción'},
-    {c:'C5.8R', n:'MAD.CERDO EUR P.150 A', f1:'Cal. 34/36', f2:'75 m', p:'1279 uds.', cat:'Promoción'}
+    {c:'C5.8R', n:'MAD.CERDO EUR P.150 A', f1:'Cal. 34/36', f2:'75 m', p:'1.279 uds.', cat:'Promoción'}
     ],
     'Cerdo United Caro':[
-    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'187 uds.', cat:'Promoción'}
+    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'68 uds.', cat:'Promoción'}
     ],
     'Culares':[
     {c:'CU42', n:'CULAR P.70 AAB 0.65', f1:'Cal. 62/67', f2:'65 m', p:'21 uds.', cat:'Promoción'}
     ],
     'Semirrizado':[
-    {c:'SC123', n:'PIEZA DE SEMIRRIZADA CCSG 65/70 0.27', f1:'Cal. 65/70', f2:'0.27 m', p:'5295 uds.', cat:'Liquidación'}
+    {c:'SC123', n:'PIEZA DE SEMIRRIZADA CCSG 65/70 0.27', f1:'Cal. 65/70', f2:'0.27 m', p:'5.295 uds.', cat:'Liquidación'}
     ],
     'Ciegos Vacuno':[
-    {c:'CI2.50', n:'CIEGOS DE VACUNO', f1:'Cal. 95/115', f2:'0.50 m', p:'12673 uds.', cat:'Promoción'}
+    {c:'CI2.50', n:'CIEGOS DE VACUNO', f1:'Cal. 95/115', f2:'0.50 m', p:'12.673 uds.', cat:'Promoción'}
+    ],
+    'Ciegos Cerdo':[
+    {c:'CIP3', n:'CIEGOS DE CERDO GRANDES', f1:'—', f2:'—', p:'13.873 uds.', cat:'Promoción'}
     ],
     'Semicular':[
     {c:'TR1503', n:'PIEZA DE SEMICULAR CA 0.35', f1:'Cal. 70/+', f2:'35 m', p:'60 uds.', cat:'Liquidación'}
     ],
     'Maextra+ PC':[
-    {c:'TR1933', n:'MAEXTRA+ PC', f1:'Cal. 43', f2:'0.30 m', p:'10760 uds.', cat:'Promoción'},
-    {c:'TR1922', n:'MAEXTRA+ PC 3L', f1:'Cal. 65', f2:'0.36 m', p:'1286 uds.', cat:'Promoción'},
-    {c:'TR2071', n:'MAEXTRA+ PC H. BLANCO 1L', f1:'Cal. 64', f2:'0.90 m', p:'2035 uds.', cat:'Promoción'},
-    {c:'TR1621', n:'MAEXTRA+ PC CA', f1:'Cal. 50', f2:'0.25 m', p:'10400 uds.', cat:'Promoción'},
-    {c:'PX255.25', n:'MAEXTRA+ PC', f1:'Cal. 55', f2:'0.25 m', p:'1255 uds.', cat:'Promoción'},
-    {c:'PX250.25', n:'MAEXTRA+ PC', f1:'Cal. 50', f2:'0.25 m', p:'7775 uds.', cat:'Promoción'}
+    {c:'TR1933', n:'MAEXTRA+ PC', f1:'Cal. 43', f2:'0.30 m', p:'10.760 uds.', cat:'Promoción'},
+    {c:'TR1922', n:'MAEXTRA+ PC 3L', f1:'Cal. 65', f2:'0.36 m', p:'1.286 uds.', cat:'Promoción'},
+    {c:'TR2071', n:'MAEXTRA+ PC H. BLANCO 1L', f1:'Cal. 64', f2:'0.90 m', p:'2.035 uds.', cat:'Promoción'},
+    {c:'TR1621', n:'MAEXTRA+ PC CA', f1:'Cal. 50', f2:'0.25 m', p:'10.400 uds.', cat:'Promoción'},
+    {c:'PX255.25', n:'MAEXTRA+ PC', f1:'Cal. 55', f2:'0.25 m', p:'1.255 uds.', cat:'Promoción'},
+    {c:'PX250.25', n:'MAEXTRA+ PC', f1:'Cal. 50', f2:'0.25 m', p:'7.775 uds.', cat:'Promoción'}
+    ],
+    'Tripa Seca Buey':[
+    {c:'TR1296', n:'TRIPA SECA DE BUEY CAL. 55/60', f1:'Cal. 55/60', f2:'18 m', p:'1.936 uds.', cat:'Promoción'}
     ],
     'Seca Laminada':[
-    {c:'TR1045', n:'T.SECA LM UNITED CARO', f1:'Cal. 55', f2:'0.90 m', p:'4930 uds.', cat:'Liquidación'},
-    {c:'TR1118', n:'T.SECA LM UNITED CARO', f1:'Cal. 70', f2:'0.60 m', p:'3297 uds.', cat:'Liquidación'}
+    {c:'TR1045', n:'T.SECA LM UNITED CARO', f1:'Cal. 55', f2:'0.90 m', p:'4.930 uds.', cat:'Liquidación'},
+    {c:'TR1118', n:'T.SECA LM UNITED CARO', f1:'Cal. 70', f2:'0.60 m', p:'3.297 uds.', cat:'Liquidación'}
     ],
-    'Maextra+':[
-    {c:'MX240.20R2', n:'MAEXTRA+ (1x20metros) T2550 2L', f1:'Cal. 40', f2:'20 m', p:'3425 uds.', cat:'Promoción'},
+    'Maextra+ Rulo':[
+    {c:'MX240.20R2', n:'MAEXTRA+ (1x20metros) T2550 2L', f1:'Cal. 40', f2:'20 m', p:'3.425 uds.', cat:'Promoción'},
     {c:'MX250.20R3', n:'MAEXTRA+ (1x20metros) T3045 2L', f1:'Cal. 47', f2:'20 m', p:'702 uds.', cat:'Promoción'}
     ],
+    'Cerdo CK XXL TF':[
+    {c:'CX50.9KF3', n:'MAD.CERDO CK P.189 XXL 14/+ TF 1T', f1:'Cal. 34/36', f2:'90 m', p:'188 uds.', cat:'Promoción'}
+    ],
     'CERDO CK':[
-    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'240 uds.', cat:'Promoción'},
-    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'1040 uds.', cat:'Promoción'},
-    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3640 uds.', cat:'Promoción'},
-    {c:'CL50.8KF3', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3400 uds.', cat:'Promoción'},
-    {c:'CL60.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 36/38', f2:'80 m', p:'1820 uds.', cat:'Promoción'}
+    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'480 uds.', cat:'Promoción'},
+    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'480 uds.', cat:'Promoción'},
+    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'720 uds.', cat:'Promoción'},
+    {c:'CL50.8KF3', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3.400 uds.', cat:'Promoción'},
+    {c:'CX50.9KF3', n:'MAD.CERDO CK P.189 XL 14/+', f1:'Cal. 34/36', f2:'90 m', p:'1.000 uds.', cat:'Promoción'},
+    {c:'CL60.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 36/38', f2:'80 m', p:'1.820 uds.', cat:'Promoción'}
     ]
   }},
   promo_especias: {label:'Especias y Preparados',subs:{
     'Especias Naturales':[
-    {c:'P-D', n:'PIMIENTOS  LARGOS DESRRAVADOS', f1:'—', f2:'—', p:'200 uds.', cat:'Promoción'},
-    {c:'V00131', n:'KG. PAN RALLADO FRUMEN G-14 I. 20 KG. INTEGRAL', f1:'—', f2:'—', p:'340 uds.', cat:'Liquidación'},
-    {c:'WE0003.25', n:'AJO GRANULADO CHINA SACO 25KG', f1:'—', f2:'—', p:'2492 uds.', cat:'Promoción'}
+    {c:'P-D', n:'PIMIENTOS LARGOS DESRRAVADOS', f1:'—', f2:'—', p:'200 uds.', cat:'Promoción'},
+    {c:'V00131', n:'PAN RALLADO FRUMEN G-14 I. 20 KG. INTEGRAL', f1:'—', f2:'—', p:'340 uds.', cat:'Liquidación'},
+    {c:'WE0003.25', n:'AJO GRANULADO CHINA SACO 25KG', f1:'—', f2:'—', p:'2.492 uds.', cat:'Promoción'}
     ],
     'Especias Wikuk':[
     {c:'WE0056.25', n:'PIMIENTA BLANCA MOLIDA BOLSA 1 KG', f1:'—', f2:'—', p:'94 uds.', cat:'Liquidación'},
-    {c:'WE0067.25', n:'CAYENA MOLIDA OJO PAJARO 80/90.00 ESCOBILLAS B 1 K', f1:'—', f2:'—', p:'122 uds.', cat:'Liquidación'},
+    {c:'WE0067.25', n:'CAYENA MOLIDA OJO PAJARO 80/90 ESCOBILLAS B 1 KG', f1:'—', f2:'—', p:'122 uds.', cat:'Liquidación'},
     {c:'WE0059.25', n:'PIMIENTA NEGRA GRANO BOLSA 5KG', f1:'—', f2:'—', p:'115 uds.', cat:'Liquidación'},
     {c:'P-1', n:'PIMIENTA NEGRA GRANO SACO 25KG', f1:'—', f2:'—', p:'239 uds.', cat:'Promoción'},
     {c:'WE0051.25', n:'PIMENTON DULCE EXTRA 140 ASTAS SACO 25 KG', f1:'—', f2:'—', p:'199 uds.', cat:'Promoción'}
@@ -2868,15 +2988,15 @@ const DATA = {
     {c:'B-3', n:'BOBINA DE ALGODON BLANCA', f1:'—', f2:'—', p:'483 uds.', cat:'Promoción'}
     ],
     'Preparados La Campana':[
-    {c:'0P2327S', n:'CHORIZO CAMPA BZ 170034', f1:'—', f2:'—', p:'1033 uds.', cat:'Promoción'}
+    {c:'0P2327S', n:'CHORIZO CAMPA BZ 170034', f1:'—', f2:'—', p:'1.033 uds.', cat:'Promoción'}
     ],
     'Accesorios':[
     {c:'FUJ1', n:'FUNDA JAMON CORTADA BLANCA', f1:'—', f2:'—', p:'710 uds.', cat:'Liquidación'}
     ]
   }},
-  promo_envases: {label:'Envases',subs:{
+  promo_envases: {label:'Envases — Promo',subs:{
     'Bolsas de Vacío':[
-    {c:'V-25x40-145', n:'BOLSA VACIO 250X400 145 MC', f1:'—', f2:'—', p:'11300 uds.', cat:'Liquidación'},
+    {c:'V-25x40-145', n:'BOLSA VACIO 250X400 145 MC', f1:'—', f2:'—', p:'11.300 uds.', cat:'Liquidación'},
     {c:'V-36.5*55-150', n:'BOLSA VACIO 365X550 150 MC', f1:'—', f2:'—', p:'4 uds.', cat:'Liquidación'},
     {c:'V-40*50', n:'BOLSA VACIO 400X600 150 MC SERIGRAFIADA', f1:'—', f2:'—', p:'22 uds.', cat:'Promoción'},
     {c:'V-40*60-150', n:'BOLSA VACIO 400X600 150 MC SERIGRAFIADA', f1:'—', f2:'—', p:'22 uds.', cat:'Promoción'},
@@ -2890,8 +3010,8 @@ const DATA = {
     {c:'TMPP1500', n:'TARRINA MICROONDAS PP 1500CC', f1:'—', f2:'—', p:'12 uds.', cat:'Promoción'}
     ],
     'Barquetas':[
-    {c:'G50', n:'BARQUETA G50 BLANCO GR 49', f1:'—', f2:'—', p:'8256 uds.', cat:'Liquidación'},
-    {c:'G95', n:'BARQUETA G95 BLANCO GR 58', f1:'—', f2:'—', p:'2056 uds.', cat:'Liquidación'}
+    {c:'G50', n:'BARQUETA G50 BLANCO GR 49', f1:'—', f2:'—', p:'8.256 uds.', cat:'Liquidación'},
+    {c:'G95', n:'BARQUETA G95 BLANCO GR 58', f1:'—', f2:'—', p:'2.056 uds.', cat:'Liquidación'}
     ],
     'Varios':[
     {c:'CO00305', n:'PORTAMENU INFANTIL TAXI AMARILLO', f1:'—', f2:'—', p:'19 uds.', cat:'Liquidación'}
@@ -2899,118 +3019,8 @@ const DATA = {
     'Bolsas':[
     {c:'CO00316', n:'BOLSAS BLOCK TRANSPARENTES 30X43', f1:'—', f2:'—', p:'15 uds.', cat:'Liquidación'}
     ]
-  }},
-
-promo_tripas:{label:'Tripas',subs:{
-  'Cordero':[
-    {c:'GA34.7N', n:'MAD.CORDERO AB', f1:'Cal. 20/22', f2:'70 m', p:'436 uds.', cat:'Promoción'},
-    {c:'GA36.9L', n:'MAD.CORDERO AB TIRA LARGA', f1:'Cal. 22/24', f2:'90 m', p:'853 uds.', cat:'Promoción'},
-    {c:'GA38.8N', n:'MAD.CORDERO AB', f1:'Cal. 24/26', f2:'80 m', p:'282 uds.', cat:'Promoción'},
-    {c:'GA42.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 19/21', f2:'90 m', p:'1744 uds.', cat:'Liquidación'},
-    {c:'GA44.9N', n:'MAD.CORDERO P.800 BC', f1:'Cal. 20/22', f2:'90 m', p:'3264 uds.', cat:'Promoción'},
-    {c:'GA46.9N', n:'MAD.CORDERO P.600 BC 2/+', f1:'Cal. 22/24', f2:'90 m', p:'1258 uds.', cat:'Promoción'},
-    {c:'GA48.9N', n:'MAD.CORDERO BC', f1:'Cal. 24/26', f2:'90 m', p:'589 uds.', cat:'Promoción'},
-    {c:'IR32.8N', n:'MAD.CORDERO P.500 AB', f1:'Cal. 19/21', f2:'80 m', p:'2464 uds.', cat:'Promoción'}
-  ],
-  'Vacuno':[
-    {c:'V13.5G', n:'MAD.BUEY EX P.70', f1:'Cal. 38/40', f2:'50 m', p:'2022 uds.', cat:'Promoción'}
-  ],
-  'Cerdo Raspado':[
-    {c:'CP155', n:'MAD.CERDO EUR P.150 A', f1:'Cal. 34/36', f2:'40 m', p:'578 uds.', cat:'Promoción'},
-    {c:'C5.8R', n:'MAD.CERDO EUR P.150 A', f1:'Cal. 34/36', f2:'75 m', p:'1279 uds.', cat:'Promoción'}
-  ],
-  'Cerdo United Caro':[
-    {c:'CP168.60', n:'MAD.CERDO UNITED CARO P.160 A', f1:'Cal. 45/48', f2:'60 m', p:'187 uds.', cat:'Promoción'}
-  ],
-  'Culares':[
-    {c:'CU42', n:'CULAR P.70 AAB 0.65', f1:'Cal. 62/67', f2:'65 m', p:'21 uds.', cat:'Promoción'}
-  ],
-  'Semirrizado':[
-    {c:'SC123', n:'PIEZA DE SEMIRRIZADA CCSG 65/70 0.27', f1:'Cal. 65/70', f2:'0.27 m', p:'5295 uds.', cat:'Liquidación'}
-  ],
-  'Ciegos Vacuno':[
-    {c:'CI2.50', n:'CIEGOS DE VACUNO', f1:'Cal. 95/115', f2:'0.50 m', p:'12673 uds.', cat:'Promoción'}
-  ],
-  'Semicular':[
-    {c:'TR1503', n:'PIEZA DE SEMICULAR CA 0.35', f1:'Cal. 70/+', f2:'35 m', p:'60 uds.', cat:'Liquidación'}
-  ],
-  'Maextra+ PC':[
-    {c:'TR1933', n:'MAEXTRA+ PC', f1:'Cal. 43', f2:'0.30 m', p:'10760 uds.', cat:'Promoción'},
-    {c:'TR1922', n:'MAEXTRA+ PC 3L', f1:'Cal. 65', f2:'0.36 m', p:'1286 uds.', cat:'Promoción'},
-    {c:'TR2071', n:'MAEXTRA+ PC H. BLANCO 1L', f1:'Cal. 64', f2:'0.90 m', p:'2035 uds.', cat:'Promoción'},
-    {c:'TR1621', n:'MAEXTRA+ PC CA', f1:'Cal. 50', f2:'0.25 m', p:'10400 uds.', cat:'Promoción'},
-    {c:'PX255.25', n:'MAEXTRA+ PC', f1:'Cal. 55', f2:'0.25 m', p:'1255 uds.', cat:'Promoción'},
-    {c:'PX250.25', n:'MAEXTRA+ PC', f1:'Cal. 50', f2:'0.25 m', p:'7775 uds.', cat:'Promoción'}
-  ],
-  'Seca Laminada':[
-    {c:'TR1045', n:'T.SECA LM UNITED CARO', f1:'Cal. 55', f2:'0.90 m', p:'4930 uds.', cat:'Liquidación'},
-    {c:'TR1118', n:'T.SECA LM UNITED CARO', f1:'Cal. 70', f2:'0.60 m', p:'3297 uds.', cat:'Liquidación'}
-  ],
-  'Maextra+':[
-    {c:'MX240.20R2', n:'MAEXTRA+ (1x20metros) T2550 2L', f1:'Cal. 40', f2:'20 m', p:'3425 uds.', cat:'Promoción'},
-    {c:'MX250.20R3', n:'MAEXTRA+ (1x20metros) T3045 2L', f1:'Cal. 47', f2:'20 m', p:'702 uds.', cat:'Promoción'}
-  ],
-  'CERDO CK':[
-    {c:'CX40.9K', n:'MAD.CERDO CK P.189 XXL 14/+', f1:'Cal. 32/34', f2:'90 m', p:'240 uds.', cat:'Promoción'},
-    {c:'CL40.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 32/34', f2:'80 m', p:'1040 uds.', cat:'Promoción'},
-    {c:'CL50.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3640 uds.', cat:'Promoción'},
-    {c:'CL50.8KF3', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 34/36', f2:'80 m', p:'3400 uds.', cat:'Promoción'},
-    {c:'CL60.8K', n:'MAD.CERDO CK P.189 XL 8/+', f1:'Cal. 36/38', f2:'80 m', p:'1820 uds.', cat:'Promoción'}
-  ]
-}},
-promo_especias:{label:'Especias y Preparados',subs:{
-  'Especias Naturales':[
-    {c:'P-D', n:'PIMIENTOS  LARGOS DESRRAVADOS', f1:'—', f2:'—', p:'200 uds.', cat:'Promoción'},
-    {c:'V00131', n:'KG. PAN RALLADO FRUMEN G-14 I. 20 KG. INTEGRAL', f1:'—', f2:'—', p:'340 uds.', cat:'Liquidación'},
-    {c:'WE0003.25', n:'AJO GRANULADO CHINA SACO 25KG', f1:'—', f2:'—', p:'2492 uds.', cat:'Promoción'}
-  ],
-  'Especias Wikuk':[
-    {c:'WE0056.25', n:'PIMIENTA BLANCA MOLIDA BOLSA 1 KG', f1:'—', f2:'—', p:'94 uds.', cat:'Liquidación'},
-    {c:'WE0067.25', n:'CAYENA MOLIDA OJO PAJARO 80/90.00 ESCOBILLAS B 1 K', f1:'—', f2:'—', p:'122 uds.', cat:'Liquidación'},
-    {c:'WE0059.25', n:'PIMIENTA NEGRA GRANO BOLSA 5KG', f1:'—', f2:'—', p:'115 uds.', cat:'Liquidación'},
-    {c:'P-1', n:'PIMIENTA NEGRA GRANO SACO 25KG', f1:'—', f2:'—', p:'239 uds.', cat:'Promoción'},
-    {c:'WE0051.25', n:'PIMENTON DULCE EXTRA 140 ASTAS SACO 25 KG', f1:'—', f2:'—', p:'199 uds.', cat:'Promoción'}
-  ],
-  'Algodones':[
-    {c:'B-1', n:'BOBINA DE ALGODON ROJA', f1:'—', f2:'—', p:'546 uds.', cat:'Liquidación'},
-    {c:'B-3', n:'BOBINA DE ALGODON BLANCA', f1:'—', f2:'—', p:'483 uds.', cat:'Promoción'}
-  ],
-  'Preparados La Campana':[
-    {c:'0P2327S', n:'CHORIZO CAMPA BZ 170034', f1:'—', f2:'—', p:'1033 uds.', cat:'Promoción'}
-  ],
-  'Accesorios':[
-    {c:'FUJ1', n:'FUNDA JAMON CORTADA BLANCA', f1:'—', f2:'—', p:'710 uds.', cat:'Liquidación'}
-  ]
-}},
-promo_envases:{label:'Envases — Promo',subs:{
-  'Bolsas de Vacío':[
-    {c:'V-25x40-145', n:'BOLSA VACIO 250X400 145 MC', f1:'—', f2:'—', p:'11300 uds.', cat:'Liquidación'},
-    {c:'V-36.5*55-150', n:'BOLSA VACIO 365X550 150 MC', f1:'—', f2:'—', p:'4 uds.', cat:'Liquidación'},
-    {c:'V-40*50', n:'BOLSA VACIO 400X600 150 MC SERIGRAFIADA', f1:'—', f2:'—', p:'22 uds.', cat:'Promoción'},
-    {c:'V-40*60-150', n:'BOLSA VACIO 400X600 150 MC SERIGRAFIADA', f1:'—', f2:'—', p:'22 uds.', cat:'Promoción'},
-    {c:'V-50*80', n:'BOLSA VACIO 500x800 90 MICRAS', f1:'—', f2:'—', p:'1 uds.', cat:'Liquidación'},
-    {c:'V-20*40 90', n:'BOLSA VACIO 200X400 90 MC', f1:'—', f2:'—', p:'1 uds.', cat:'Liquidación'}
-  ],
-  'Otros':[
-    {c:'RT-80', n:'ROLLO TERMICO 80X80', f1:'—', f2:'—', p:'28 uds.', cat:'Liquidación'}
-  ],
-  'Tarrina Microondas':[
-    {c:'TMPP1500', n:'TARRINA MICROONDAS PP 1500CC', f1:'—', f2:'—', p:'12 uds.', cat:'Promoción'}
-  ],
-  'Barquetas':[
-    {c:'G50', n:'BARQUETA G50 BLANCO GR 49', f1:'—', f2:'—', p:'8256 uds.', cat:'Liquidación'},
-    {c:'G95', n:'BARQUETA G95 BLANCO GR 58', f1:'—', f2:'—', p:'2056 uds.', cat:'Liquidación'}
-  ],
-  'Varios':[
-    {c:'CO00305', n:'PORTAMENU INFANTIL TAXI AMARILLO', f1:'—', f2:'—', p:'19 uds.', cat:'Liquidación'}
-  ],
-  'Bolsas':[
-    {c:'CO00316', n:'BOLSAS BLOCK TRANSPARENTES 30X43', f1:'—', f2:'—', p:'15 uds.', cat:'Liquidación'}
-  ]
-}}
-};
-
-// ═══ DELIVERY & HELPER FUNCTIONS ═══
+  }}
+};// ═══ DELIVERY & HELPER FUNCTIONS ═══
 var _DAYS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 var _MTHS=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 function _fmtD(d){return _DAYS[d.getDay()]+' '+d.getDate()+' '+_MTHS[d.getMonth()];}
@@ -3323,48 +3333,91 @@ async function clearAccesos() {
 
 
 // ── Load users from JSONBin ──
-async function loadUsers() {
-  try {
-    var r = await fetch(JSONBIN_URL + '/latest', {
-      headers: {
-        'X-Master-Key': JSONBIN_KEY
+var _loadUsersPromise = null;
+var _WK_CACHE_KEY = 'wk_data_cache';
+var _WK_CACHE_VER = 'v3'; // incrementar para forzar recarga
+var _WK_CACHE_TTL = 12 * 60 * 60 * 1000; // 12 horas
+
+async function loadUsers(forceRemote) {
+  if (_loadUsersPromise) return _loadUsersPromise;
+  // Si no es forzado, intentar desde caché local primero
+  if (!forceRemote) {
+    try {
+      var cached = localStorage.getItem(_WK_CACHE_KEY);
+      if (cached) {
+        var obj = JSON.parse(cached);
+        // Verificar versión y expiración
+        if (obj.ver === _WK_CACHE_VER && obj.expiry > Date.now() && Array.isArray(obj.usuarios) && obj.usuarios.length > 0) {
+          APP_USERS   = obj.usuarios;
+          ACCESOS_LOG = obj.accesos || [];
+          return;
+        } else {
+          // Caché inválida — borrar
+          localStorage.removeItem(_WK_CACHE_KEY);
+        }
       }
-    });
-    var responseText = await r.text();
-    console.log('loadUsers response:', r.status, responseText.substring(0, 300));
-    if (!r.ok) throw new Error('HTTP ' + r.status + ': ' + responseText);
-    var data = JSON.parse(responseText);
-    APP_USERS = (data.record && data.record.usuarios) ? data.record.usuarios : [];
-    console.log('Loaded', APP_USERS.length, 'users');
-  } catch(e) {
-    console.error('Error loading users:', e);
-    APP_USERS = [];
+    } catch(e) { localStorage.removeItem(_WK_CACHE_KEY); }
   }
+  _loadUsersPromise = (async function() {
+    try {
+      var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var data = JSON.parse(await r.text());
+      APP_USERS   = (data.record && data.record.usuarios) ? data.record.usuarios : [];
+      ACCESOS_LOG = (data.record && data.record.accesos)  ? data.record.accesos  : [];
+      // Guardar en caché local
+      try {
+        localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+          usuarios: APP_USERS, accesos: ACCESOS_LOG,
+          expiry: Date.now() + _WK_CACHE_TTL
+        }));
+      } catch(e) {}
+    } catch(e) {
+      console.error('Error loading users:', e);
+      APP_USERS = []; ACCESOS_LOG = [];
+    }
+    _loadUsersPromise = null;
+  })();
+  return _loadUsersPromise;
 }
 
 // ── Save users to JSONBin ──
 async function saveUsers() {
-  try {
-    var body = JSON.stringify({usuarios: APP_USERS});
-    console.log('Saving to JSONBin:', body.substring(0, 200));
-    var r = await fetch(JSONBIN_URL, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Master-Key': JSONBIN_KEY
-      },
-      body: body
-    });
-    var responseText = await r.text();
-    console.log('JSONBin response:', r.status, responseText.substring(0, 300));
-    if (!r.ok) {
-      throw new Error('HTTP ' + r.status + ': ' + responseText);
+  // Limitar accesos a los últimos 100 para no superar límite JSONBin (100KB)
+  var accesosToSave = ACCESOS_LOG.length > 100 ? ACCESOS_LOG.slice(-100) : ACCESOS_LOG;
+  var payload = {usuarios: APP_USERS, accesos: accesosToSave};
+  var body = JSON.stringify(payload);
+
+  // Reintentar hasta 3 veces si falla la red
+  for (var attempt = 1; attempt <= 3; attempt++) {
+    try {
+      var r = await fetch(JSONBIN_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+        body: body
+      });
+      if (!r.ok) {
+        var rt = await r.text();
+        throw new Error('HTTP ' + r.status + ': ' + rt.substring(0, 100));
+      }
+      // Solo actualizar caché DESPUÉS de confirmar save exitoso
+      try {
+        localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+          ver: _WK_CACHE_VER,
+          usuarios: APP_USERS, accesos: accesosToSave,
+          expiry: Date.now() + _WK_CACHE_TTL
+        }));
+      } catch(e) {}
+      return true;
+    } catch(e) {
+      console.warn('saveUsers intento ' + attempt + ' fallido:', e.message);
+      if (attempt === 3) {
+        alert('❌ Error al guardar (intento ' + attempt + '/3): ' + e.message + '\n\nComprueba tu conexión e inténtalo de nuevo.');
+        return false;
+      }
+      // Esperar antes de reintentar (1s, 2s)
+      await new Promise(function(res){ setTimeout(res, attempt * 1000); });
     }
-    return true;
-  } catch(e) {
-    console.error('Error saving users:', e);
-    alert('Error al guardar: ' + e.message);
-    return false;
   }
 }
 
@@ -3396,6 +3449,15 @@ async function doUserLogin() {
   ACTIVE_USER = found;
   ACTIVE_VENDOR_CATS = found.categorias === 'todas' ? null : found.categorias;
   registrarAcceso(found.usuario, found.nombre);
+  setTimeout(function() { _updateShareBtn(); _updateAdminBtn(); }, 300);
+
+  // Guardar sesión 12 horas en localStorage
+  try {
+    localStorage.setItem('wk_session', JSON.stringify({
+      usuario: found.usuario,
+      expiry: Date.now() + 12 * 60 * 60 * 1000
+    }));
+  } catch(e) {}
 
   document.getElementById('loginScreen').style.display = 'none';
   // Show user badge
@@ -3430,13 +3492,18 @@ async function renderUserList() {
   }
   container.innerHTML = APP_USERS.map(function(u, i) {
     var cats = u.categorias === 'todas' ? 'Todas las categorías' : Object.keys(u.categorias||{}).filter(function(k){return u.categorias[k];}).length + ' categorías';
+    var clienteActivo = u.activoCliente && u.tokenCliente;
     return '<div class="agent-card" style="margin-bottom:10px;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;">'
-      + '<div><strong>' + u.nombre + '</strong> <span style="color:var(--muted);font-size:.8rem">@' + u.usuario + '</span></div>'
-      + '<div style="display:flex;gap:8px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">'
+      + '<div><strong>' + u.nombre + '</strong> <span style="color:var(--muted);font-size:.8rem">@' + u.usuario + '</span>'
+      + (clienteActivo ? ' <span style="background:#D1FAE5;color:#065F46;font-size:.68rem;padding:2px 7px;border-radius:4px;font-weight:700">🔗 ENLACE ACTIVO</span>' : '')
+      + '</div>'
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
       + '<span style="font-size:.75rem;padding:2px 8px;border-radius:4px;background:' + (u.activo!==false?'#D1FAE5':'#FEE2E2') + ';color:' + (u.activo!==false?'#065F46':'#991B1B') + '">' + (u.activo!==false?'Activo':'Inactivo') + '</span>'
       + '<button onclick="editUser(' + i + ')" style="background:var(--accent);color:white;border:none;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer">Editar</button>'
       + '<button onclick="deleteUser(' + i + ')" style="background:#DC2626;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer">✕</button>'
+      + '<button onclick="toggleEnlaceCliente(' + i + ')" style="background:' + (clienteActivo?'#D1FAE5':'#F3F4F6') + ';color:' + (clienteActivo?'#065F46':'#374151') + ';border:1px solid ' + (clienteActivo?'#6EE7B7':'#D1D5DB') + ';border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer" title="' + (clienteActivo?'Desactivar':'Activar') + ' enlace cliente">🔗 ' + (clienteActivo?'Desactivar':'Activar') + '</button>'
+      + (clienteActivo ? '<button onclick="copyEnlaceCliente(' + i + ')" style="background:#DBEAFE;color:#1E40AF;border:1px solid #93C5FD;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer" title="Copiar enlace">📋 Copiar</button>' : '')
       + '</div></div>'
       + '<div style="font-size:.78rem;color:var(--muted);margin-top:4px">' + cats + '</div>'
       + '</div>';
@@ -3476,6 +3543,19 @@ function editUser(idx) {
     if (el) el.checked = todasChecked || (u.categorias && u.categorias[cat.key]);
   });
   toggleUserCatSection();
+  // Client link fields
+  var clienteActivo = u.activoCliente && u.tokenCliente;
+  document.getElementById('ucat-cliente-activo').checked = !!clienteActivo;
+  // Mostrar sección de categorías siempre (para configurar antes de activar)
+  document.getElementById('ucatc-section').style.display = 'block';
+  var catsCliente = u.categoriasCliente;
+  var todasClienteChecked = !catsCliente || catsCliente === 'todas';
+  document.getElementById('ucatc-todas').checked = todasClienteChecked;
+  document.getElementById('ucatc-cats').style.display = todasClienteChecked ? 'none' : 'grid';
+  ALL_CATS.forEach(function(cat) {
+    var el = document.getElementById('ucatc-' + cat.key);
+    if (el) el.checked = todasClienteChecked || (catsCliente && catsCliente[cat.key] !== false);
+  });
 }
 
 function toggleUserCatSection() {
@@ -3502,7 +3582,27 @@ async function saveUserForm() {
     });
   }
 
-  var userObj = { nombre: nombre, usuario: usuario, clave: clave, activo: activo, categorias: categorias };
+  // Client link config
+  var clienteActivo = document.getElementById('ucat-cliente-activo').checked;
+  var todasCliente  = document.getElementById('ucatc-todas').checked;
+  // Guardar categoriasCliente SIEMPRE (no solo si activo) para no perder la config al desactivar
+  var categoriasCliente;
+  if (todasCliente) {
+    categoriasCliente = 'todas';
+  } else {
+    categoriasCliente = {};
+    ALL_CATS.forEach(function(cat) {
+      var el = document.getElementById('ucatc-' + cat.key);
+      if (el) categoriasCliente[cat.key] = el.checked;
+    });
+  }
+
+  // Keep existing token if already generated, create new one if enabling for first time
+  var existingToken = (idx !== -1 && APP_USERS[idx].tokenCliente) ? APP_USERS[idx].tokenCliente : null;
+  var tokenCliente = clienteActivo ? (existingToken || _genToken()) : null;
+
+  var userObj = { nombre: nombre, usuario: usuario, clave: clave, activo: activo, categorias: categorias,
+    activoCliente: clienteActivo, tokenCliente: tokenCliente, categoriasCliente: categoriasCliente };
 
   if (idx === -1) {
     APP_USERS.push(userObj);
@@ -3528,12 +3628,216 @@ async function deleteUser(idx) {
 function cancelUserForm() {
   document.getElementById('admin-user-form').style.display = 'none';
 }
+
+function toggleUserCatClienteSection() {
+  var activo = document.getElementById('ucat-cliente-activo').checked;
+  document.getElementById('ucatc-section').style.display = activo ? 'block' : 'none';
+}
+
+function toggleClienteCatSection() {
+  var todas = document.getElementById('ucatc-todas').checked;
+  document.getElementById('ucatc-cats').style.display = todas ? 'none' : 'grid';
+}
+
+function _genToken() {
+  return Math.random().toString(36).substring(2,10) + Math.random().toString(36).substring(2,10);
+}
+
+async function toggleEnlaceCliente(idx) {
+  var u = APP_USERS[idx];
+  if (u.activoCliente) {
+    if (!confirm('¿Desactivar el enlace de ' + u.nombre + '? El cliente no podrá acceder.')) return;
+    APP_USERS[idx].activoCliente = false;
+  } else {
+    // Nuevo token siempre al reactivar — enlace anterior queda inválido
+    APP_USERS[idx].tokenCliente = _genToken();
+    APP_USERS[idx].activoCliente = true;
+    if (!APP_USERS[idx].categoriasCliente) APP_USERS[idx].categoriasCliente = u.categorias;
+  }
+  await saveUsers();
+  renderUserList();
+}
+
+function copyEnlaceCliente(idx) {
+  var u = APP_USERS[idx];
+  if (!u.tokenCliente || !u.activoCliente) { alert('El enlace no está activo'); return; }
+  var base = window.location.href.split('?')[0];
+  var url = base + '?cliente=' + encodeURIComponent(u.token || u.tokenCliente);
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('✅ Enlace copiado al portapapeles');
+  }).catch(function() {
+    prompt('Copia este enlace:', url);
+  });
+}
+
+// ── CLIENT MODE: acceso por token en URL ──
+var CLIENT_MODE = false;
+var CLIENT_CATS = null;
+
+// ── SHARE MODAL FUNCTIONS ──
+function _getMyEnlaceUrl() {
+  if (!ACTIVE_USER || !ACTIVE_USER.tokenCliente) return null;
+  var base = window.location.href.split('?')[0];
+  return base + '?cliente=' + ACTIVE_USER.tokenCliente;
+}
+
+function openShareModal() {
+  var modal = document.getElementById('share-modal');
+  if (!modal) return;
+  // Sync ACTIVE_USER from APP_USERS (in case admin changed it)
+  var u = APP_USERS.find(function(x){ return x.usuario === ACTIVE_USER.usuario; });
+  if (u) { ACTIVE_USER.activoCliente = u.activoCliente; ACTIVE_USER.tokenCliente = u.tokenCliente; }
+  _refreshShareModal();
+  modal.style.display = 'flex';
+}
+
+function closeShareModal() {
+  document.getElementById('share-modal').style.display = 'none';
+}
+
+function _refreshShareModal() {
+  var activo = ACTIVE_USER && ACTIVE_USER.activoCliente && ACTIVE_USER.tokenCliente;
+  var url = _getMyEnlaceUrl();
+  document.getElementById('share-url-section').style.display = activo ? 'block' : 'none';
+  document.getElementById('share-inactive-section').style.display = activo ? 'none' : 'block';
+  if (activo && url) document.getElementById('share-url-box').textContent = url;
+}
+
+async function deactivateMyEnlace() {
+  if (!confirm('¿Desactivar el enlace? El cliente no podrá acceder al catálogo.')) return;
+  var u = APP_USERS.find(function(x){ return x.usuario === ACTIVE_USER.usuario; });
+  if (!u) return;
+  var idx = APP_USERS.indexOf(u);
+  APP_USERS[idx].activoCliente = false;
+  ACTIVE_USER.activoCliente = false;
+  await saveUsers();
+  _refreshShareModal();
+  _updateShareBtn();
+}
+
+async function activateMyEnlace() {
+  var u = APP_USERS.find(function(x){ return x.usuario === ACTIVE_USER.usuario; });
+  if (!u) return;
+  var idx = APP_USERS.indexOf(u);
+  // Siempre token nuevo al activar
+  var token = _genToken();
+  APP_USERS[idx].tokenCliente = token;
+  APP_USERS[idx].activoCliente = true;
+  ACTIVE_USER.tokenCliente = token;
+  ACTIVE_USER.activoCliente = true;
+  if (!APP_USERS[idx].categoriasCliente) APP_USERS[idx].categoriasCliente = u.categorias;
+  await saveUsers();
+  _refreshShareModal();
+  _updateShareBtn();
+}
+
+async function newShareUrl() {
+  if (!confirm('¿Generar un nuevo enlace? El enlace anterior dejará de funcionar inmediatamente.')) return;
+  await activateMyEnlace();
+  showToast('✅ Nuevo enlace generado');
+}
+
+function shareWhatsApp() {
+  var url = _getMyEnlaceUrl();
+  if (!url) return;
+  var text = 'Hola, te comparto el catálogo de productos Wikuk: ' + url;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function shareEmail() {
+  var url = _getMyEnlaceUrl();
+  if (!url) return;
+  var subject = 'Catálogo de productos Wikuk';
+  var body = 'Hola,\n\nTe comparto el catálogo de productos Wikuk para que puedas consultarlo:\n\n' + url + '\n\nSaludos.';
+  window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+
+function copyShareUrl() {
+  var url = _getMyEnlaceUrl();
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('✅ Enlace copiado');
+  }).catch(function() {
+    prompt('Copia este enlace:', url);
+  });
+}
+
+function _updateShareBtn() {
+  var btn = document.getElementById('btnShareCliente');
+  if (!btn) return;
+  if (!ACTIVE_USER || ACTIVE_USER.esCliente || ACTIVE_USER.esAdmin) {
+    btn.style.display = 'none'; return;
+  }
+  var u = APP_USERS.find(function(x){ return x.usuario === ACTIVE_USER.usuario; });
+  if (u && u.tokenCliente) {
+    btn.style.display = 'flex';
+    btn.style.background = u.activoCliente ? '#D97706' : '#6B7280';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function _updateAdminBtn() {
+  var btn = document.getElementById('btnAdminTopbar');
+  if (!btn) return;
+  // Mostrar solo si hay usuario activo (no cliente)
+  // Cualquier usuario logado puede intentar acceder al admin con su PIN
+  if (ACTIVE_USER && !ACTIVE_USER.esCliente) {
+    btn.style.display = 'flex';
+    btn.style.alignItems = 'center';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function checkClientToken() {
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('cliente');
+  if (!token) return false;
+  var u = APP_USERS.find(function(u) { return u.tokenCliente === token && u.activoCliente; });
+  if (!u) {
+    // Token inválido o desactivado
+    var es = document.getElementById('entryScreen');
+    if (es) es.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;font-family:Inter,sans-serif;">'
+      + '<div style="font-size:3rem">🔒</div>'
+      + '<div style="font-size:1.1rem;font-weight:700">Enlace no disponible</div>'
+      + '<div style="font-size:.9rem;color:#6B7280">Este enlace ha sido desactivado o ha caducado.</div>'
+      + '</div>';
+    return true;
+  }
+  CLIENT_MODE = true;
+  var catsCliente = u.categoriasCliente;
+  CLIENT_CATS = (!catsCliente || catsCliente === 'todas') ? null : catsCliente;
+  ACTIVE_USER = { nombre: 'Cliente', usuario: 'cliente', categorias: catsCliente || 'todas', esCliente: true };
+  ACTIVE_VENDOR_CATS = CLIENT_CATS;
+
+  // Hide entry screen (same as normal login)
+  document.getElementById('entryScreen').style.display = 'none';
+  ['loginScreen','vendorScreen','clientScreen'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  // Hide UI elements not relevant to clients
+  var backBtn = document.getElementById('btnBackEntry');
+  if (backBtn) backBtn.style.display = 'none';
+  var shareBtn = document.getElementById('btnShareCliente');
+  if (shareBtn) shareBtn.style.display = 'none';
+  var badge = document.getElementById('clientBadge');
+  if (badge) badge.style.display = 'none';
+
+  // Apply category filter (same as doUserLogin does)
+  applyVendorCatFilter();
+  return true;
+}
 // ═══ ENTRY & VENDOR/CLIENT FUNCTIONS ═══
 function goBackToEntry() {
   ACTIVE_CLIENT = null;
   ACTIVE_VENDOR = null;
   ACTIVE_VENDOR_CATS = null;
+  ACTIVE_USER = null;
   CLIENTS = [];
+  try { localStorage.removeItem('wk_session'); } catch(e) {}
   document.getElementById('clientBadge').classList.remove('visible');
   // Hide mobile screens, show entry
   ['m-s1','ms1b','m-s2','m-s3','m-s4'].forEach(function(id){
@@ -3546,7 +3850,9 @@ function goBackToEntry() {
 
 function applyVendorCatFilter() {
   ALL_CATS.forEach(function(cat) {
-    var allowed = !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[cat.key];
+    // Para clientes: solo mostrar si explícitamente true
+    // Para vendedores (ACTIVE_VENDOR_CATS=null): mostrar todo
+    var allowed = !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[cat.key] === true;
 
     // ── Mobile menu: hide m-item parent of mlbl- span ──
     var el = document.getElementById('mlbl-'+cat.key);
@@ -3563,6 +3869,31 @@ function applyVendorCatFilter() {
     // ── Desktop col1: hide .col-item with matching data ──
     var colEl = document.getElementById('ci-'+cat.key);
     if (colEl) colEl.style.display = allowed ? '' : 'none';
+  });
+
+  // ── Promociones: elemento único en desktop y mobile ──
+  var promoKeys = ['promo_tripas','promo_especias','promo_envases'];
+  var promoAllowed = promoKeys.some(function(k) {
+    return !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[k] === true;
+  });
+  var promoDesktop = document.getElementById('ci-promociones');
+  if (promoDesktop) promoDesktop.style.display = promoAllowed ? '' : 'none';
+  var promoMobile = document.getElementById('mlbl-promo-main');
+  if (promoMobile) {
+    var item = promoMobile.parentNode;
+    var safety = 0;
+    while (item && safety++ < 6) {
+      var cls = item.className || '';
+      if (cls.indexOf('m-item') !== -1 || cls.indexOf('m-group') !== -1) {
+        item.style.display = promoAllowed ? '' : 'none'; break;
+      }
+      item = item.parentNode;
+    }
+  }
+  // ── Promociones sub-items mobile ──
+  ['promo_tripas','promo_especias','promo_envases'].forEach(function(k) {
+    var el = document.getElementById('m-'+k);
+    if (el) el.style.display = (!ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[k] === true) ? '' : 'none';
   });
 }
 
@@ -3757,7 +4088,11 @@ function renderPromoSections() {
     {key:'promo_especias', label:'Especias y Preparados'},
     {key:'promo_envases',  label:'Envases'}
   ];
-  document.getElementById('d-col2').innerHTML = sections.map(function(s){
+  // Filtrar según permisos del cliente/vendedor
+  var visible = sections.filter(function(s) {
+    return !ACTIVE_VENDOR_CATS || ACTIVE_VENDOR_CATS[s.key] === true;
+  });
+  document.getElementById('d-col2').innerHTML = visible.map(function(s){
     return '<div class="sub-item" onclick="dSelectPromoSection(\''+s.key+'\',this)">'
       +'<span class="sub-dot"></span>🏷️ '+s.label+'</div>';
   }).join('');
@@ -3809,7 +4144,7 @@ function dRender() {
           +'<span style="margin-left:3px;font-size:.65rem;color:var(--accent);font-weight:600">-'+discResult.pct+'%</span>'
           +priceDiff;
       } else {
-        price=p.p+(p.cat?'':' €')+priceDiff;
+        price=CLIENT_MODE?'—':p.p+(p.cat?'':' €')+priceDiff;
       }
       let lastCell;
       if(p.cat){
@@ -3892,7 +4227,7 @@ function mGoSub(sub, el) {
           +'<span style="margin-left:3px;font-size:.65rem;color:var(--accent);font-weight:600">-'+discResult.pct+'%</span>'
           +priceDiff;
       } else {
-        price=p.p+(p.cat?'':' €')+priceDiff;
+        price=CLIENT_MODE?'—':p.p+(p.cat?'':' €')+priceDiff;
       }
       let lastLine='';
       if(p.cat){
@@ -3968,7 +4303,7 @@ function doSearch(q) {
       ?'<div style="text-align:center;padding:40px;color:var(--muted);font-size:.85rem">Sin resultados</div>'
       :results.map(function(p){
         return '<div class="m-search-card">'
-          +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+p.p+' €</div></div>'
+          +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+(CLIENT_MODE?'—':p.p+' €')+'</div></div>'
           +'<div class="m-card-bot">'
           +'<span class="m-card-code">'+p.c+'</span>'
           +'<span style="font-size:.7rem;padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--muted)">'+p.catLabel+'</span>'
@@ -3984,7 +4319,7 @@ function doSearch(q) {
           +'<span class="sr-name">'+p.n+'</span>'
           +'<span class="sr-tag">'+p.catLabel+'</span>'
           +'<span class="sr-tag">'+p.sub+'</span>'
-          +'<span class="sr-price">'+p.p+' €</span>'
+          +(CLIENT_MODE?'':+'<span class="sr-price">'+p.p+' €</span>')
           +'</div>';
       }).join('');
     document.getElementById('d-products').innerHTML=''
@@ -4098,10 +4433,10 @@ var ALL_CATS = [
   {key:'promo_tripas', label:'Promociones — Tripas'},
   {key:'promo_especias',label:'Promociones — Especias'},
   {key:'promo_envases',label:'Promociones — Envases'},
-  {key:'spot_cui',     label:'Spot CUI — Gastronorm'},
-  {key:'spot_frumen',  label:'Spot Frumen — Pan Rallado'},
-  {key:'spot_el_carmen',label:'Spot El Carmen'},
-  {key:'spot_sierra',  label:'Spot Sierra Nevada'}
+  {key:'spot_cui',     label:'Spot Banquetas'},
+  {key:'spot_frumen',  label:'Spot Pan Rallado'},
+  {key:'spot_el_carmen',label:'Spot Embalaje 1'},
+  {key:'spot_sierra',  label:'Spot Embalaje 2'}
 ];
 
 // ── Load/Save ──
@@ -4124,7 +4459,10 @@ function saveAgentConf() {
 
 // ── PIN Screen ──
 function showAdminPin() {
-  document.getElementById('adminPinScreen').classList.add('visible');
+  var el = document.getElementById('adminPinScreen');
+  if (!el) { console.error('adminPinScreen not found'); return; }
+  el.classList.add('visible');
+  el.style.display = 'flex'; // forzar display por si clase no funciona
   document.getElementById('adminPinInput').value = '';
   document.getElementById('adminPinError').style.display = 'none';
   setTimeout(function(){ document.getElementById('adminPinInput').focus(); }, 100);
@@ -4146,14 +4484,20 @@ function submitAdminPin() {
 
 // ── Admin Panel ──
 function openAdminPanel() {
-  document.getElementById('entryScreen').style.display = 'none';
+  // Ocultar entryScreen si está visible (acceso desde pantalla entrada)
+  var es = document.getElementById('entryScreen');
+  if (es) es.style.display = 'none';
   document.getElementById('adminScreen').classList.add('visible');
   showAdminTab('users');
-  renderUserList();
 }
 function closeAdminPanel() {
   document.getElementById('adminScreen').classList.remove('visible');
-  document.getElementById('entryScreen').style.display = 'flex';
+  // Si hay usuario activo, volver al catálogo; si no, a la pantalla de entrada
+  if (ACTIVE_USER && !ACTIVE_USER.esCliente) {
+    // Ya estaba en el catálogo — no mostrar entryScreen
+  } else {
+    document.getElementById('entryScreen').style.display = 'flex';
+  }
 }
 function showAdminTab(tab) {
   ['users','admins','accesos'].forEach(function(t){
@@ -4762,6 +5106,65 @@ function closeModal() {
 document.addEventListener('DOMContentLoaded', function() {
   var sel = document.getElementById('modal-estado');
   if (sel) sel.addEventListener('change', onModalEstadoChange);
+  // Una sola llamada a loadUsers — deduplicada internamente
+  var isClientLink = window.location.search.indexOf('cliente=') !== -1;
+
+  // Intentar restaurar sesión guardada (válida 12h)
+  if (!isClientLink) {
+    try {
+      var saved = localStorage.getItem('wk_session');
+      if (saved) {
+        var sess = JSON.parse(saved);
+        if (sess.expiry > Date.now()) {
+          // Sesión válida — cargar usuarios y entrar directamente
+          loadUsers().then(function() {
+            var found = APP_USERS.find(function(u) {
+              return u.usuario === sess.usuario && u.activo !== false;
+            });
+            if (found) {
+              ACTIVE_USER = found;
+              ACTIVE_VENDOR_CATS = found.categorias === 'todas' ? null : found.categorias;
+              document.getElementById('entryScreen').style.display = 'none';
+              document.getElementById('loginScreen').style.display = 'none';
+              var badge = document.getElementById('clientBadge');
+              if (badge) {
+                document.getElementById('clientBadgeText').textContent = found.nombre || found.usuario;
+                badge.classList.add('visible');
+                badge.style.cursor = 'default';
+                badge.onclick = null;
+              }
+              applyVendorCatFilter();
+              setTimeout(function() { _updateShareBtn(); _updateAdminBtn(); }, 100);
+            } else {
+              // Usuario desactivado o eliminado — borrar sesión
+              localStorage.removeItem('wk_session');
+            }
+          });
+        } else {
+          localStorage.removeItem('wk_session'); // caducada
+        }
+      }
+    } catch(e) {}
+  }
+
+  if (isClientLink) {
+    // Mostrar spinner inmediatamente
+    var loader = document.createElement('div');
+    loader.id = 'client-loader';
+    loader.style.cssText = 'position:fixed;inset:0;background:#FAF9F7;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;font-family:Inter,sans-serif;gap:16px;';
+    loader.innerHTML = '<div style="font-size:2rem;font-weight:900;color:#B45309">WI<span style="color:#1a1a1a">KUK</span></div>'
+      + '<div style="width:36px;height:36px;border:3px solid #E5E7EB;border-top-color:#B45309;border-radius:50%;animation:spin .8s linear infinite;"></div>'
+      + '<div style="font-size:.82rem;color:#9CA3AF;">Cargando catálogo...</div>'
+      + '<style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(loader);
+    loadUsers().then(function() {
+      var l = document.getElementById('client-loader');
+      if (l) l.remove();
+      checkClientToken();
+    });
+  } else {
+    loadUsers(); // precarga en background para login rápido
+  }
 });
 
 function onModalEstadoChange() {
