@@ -1044,7 +1044,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
           style="padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:Inter,sans-serif;font-size:.88rem;outline:none;">
         <input id="new-admin-pass" type="password" placeholder="Clave"
           style="padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:Inter,sans-serif;font-size:.88rem;outline:none;">
-        <button onclick="addAdmin()" style="padding:11px;background:#1A1816;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Añadir administrad
+        <button onclick="addAdmin()" style="padding:11px;background:#1A1816;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Añadir administrador</button>
+      </div>
+    </div>
+  </div>
 
   <!-- PANEL: TARIFAS -->
   <div class="admin-panel" id="apanel-tarifas" style="display:none;padding:10px 14px;overflow-y:auto;">
@@ -1102,7 +1105,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   </div>
 </div><!-- /admin-screen -->
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 var LANG='es';
 var T={
@@ -5541,6 +5544,7 @@ Object.keys(DATA).forEach(function(k){_tCAT_LBL[k]=DATA[k].label||k;});
 
 function tarifaLoadFile(input,type){
   if(!input.files.length)return;
+  if(typeof XLSX==='undefined'){alert('Cargando librería Excel... Inténtalo de nuevo en unos segundos.');return;}
   var file=input.files[0];
   var rd=new FileReader();
   rd.onload=function(e){
