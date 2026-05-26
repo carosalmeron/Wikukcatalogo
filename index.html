@@ -313,7 +313,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </div>
     </div>
   </div>
-  <button onclick="alert('click OK');document.getElementById('adminPinScreen').style.display='flex'" style="margin-top:24px;background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:.04em;">
+  <button onclick="var el=document.getElementById('adminPinScreen');alert('Existe: '+(el?'SI':'NO'));if(el){el.style.cssText='display:flex;position:fixed;top:0;left:0;width:100vw;height:100vh;background:red;z-index:99999;flex-direction:column;align-items:center;justify-content:center;';}" style="margin-top:24px;background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:.04em;">
     ⚙️ Zona Administrador
   </button>
 </div>
