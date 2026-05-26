@@ -313,7 +313,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </div>
     </div>
   </div>
-  <button onclick="showAdminPin()" style="margin-top:24px;background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:.04em;">
+  <button onclick="document.getElementById('adminPinScreen').style.display='flex';setTimeout(function(){document.getElementById('adminPinInput').focus()},100)" style="margin-top:24px;background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:.04em;">
     ⚙️ Zona Administrador
   </button>
 </div>
@@ -888,7 +888,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 </div>
 
 <!-- ADMIN PIN SCREEN -->
-<div class="admin-pin-screen" id="adminPinScreen">
+<div class="admin-pin-screen" id="adminPinScreen" style="display:none;">
   <div style="font-size:2rem;margin-bottom:8px">🔐</div>
   <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px">Zona Administrador</div>
   <div style="font-size:.82rem;color:var(--muted);margin-bottom:20px;text-align:center">Introduce tu clave de acceso</div>
@@ -900,7 +900,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 </div>
 
 <!-- ADMIN PANEL -->
-<div class="admin-screen" id="adminScreen">
+<div class="admin-screen" id="adminScreen" style="display:none;">
   <div class="admin-topbar">
     <button class="admin-topbar-back" onclick="closeAdminPanel()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Salir
@@ -4620,13 +4620,13 @@ function saveAgentConf() {
 
 // ── PIN Screen ──
 function showAdminPin() {
-  document.getElementById('adminPinScreen').classList.add('visible');
+  document.getElementById('adminPinScreen').style.display = 'flex';
   document.getElementById('adminPinInput').value = '';
   document.getElementById('adminPinError').style.display = 'none';
   setTimeout(function(){ document.getElementById('adminPinInput').focus(); }, 100);
 }
 function closeAdminPin() {
-  document.getElementById('adminPinScreen').classList.remove('visible');
+  document.getElementById('adminPinScreen').style.display = 'none';
 }
 function submitAdminPin() {
   var pin = document.getElementById('adminPinInput').value.trim();
@@ -4643,12 +4643,12 @@ function submitAdminPin() {
 // ── Admin Panel ──
 function openAdminPanel() {
   document.getElementById('entryScreen').style.display = 'none';
-  document.getElementById('adminScreen').classList.add('visible');
+  document.getElementById('adminScreen').style.display = 'flex';
   showAdminTab('users');
   renderUserList();
 }
 function closeAdminPanel() {
-  document.getElementById('adminScreen').classList.remove('visible');
+  document.getElementById('adminScreen').style.display = 'none';
   document.getElementById('entryScreen').style.display = 'flex';
 }
 function showAdminTab(tab) {
