@@ -313,7 +313,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </div>
     </div>
   </div>
-  <button onclick="document.getElementById('adminPinScreen').style.display='flex';setTimeout(function(){document.getElementById('adminPinInput').focus()},100)" style="margin-top:24px;background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:.04em;">
+  <button onclick="alert('click OK');document.getElementById('adminPinScreen').style.display='flex'" style="margin-top:24px;background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:.04em;">
     ⚙️ Zona Administrador
   </button>
 </div>
@@ -888,7 +888,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 </div>
 
 <!-- ADMIN PIN SCREEN -->
-<div class="admin-pin-screen" id="adminPinScreen" style="display:none;">
+<div id="adminPinScreen" style="display:none;position:fixed;inset:0;background:#F7F5F2;z-index:1200;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;">
   <div style="font-size:2rem;margin-bottom:8px">🔐</div>
   <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px">Zona Administrador</div>
   <div style="font-size:.82rem;color:var(--muted);margin-bottom:20px;text-align:center">Introduce tu clave de acceso</div>
