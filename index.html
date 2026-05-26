@@ -1105,7 +1105,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   </div>
 </div><!-- /admin-screen -->
 
-<script async src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 var LANG='es';
 var T={
@@ -4630,13 +4629,14 @@ function saveAgentConf() {
 
 // ── PIN Screen ──
 function showAdminPin() {
-  document.getElementById('adminPinScreen').classList.add('visible');
+  var el = document.getElementById('adminPinScreen');
+  el.style.display = 'flex';
   document.getElementById('adminPinInput').value = '';
   document.getElementById('adminPinError').style.display = 'none';
   setTimeout(function(){ document.getElementById('adminPinInput').focus(); }, 100);
 }
 function closeAdminPin() {
-  document.getElementById('adminPinScreen').classList.remove('visible');
+  document.getElementById('adminPinScreen').style.display = 'none';
 }
 function submitAdminPin() {
   var pin = document.getElementById('adminPinInput').value.trim();
@@ -4653,12 +4653,12 @@ function submitAdminPin() {
 // ── Admin Panel ──
 function openAdminPanel() {
   document.getElementById('entryScreen').style.display = 'none';
-  document.getElementById('adminScreen').classList.add('visible');
+  document.getElementById('adminScreen').style.display = 'flex';
   showAdminTab('users');
   renderUserList();
 }
 function closeAdminPanel() {
-  document.getElementById('adminScreen').classList.remove('visible');
+  document.getElementById('adminScreen').style.display = 'none';
   document.getElementById('entryScreen').style.display = 'flex';
 }
 function showAdminTab(tab) {
@@ -5840,5 +5840,6 @@ function _tEsc(s){if(!s)return'';var d=document.createElement('div');d.textConte
 initApp();
 
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </body>
 </html>
