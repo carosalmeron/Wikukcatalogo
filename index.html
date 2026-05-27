@@ -3333,6 +3333,15 @@ for(const catKey in DATA){
 // ═══ JSONBIN CONFIG ═══
 var JSONBIN_URL = 'https://api.jsonbin.io/v3/b/69d819ddaaba882197e066d6';
 var JSONBIN_KEY = '$2a$10$7CwtKpd.KHsd0jz8xyGJqe437zEj0pvow/WSQQfe1TqlY7nWq1Xw6';
+var CORS_PROXY = 'https://corsproxy.io/?';
+function _jbFetch(urlPath, opts) {
+  opts = opts || {};
+  var directUrl = JSONBIN_URL + (urlPath || '');
+  return fetch(directUrl, opts).catch(function() {
+    // CORS fallback: use proxy
+    return fetch(CORS_PROXY + directUrl, opts);
+  });
+}
 var APP_USERS = [];       // loaded from JSONBin
 var ACTIVE_USER = null;   // logged in user
 
@@ -3343,7 +3352,7 @@ var SESSION_TIMER = null;
 
 async function loadAccesos() {
   try {
-    var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
+    var r = await _jbFetch('/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
     if (!r.ok) { ACCESOS_LOG = []; return; }
     var data = JSON.parse(await r.text());
     ACCESOS_LOG = (data.record && data.record.accesos) ? data.record.accesos : [];
@@ -3355,7 +3364,7 @@ async function saveAccesos() {
     if (ACCESOS_LOG.length > 100) ACCESOS_LOG = ACCESOS_LOG.slice(-100);
     // Usar APP_USERS actual para no sobrescribir cambios del admin
     var body = { usuarios: APP_USERS, accesos: ACCESOS_LOG };
-    var r = await fetch(JSONBIN_URL, {
+    var r = await _jbFetch('', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
       body: JSON.stringify(body)
@@ -3519,7 +3528,7 @@ async function loadUsers(forceRemote) {
   }
   _loadUsersPromise = (async function() {
     try {
-      var r = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
+      var r = await _jbFetch('/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       var data = JSON.parse(await r.text());
       APP_USERS   = (data.record && data.record.usuarios) ? data.record.usuarios : [];
@@ -3550,7 +3559,7 @@ async function saveUsers() {
   // Reintentar hasta 3 veces si falla la red
   for (var attempt = 1; attempt <= 3; attempt++) {
     try {
-      var r = await fetch(JSONBIN_URL, {
+      var r = await _jbFetch('', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
         body: body
