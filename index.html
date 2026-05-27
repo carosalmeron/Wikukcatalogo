@@ -313,7 +313,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </div>
     </div>
   </div>
-  <button onclick="var el=document.getElementById('adminPinScreen');alert('Existe: '+(el?'SI':'NO'));if(el){el.style.cssText='display:flex;position:fixed;top:0;left:0;width:100vw;height:100vh;background:red;z-index:99999;flex-direction:column;align-items:center;justify-content:center;';}" style="margin-top:24px;background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:.04em;">
+  <button onclick="showAdminPin()" style="margin-top:24px;background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;font-family:Inter,sans-serif;letter-spacing:.04em;">
     ⚙️ Zona Administrador
   </button>
 </div>
@@ -4620,19 +4620,33 @@ function saveAgentConf() {
 
 // ── PIN Screen ──
 function showAdminPin() {
-  document.getElementById('adminPinScreen').style.display = 'flex';
-  document.getElementById('adminPinInput').value = '';
-  document.getElementById('adminPinError').style.display = 'none';
-  setTimeout(function(){ document.getElementById('adminPinInput').focus(); }, 100);
+  var old = document.getElementById('dynPinOverlay');
+  if (old) old.remove();
+  var d = document.createElement('div');
+  d.id = 'dynPinOverlay';
+  d.style.cssText = 'display:flex;position:fixed;top:0;left:0;width:100%;height:100%;background:#F7F5F2;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
+  d.innerHTML = '<div style="font-size:2rem">🔐</div>'
+    + '<div style="font-size:1.1rem;font-weight:800">Zona Administrador</div>'
+    + '<div style="font-size:.82rem;color:#999;margin-bottom:12px">Introduce tu clave de acceso</div>'
+    + '<input id="dynPinInput" type="password" placeholder="••••••••" style="width:240px;padding:12px;border:1.5px solid #ddd;border-radius:10px;font-size:1rem;text-align:center;font-family:Inter,sans-serif;outline:none;">'
+    + '<div id="dynPinErr" style="color:#DC2626;font-size:.82rem;display:none">Clave incorrecta.</div>'
+    + '<button id="dynPinBtn" style="width:240px;padding:12px;background:#1A1816;color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>'
+    + '<button id="dynPinCancel" style="background:none;border:none;color:#999;font-size:.85rem;cursor:pointer;font-family:Inter,sans-serif;margin-top:4px;">Cancelar</button>';
+  document.body.appendChild(d);
+  document.getElementById('dynPinInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') submitAdminPin(); });
+  document.getElementById('dynPinBtn').addEventListener('click', function() { submitAdminPin(); });
+  document.getElementById('dynPinCancel').addEventListener('click', function() { closeAdminPin(); });
+  setTimeout(function(){ document.getElementById('dynPinInput').focus(); }, 100);
 }
 function closeAdminPin() {
-  document.getElementById('adminPinScreen').style.display = 'none';
+  var el = document.getElementById('dynPinOverlay');
+  if (el) el.remove();
 }
 function submitAdminPin() {
-  var pin = document.getElementById('adminPinInput').value.trim();
+  var pin = document.getElementById('dynPinInput').value.trim();
   var ok = ADMIN_USERS.find(function(u){ return u.pass === pin; });
   if (!ok) {
-    document.getElementById('adminPinError').style.display = 'block';
+    document.getElementById('dynPinErr').style.display = 'block';
     return;
   }
   closeAdminPin();
@@ -4643,7 +4657,9 @@ function submitAdminPin() {
 // ── Admin Panel ──
 function openAdminPanel() {
   document.getElementById('entryScreen').style.display = 'none';
-  document.getElementById('adminScreen').style.display = 'flex';
+  var as = document.getElementById('adminScreen');
+  if (as.parentNode !== document.body) document.body.appendChild(as);
+  as.style.cssText = 'display:flex;position:fixed;inset:0;background:#FAF9F7;z-index:1100;flex-direction:column;';
   showAdminTab('users');
   renderUserList();
 }
