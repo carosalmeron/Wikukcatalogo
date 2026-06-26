@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.29</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.30</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -551,6 +551,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <span class="i-icon">🏷️</span><span class="i-label">Promociones / Liquidaciones</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
+
+      <div class="col-divider" style="color:#6B3A1A;background:#FDF6F0">Tripas Naturales</div>
+      <div class="col-item" style="--item-color:#6B3A1A;--item-bg:#FDF6F0" id="ci-tripas_naturales" onclick="dSelectCat('tripas_naturales',this)">
+        <span class="i-icon">🥩</span><span class="i-label" id="dlbl-tripas_naturales">Tripas Naturales</span>
+        <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
     </div>
   </div>
 
@@ -659,6 +665,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </div>
       <div class="m-item" onclick="mGo('aditivos',this,'🧪','Aditivos','var(--bg)')">
         <div class="m-iicon" style="background:var(--bg)">🧪</div><span class="m-ilabel" id="mlbl-aditivos">Aditivos</span><svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+        <div class="m-divider" style="color:#6B3A1A;background:#FDF6F0">Tripas Naturales</div>
+    <div class="m-list" style="margin-top:0;border-radius:0">
+      <div class="m-item" onclick="mGo('tripas_naturales',this,'🥩','Tripas Naturales','#FDF6F0')">
+        <div class="m-iicon" style="background:#FDF6F0">🥩</div><span class="m-ilabel" id="mlbl-tripas_naturales">Tripas Naturales</span><svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
     </div>
         <div class="m-divider" id="mdiv-promociones-y-liquidaciones">Promociones y Liquidaciones</div>
@@ -966,6 +978,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-envases" checked> Envases</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-accesorios" checked> Accesorios</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-aditivos" checked> Aditivos</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-tripas_naturales" checked> Tripas Naturales</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-promo_tripas" checked> Promo Tripas</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-promo_especias" checked> Promo Especias</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucat-promo_envases" checked> Promo Envases</label>
@@ -1003,6 +1016,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-envases"> Envases</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-accesorios"> Accesorios</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-aditivos"> Aditivos</label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-tripas_naturales"> Tripas Naturales</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-promo_tripas"> Promo Tripas</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-promo_especias"> Promo Especias</label>
               <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="ucatc-promo_envases"> Promo Envases</label>
