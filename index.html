@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.36</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.37</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -3565,7 +3565,27 @@ async function loadAccesos() {
 async function saveAccesos() {
   try {
     if (ACCESOS_LOG.length > 100) ACCESOS_LOG = ACCESOS_LOG.slice(-100);
-    // Usar APP_USERS actual para no sobrescribir cambios del admin
+    // Load latest from JSONBin first to avoid overwriting other users' entries
+    try {
+      var lr = await _jbFetch('/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
+      if (lr.ok) {
+        var ld = JSON.parse(await lr.text());
+        var remoteAccesos = (ld.record && ld.record.accesos) ? ld.record.accesos : [];
+        var remoteUsers = (ld.record && ld.record.usuarios) ? ld.record.usuarios : APP_USERS;
+        // Merge: keep all remote entries + add our new ones (by id)
+        var remoteIds = new Set(remoteAccesos.map(function(a){ return a.id; }));
+        ACCESOS_LOG.forEach(function(a) {
+          if (!remoteIds.has(a.id)) remoteAccesos.push(a);
+          else {
+            // Update existing entry (duration, exit time)
+            var idx = remoteAccesos.findIndex(function(x){ return x.id === a.id; });
+            if (idx > -1 && (a.duracion || a.salida)) remoteAccesos[idx] = a;
+          }
+        });
+        ACCESOS_LOG = remoteAccesos.slice(-100);
+        APP_USERS = remoteUsers;
+      }
+    } catch(e) { /* continue with local data if load fails */ }
     var body = { usuarios: APP_USERS, accesos: ACCESOS_LOG };
     var r = await _jbFetch('', {
       method: 'PUT',
@@ -3573,7 +3593,6 @@ async function saveAccesos() {
       body: JSON.stringify(body)
     });
     if (r.ok) {
-      // Actualizar caché con datos completos
       try {
         localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
           ver: _WK_CACHE_VER,
