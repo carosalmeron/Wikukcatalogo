@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.31</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.32</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -3238,8 +3238,8 @@ const DATA = {
         {c:'SC46', n:'SEMIRRIZADA P.CN A', p:'0.53', o:'EUROPA', pr:'Semirrizada WB', q:'A', t:'PIEZA', ca:'65/70', me:'33 cm'},
       ],
       'CERDO — SEMIRRIZADA':[
-        {c:'SRF2.27C', n:'SEMIRRIZADA P.CF A', p:'0.67', o:'EUROPA', pr:'Semirrizada CF', q:'A', t:'PIEZA COSIDA', ca:'50/55', me:'27 cm'},
-        {c:'SRF3.27C', n:'SEMIRRIZADA P.CF A', p:'0.70', o:'EUROPA', pr:'Semirrizada CF', q:'A', t:'PIEZA COSIDA', ca:'55/60', me:'27 cm'},
+        {c:'SRF2.27C', n:'SEMIRRIZADA P.CF A', p:'0.67', o:'EUROPA', pr:'Semirrizada CF', q:'A', t:'PIEZA COSIDA', ca:'50/55', me:'0,27'},
+        {c:'SRF3.27C', n:'SEMIRRIZADA P.CF A', p:'0.70', o:'EUROPA', pr:'Semirrizada CF', q:'A', t:'PIEZA COSIDA', ca:'55/60', me:'0,27'},
         {c:'SC68', n:'SEMIRRIZADA P.CN A', p:'0.50', o:'EUROPA', pr:'Semirrizada WB', q:'A', t:'PIEZA', ca:'50/55', me:'33 cm'},
       ],
       'VACUNO — CIEGOS':[
@@ -3304,16 +3304,11 @@ const DATA = {
         {c:'GA36.7N', n:'MAD.CORDERO P.GA AB', p:'14.32', o:'MEDIO ORIENTE', pr:'GA', q:'AB', t:'TIRA ESTANDAR', ca:'22/24', me:'70 m'},
       ],
       'DESHIDRATADOS — ESPECTA':[
-        {c:'ESPX60.63RB', n:'ESPECTA PRO CR MEDIA', p:'2.67', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'PIEZA', ca:'60', me:'63 cm'},
-        {c:'ESPX60.63RR', n:'ESPECTA PRO CR MEDIA', p:'2.67', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'PIEZA', ca:'60', me:'63 cm'},
-        {c:'ESPX60.63RDT', n:'ESPECTA PRO CR MEDIA', p:'2.67', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'PIEZA', ca:'60', me:'63 cm'},
-        {c:'ESPX60.63RDJ', n:'ESPECTA PRO CR MEDIA', p:'2.67', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'PIEZA', ca:'60', me:'63 cm'},
         {c:'ESP45.10', n:'ESPECTA PRO CR MEDIA', p:'34.84', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'45', me:'10 m'},
         {c:'ESP50.10', n:'ESPECTA PRO CR MEDIA', p:'34.84', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'50', me:'10 m'},
         {c:'ESP55.10', n:'ESPECTA PRO CR MEDIA', p:'34.84', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'55', me:'10 m'},
         {c:'ESP60.10', n:'ESPECTA PRO CR MEDIA', p:'40.00', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'60', me:'10 m'},
         {c:'ESP65.10', n:'ESPECTA PRO CR MEDIA', p:'42.78', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'65', me:'10 m'},
-        {c:'ESP70.10', n:'ESPECTA PRO CR MEDIA', p:'43.89', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'70', me:'10 m'},
         {c:'ESC45.63', n:'ESPECTA CR CORTA', p:'1.71', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'45', me:'63 cm'},
         {c:'ESC50.40', n:'ESPECTA CR CORTA', p:'1.08', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'50', me:'40 cm'},
         {c:'ESC50.63', n:'ESPECTA CR CORTA', p:'1.70', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'50', me:'63 cm'},
@@ -3344,18 +3339,21 @@ const DATA = {
         {c:'MXP34.10F4', n:'MAEXTRA PRO (1x10metros) TF CURVA', p:'5.03', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'34', me:'10 m'},
         {c:'MXP36.10F4', n:'MAEXTRA PRO (1x10metros) TF CURVA', p:'4.72', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'36', me:'10 m'},
         {c:'MXP38.10R1', n:'MAEXTRA PRO (1x10metros) TR CURVA', p:'4.72', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'38', me:'10 m'},
-        {c:'MX243.20R2', n:'MAEXTRA + (1x20metros) 25*50', p:'13.28', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'43', me:'20 m'},
-        {c:'MX245.20R2', n:'MAEXTRA + (1x20metros) 25*50', p:'13.28', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'45', me:'20 m'},
-        {c:'MX248.8-8R2', n:'MAEXTRA + (1x16metros) 25*50', p:'13.68', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'48', me:'16 m'},
-        {c:'MX250.8-8R2', n:'MAEXTRA + (1x16metros) 25*50', p:'13.68', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'50', me:'16 m'},
-        {c:'MX250.20R3', n:'MAEXTRA + (1x20metros) 30*45', p:'17.09', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'50', me:'20 m'},
-        {c:'MX255.20R4', n:'MAEXTRA + (1x20metros) 38*50', p:'19.19', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'55', me:'20 m'},
-        {c:'MX255.20R3', n:'MAEXTRA + (1x20metros) 30*45', p:'19.19', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'55', me:'20 m'},
-        {c:'MX258.8-8R5', n:'MAEXTRA + (1x16metros) 38*45', p:'16.42', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'58', me:'16 m'},
-        {c:'TR2058', n:'MAEXTRA + (1x16metros) TR', p:'16.42', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'60', me:'16 m'},
-        {c:'MX260.8-8R5', n:'MAEXTRA + (1x16metros) 38*45', p:'16.42', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'60', me:'16 m'},
-        {c:'MX260.20R4', n:'MAEXTRA + (1x20metros) 38*50', p:'23.23', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'60', me:'20 m'},
-        {c:'MX264.20R4', n:'MAEXTRA + (1x20metros) 38*50', p:'29.50', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'64', me:'20 m'},
+        {c:'MX243.20R2', n:'MAEXTRA + (1x20metros) T2550', p:'13.28', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'43', me:'20 m'},
+        {c:'MX245.20R2', n:'MAEXTRA + (1x20metros) T2550', p:'13.28', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'45', me:'20 m'},
+        {c:'MX248.8-8R2', n:'MAEXTRA + (2X8metros) T2550', p:'13.68', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'48', me:'16 m'},
+        {c:'MX250.8-8R2', n:'MAEXTRA + (2x8 metros) T2550', p:'13.68', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'50', me:'16 m'},
+        {c:'MX250.20R3', n:'MAEXTRA + (1x20metros) T3045', p:'17.09', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'50', me:'20 m'},
+        {c:'MX255.20R4', n:'MAEXTRA + (1x20metros) T3850', p:'19.19', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'55', me:'20 m'},
+        {c:'MX255.20R3', n:'MAEXTRA + (1x20metros) T3045', p:'19.19', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'55', me:'20 m'},
+        {c:'MX258.8-8R5', n:'MAEXTRA + (1x16metros) T3845', p:'16.42', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'58', me:'16 m'},
+        {c:'TR2058', n:'MAEXTRA + (1x16metros) T3845', p:'16.42', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'60', me:'16 m'},
+        {c:'MX260.8-8R5', n:'MAEXTRA + (1x16metros) T3845', p:'16.42', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'60', me:'16 m'},
+        {c:'MX260.20R4', n:'MAEXTRA + (1x20metros) T3850', p:'23.23', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'60', me:'20 m'},
+        {c:'MX264.20R4', n:'MAEXTRA + (1x20metros) T3850', p:'29.50', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'64', me:'20 m'},
+        {c:'MX268.10R4', n:'MAEXTRA + (1x10metros) T3850', p:'17.17', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'68', me:'10 m'},
+        {c:'MX364.10R4', n:'MAEXTRA + (1x10metros) T3850 3L', p:'21.51', o:'EUROPA', pr:'Maextra+', q:'3L', t:'STICK', ca:'64', me:'10 m'},
+        {c:'MX368.10R4', n:'MAEXTRA + (1x10metros) T3850 3L', p:'25.33', o:'EUROPA', pr:'Maextra+', q:'3L', t:'STICK', ca:'68', me:'10 m'},
         {c:'PX247.35', n:'MAEXTRA PC', p:'0.37', o:'EUROPA', pr:'Maextra+', q:'A', t:'PIEZA', ca:'47*35', me:'35 cm'},
         {c:'PX255.30', n:'MAEXTRA PC', p:'0.38', o:'EUROPA', pr:'Maextra+', q:'A', t:'PIEZA', ca:'55*30', me:'30 cm'},
         {c:'PX255.35', n:'MAEXTRA PC', p:'0.44', o:'EUROPA', pr:'Maextra+', q:'A', t:'PIEZA', ca:'55*35', me:'35 cm'},
