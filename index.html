@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.30</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.31</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -494,6 +494,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <span class="i-icon">🍔</span><span class="i-label" id="dlbl-campana_gen">La Campana</span>
         <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
+      <div class="col-item" style="--item-color:#6B3A1A;--item-bg:#FDF6F0" id="ci-tripas_naturales" onclick="dSelectCat('tripas_naturales',this)">
+        <span class="i-icon">🥩</span><span class="i-label" id="dlbl-tripas_naturales">Tripas Naturales</span>
+        <svg class="chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
 
       <div class="col-divider" id="ddiv-spots">Spots</div>
       <div class="col-item" style="--item-color:var(--green);--item-bg:var(--green-bg)" id="ci-spot_wikuk" onclick="dSelectCat('spot_wikuk',this)">
@@ -600,7 +604,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </div>
       <div class="m-item" onclick="mGo('campana_gen',this,'🍔','La Campana','var(--blue-bg)')">
         <div class="m-iicon" style="background:var(--blue-bg)">🍔</div><span class="m-ilabel" id="mlbl-campana_gen">La Campana</span><svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </div>      <div class="m-item" onclick="mGo('tripas_naturales',this,'🥩','Tripas Naturales','#FDF6F0')">
+        <div class="m-iicon" style="background:#FDF6F0">🥩</div><span class="m-ilabel" id="mlbl-tripas_naturales">Tripas Naturales</span><svg class="m-ichev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
       </div>
+
     </div>
     <div class="m-divider" id="mdiv-spots">Spots</div>
     <div class="m-list" style="margin-top:0;border-radius:0">
