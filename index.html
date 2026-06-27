@@ -303,7 +303,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.85</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.86</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -6126,33 +6126,31 @@ initApp();
     return h;
   }
 
+  function _ppEscHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   window.openPricePanel=function(code,name,priceRaw){
     _ppOpenedAt=Date.now();
     var _ov=document.getElementById('ppOverlay'), _sh=document.getElementById('ppSheet');
     if(!_sh) return;
+    var base=_ppNum(priceRaw), inner='';
+    inner+='<div class="pp-handle"></div>';
+    inner+='<div class="pp-head"><button class="pp-close" onclick="closePricePanel()" aria-label="Cerrar">✕</button>'
+      +'<div class="pp-name">'+_ppEscHtml(name||'Producto')+'</div>'
+      +'<div class="pp-code">'+(code?('Código: '+_ppEscHtml(code)):'')+'</div></div>';
+    if(isNaN(base)||base<=0){
+      inner+='<div style="padding:22px 20px;color:#888;font-size:.88rem">Este producto no tiene un precio numérico para calcular descuentos.</div>';
+    } else {
+      var fab=base*0.90;
+      inner+='<div class="pp-block"><div class="pp-block-h" style="background:#C0392B">🔴 PVP Carnicero</div>'+_ppRows(base)+'</div>'
+        +'<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">🔵 PVP Fabricante <span style="font-size:.78rem;font-weight:700;opacity:.9">−10%</span></div>'+_ppRows(fab)+'</div>';
+    }
+    var url='https://crmwikuk.vercel.app/?accion=estrategia'
+      +'&codigo='+encodeURIComponent(code||'')
+      +'&nombre='+encodeURIComponent(name||'')
+      +'&precio='+encodeURIComponent(priceRaw||'');
+    inner+='<button class="pp-crm" onclick="window.open(\''+url.replace(/'/g,"\\'")+'\',\'_blank\')">📋 Solicitar Estrategia en CRM</button>';
+    _sh.innerHTML=inner;
     _ov.classList.add('open'); _sh.classList.add('open');
     document.body.style.overflow='hidden';
-    try{
-      var base=_ppNum(priceRaw);
-      document.getElementById('pp-name').textContent=name||'Producto';
-      document.getElementById('pp-code').textContent=code?('Código: '+code):'';
-      var body=document.getElementById('pp-body');
-      if(isNaN(base)||base<=0){
-        body.innerHTML='<div style="padding:22px 20px;color:var(--muted);font-size:.88rem">Este producto no tiene un precio numérico para calcular descuentos.</div>';
-      } else {
-        var fab=base*0.90;
-        body.innerHTML=''
-          +'<div class="pp-block"><div class="pp-block-h" style="background:#C0392B">🔴 PVP Carnicero</div>'+_ppRows(base)+'</div>'
-          +'<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">🔵 PVP Fabricante <span style="font-size:.78rem;font-weight:700;opacity:.9">−10%</span></div>'+_ppRows(fab)+'</div>';
-      }
-      var url='https://crmwikuk.vercel.app/?accion=estrategia'
-        +'&codigo='+encodeURIComponent(code||'')
-        +'&nombre='+encodeURIComponent(name||'')
-        +'&precio='+encodeURIComponent(priceRaw||'');
-      body.innerHTML+='<button class="pp-crm" onclick="window.open(\''+url.replace(/'/g,"\\'")+'\',\'_blank\')">📋 Solicitar Estrategia en CRM</button>';
-    }catch(err){
-      try{document.getElementById('pp-body').innerHTML='<div style="padding:22px 20px;color:#B42318">Error: '+err.message+'</div>';}catch(e){}
-    }
   };
   window.closePricePanel=function(){
     var _ov=document.getElementById('ppOverlay'), _sh=document.getElementById('ppSheet');
