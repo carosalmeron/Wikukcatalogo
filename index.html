@@ -255,6 +255,31 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .admin-pin-screen.visible{display:flex;}
 .pin-input{font-size:1.3rem;letter-spacing:.3em;text-align:center;padding:12px 20px;border:2px solid var(--border);border-radius:10px;width:100%;max-width:260px;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;}
 .pin-input:focus{border-color:var(--accent);}
+/* ─── Panel de precios v2.39 ─── */
+[data-pp]{cursor:pointer;transition:background .12s;}
+.m-card[data-pp]:active{background:#faf7f4;}
+tr[data-pp]:hover{background:#faf7f4;}
+.search-result[data-pp]:hover,.m-search-card[data-pp]:active{background:#faf7f4;}
+#ppOverlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:3000;opacity:0;pointer-events:none;transition:opacity .22s;}
+#ppOverlay.open{opacity:1;pointer-events:auto;}
+#ppSheet{position:fixed;left:0;right:0;bottom:0;z-index:3001;background:var(--white,#fff);border-radius:18px 18px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.25);transform:translateY(110%);transition:transform .28s cubic-bezier(.4,0,.2,1);max-height:90vh;overflow-y:auto;padding:0 0 24px;}
+#ppSheet.open{transform:translateY(0);}
+@media(min-width:701px){#ppSheet{left:auto;right:0;top:0;bottom:0;width:420px;max-width:92vw;border-radius:18px 0 0 18px;transform:translateX(110%);max-height:100vh;box-shadow:-8px 0 40px rgba(0,0,0,.25);}#ppSheet.open{transform:translateX(0);}}
+.pp-handle{width:40px;height:4px;background:#d8d2cb;border-radius:3px;margin:10px auto 4px;}
+.pp-head{padding:8px 20px 14px;border-bottom:1px solid var(--border,#eee);position:sticky;top:0;background:var(--white,#fff);z-index:2;}
+.pp-name{font-size:1.05rem;font-weight:700;line-height:1.3;color:var(--text,#222);}
+.pp-code{font-family:monospace;font-size:.72rem;color:var(--muted,#888);margin-top:3px;}
+.pp-close{position:absolute;top:12px;right:14px;background:var(--bg,#f3f0ec);border:none;width:32px;height:32px;border-radius:50%;font-size:1.1rem;cursor:pointer;color:var(--muted,#666);line-height:1;}
+.pp-block{margin:14px 20px;border:1.5px solid var(--border,#eee);border-radius:14px;overflow:hidden;}
+.pp-block-h{padding:11px 16px;font-size:.92rem;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:space-between;}
+.pp-row{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-size:.9rem;border-top:1px solid #f1ede8;}
+.pp-row:first-child{border-top:none;}
+.pp-row.base{font-weight:800;background:#fafafa;}
+.pp-row .lbl{color:var(--muted,#666);font-weight:600;}
+.pp-row.base .lbl{color:var(--text,#222);}
+.pp-row .val{font-weight:700;font-variant-numeric:tabular-nums;color:var(--text,#222);}
+.pp-crm{margin:18px 20px 4px;display:block;width:calc(100% - 40px);padding:15px;border:none;border-radius:12px;background:var(--accent,#C8612A);color:#fff;font-size:.95rem;font-weight:800;cursor:pointer;font-family:Inter,sans-serif;text-align:center;}
+.pp-crm:active{filter:brightness(.94);}
 </style>
 </head>
 <body>
@@ -341,8 +366,8 @@ async function doUserLoginUnified() {
       fetch(FB+"/catalogo/config",{cache:"no-store"})
     ]);
     var allUsers = [];
-    if(r1.ok){var d1=await r1.json();(d1.documents||[]).forEach(function(doc){var f=doc.fields||{};allUsers.push({username:(f.username&&f.username.stringValue)||"",vendedor:(f.catalogoVendedor&&f.catalogoVendedor.stringValue)||"",grupo:(f.grupoAgente&&f.grupoAgente.stringValue)||"",id:(f.id&&f.id.stringValue)||"",nombre:(f.nombre&&f.nombre.stringValue)||"",user:(f.user&&f.user.stringValue)||"",clave:(f.catalogoClave&&f.catalogoClave.stringValue)||"",password:(f.password&&f.password.stringValue)||""});});}
-    if(r2.ok){var d2=await r2.json();(d2.documents||[]).forEach(function(doc){var f=doc.fields||{};allUsers.push({username:(f.username&&f.username.stringValue)||"",vendedor:(f.catalogoVendedor&&f.catalogoVendedor.stringValue)||"",grupo:(f.grupoAgente&&f.grupoAgente.stringValue)||"",id:(f.id&&f.id.stringValue)||"",nombre:(f.nombre&&f.nombre.stringValue)||"",user:(f.user&&f.user.stringValue)||"",clave:(f.catalogoClave&&f.catalogoClave.stringValue)||"",password:(f.password&&f.password.stringValue)||(f.clave&&f.clave.stringValue)||""});});}
+    if(r1.ok){var d1=await r1.json();(d1.documents||[]).forEach(function(doc){var f=doc.fields||{};allUsers.push({username:(f.username&&f.username.stringValue)||"",vendedor:(f.catalogoVendedor&&f.catalogoVendedor.stringValue)||"",grupo:(f.grupoAgente&&f.grupoAgente.stringValue)||"",id:(f.id&&f.id.stringValue)||"",nombre:(f.nombre&&f.nombre.stringValue)||"",user:(f.user&&f.user.stringValue)||"",clave:(f.catalogoClave&&f.catalogoClave.stringValue)||"",password:(f.password&&f.password.stringValue)||"",cats:(f.catalogoCategorias&&f.catalogoCategorias.stringValue)||""});});}
+    if(r2.ok){var d2=await r2.json();(d2.documents||[]).forEach(function(doc){var f=doc.fields||{};allUsers.push({username:(f.username&&f.username.stringValue)||"",vendedor:(f.catalogoVendedor&&f.catalogoVendedor.stringValue)||"",grupo:(f.grupoAgente&&f.grupoAgente.stringValue)||"",id:(f.id&&f.id.stringValue)||"",nombre:(f.nombre&&f.nombre.stringValue)||"",user:(f.user&&f.user.stringValue)||"",clave:(f.catalogoClave&&f.catalogoClave.stringValue)||"",password:(f.password&&f.password.stringValue)||(f.clave&&f.clave.stringValue)||"",cats:(f.catalogoCategorias&&f.catalogoCategorias.stringValue)||""});});}
     if(r3.ok){var d3=await r3.json();var f3=d3.fields||{};var cu=f3.usuarios&&f3.usuarios.stringValue?JSON.parse(f3.usuarios.stringValue):[];cu.forEach(function(u){allUsers.push({username:u.usuario||"",vendedor:u.usuario||"",grupo:"",id:u.crmId||u.usuario||"",nombre:u.nombre||"",user:u.usuario||"",clave:u.clave||"",password:u.clave||""});});}
 
     var uid=userId.toUpperCase();
@@ -351,7 +376,11 @@ async function doUserLoginUnified() {
       var match=(u.username&&u.username.toUpperCase()===uid)||(u.vendedor&&u.vendedor.toUpperCase()===uid)||(u.grupo&&u.grupo.toUpperCase()===uid)||(u.id&&u.id.toUpperCase()===uid)||(u.nombre&&u.nombre.toUpperCase()===uid)||(u.user&&u.user.toUpperCase()===uid);
       if(match){
         var validPass=!passVal||(u.clave&&u.clave===passVal)||(u.password&&u.password===passVal)||(!u.clave&&!u.password);
-        if(validPass) found={usuario:u.vendedor||u.grupo||u.id||u.username,nombre:u.nombre,activo:true,categorias:"todas"};
+        if(validPass){
+          var _cats="todas";
+          if(u.cats&&u.cats!=="todas"){try{var _o=JSON.parse(u.cats);if(_o&&typeof _o==="object")_cats=_o;}catch(e){_cats="todas";}}
+          found={usuario:u.vendedor||u.grupo||u.id||u.username,nombre:u.nombre,activo:true,categorias:_cats};
+        }
       }
     });
 
@@ -364,11 +393,12 @@ async function doUserLoginUnified() {
     }
 
     window.ACTIVE_USER=found;
+    try{ ACTIVE_VENDOR_CATS=(found.categorias&&found.categorias!=="todas")?found.categorias:null; }catch(e){}
     if(errEl) errEl.style.display='none';
     document.getElementById('entryScreen').style.display='none';
     document.getElementById('loginScreen').style.display='none';
     try{registrarAcceso(found.usuario,found.nombre);}catch(e){}
-    try{applyUserCatFilter();}catch(e){}
+    try{applyVendorCatFilter();}catch(e){}
   } catch(e) {
     // Fallback to original login
     if(typeof _originalDoUserLogin==='function'){_originalDoUserLogin();return;}
@@ -973,7 +1003,7 @@ async function doUserLoginUnified() {
   </div>
   <div class="admin-tab-bar">
     <div class="admin-tab active" id="atab-users" onclick="showAdminTab('users')">👥 Usuarios</div>
-    <div class="admin-tab" id="atab-admins" onclick="showAdminTab('admins')">🔐 Administradores</div>
+    <div class="admin-tab" id="atab-admins" onclick="showAdminTab('admins')" style="display:none;">🔐 Administradores</div>
     <div class="admin-tab" id="atab-accesos" onclick="showAdminTab('accesos')">📊 Accesos</div>
     <div class="admin-tab" id="atab-tarifas" onclick="showAdminTab('tarifas')">💰 Tarifas</div>
   </div>
@@ -982,7 +1012,7 @@ async function doUserLoginUnified() {
   <div class="admin-panel active" id="apanel-users">
     <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:var(--white);">
       <div style="font-size:.9rem;font-weight:700">Usuarios con acceso</div>
-      <button onclick="showNewUserForm()" style="background:var(--accent);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">+ Nuevo</button>
+      <span style="font-size:.72rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;">🔒 Solo lectura · se gestionan en el CRM</span>
     </div>
     <div id="admin-user-list" style="padding:12px;overflow-y:auto;flex:1;">
       <div style="text-align:center;padding:30px;color:var(--muted);font-size:.85rem">Cargando usuarios...</div>
@@ -3523,6 +3553,10 @@ function isPromo(k){return k==='promo_tripas'||k==='promo_especias'||k==='promo_
 var TARIFF_LOG = [];
 var PREV_PRICES = {"53179":59.14,"53239":68.44,"53244":115.84,"53245":79.03,"53246":41.66,"53258":180.19,"53947":155.32,"53949":216.47,"100087":6.25,"102144":5.82,"102341":7.25,"300214":7.62,"300444":4.7,"300507":9.79,"300511":9.02,"300513":9.97,"301923":8.55,"500060":7.83,"806334":8.91,"901062":24.06,"500060S":7.29,"WE0012.14":3.76,"WE0059.25":14.57,"WE0051.25":6.38,"WE0018.5":12.2,"WE0018.25":11.66,"V00127":1.98,"V00128":2.02,"WP039.5":3.67,"WE0079.5":10.91,"VS06150200":27.45,"VS06150250":34.32,"VS06160250":36.61,"VS06150300":41.18,"VS06175250":40.05,"VS06180300":49.42,"VS06200200":36.61,"VS06200250":45.76,"VS06200300":54.91,"VS06200350":64.06,"VS06200400":73.21,"VS06220300":60.39,"VS06250300":68.64,"VS06250350":80.08,"VS06250400":91.52,"VS06300400":109.82,"VS06300500":137.27,"VS06350450":144.14,"VS06350500":160.15,"VS06400500":183.03,"VS85120200":23.06,"VS85120250":28.82,"VS85125400":48.03,"VS85140200":26.89,"VS85140300":40.35,"VS85140450":60.52,"VS85140600":80.7,"VS85150200":28.82,"VS85150250":36.03,"VS85150300":43.23,"VS85160250":38.42,"VS85175250":42.03,"VS85180250":43.23,"VS85180300":51.88,"VS85200200":38.42,"VS85200250":48.03,"VS85200300":57.64,"VS85200350":67.24,"VS85200400":76.85,"VS85220300":63.39,"VS85250300":72.05,"VS85250350":84.06,"VS85250400":96.06,"VS85250500":120.08,"VS85250600":144.09,"VS85300300":86.45,"VS85300350":100.86,"VS85300400":115.27,"VS85300450":129.68,"VS85300500":144.09,"VS85300600":172.91,"VS85350400":134.48,"VS85350450":151.3,"VS85350500":168.11,"VS85350550":184.92,"VS85350600":201.73,"VS85400500":192.12,"VS85400600":230.55,"VS85400700":268.97,"VS85450650":280.98,"VS09120200":25.45,"VS09120250":31.82,"VS09125400":53.03,"VS09140200":29.7,"VS09140300":44.55,"VS09140450":66.82,"VS09140600":89.09,"VS09150200":31.82,"VS09150250":39.77,"VS09150300":47.73,"VS09160250":42.42,"VS09175250":46.41,"VS09180250":47.73,"VS09180300":57.27,"VS09200200":42.42,"VS09200250":53.03,"VS09200300":63.64,"VS09200350":74.24,"VS09200400":84.85,"VS09220300":70,"VS09250300":79.55,"VS09250350":92.8,"VS09250400":106.06,"VS09250500":132.58,"VS09250600":159.09,"VS09300300":95.45,"VS09300350":111.36,"VS09300400":127.27,"VS09300450":143.18,"VS09300500":159.09,"VS09300600":190.91,"VS09350400":148.48,"VS09350450":167.05,"VS09350500":185.61,"VS09350550":204.17,"VS09350600":222.73,"VS09400500":212.12,"VS09400600":254.55,"VS09400700":296.97,"VS09450650":310.23,"VS12130400":79.97,"VS12140450":96.89,"VS12140500":107.65,"VS12140800":172.24,"VS12200300":92.27,"VS12220300":101.5,"VS12220700":236.83,"VS12250300":115.35,"VS12250350":134.56,"VS12300400":184.55,"VS12315500":242.21,"VS12350450":242.21,"VS12350500":269.14,"VS12400500":307.58,"VS12400600":369.09,"VS15125450":104.32,"VS15135350":87.62,"VS15140800":207.71,"VS15165400":122.39,"VS15175200":64.91,"VS15175250":81.14,"VS15200250":92.73,"VS15200300":111.27,"VS15250350":162.27,"VS15250650":301.36,"VS15300350":194.73,"VS15300400":222.55,"VS15300500":278.18,"VS15350400":259.64,"VS15350450":292.09,"VS15350500":324.55,"VS15350550":357,"VS15350600":389.45,"VS15365450":304.61,"VS15365550":372.3,"VS15365600":406.15,"VS15365650":439.98,"VS15400600":445.09,"VS17220300":148.39,"VS17370550":457.56,"VS17370650":540.76,"VS17380650":555.38,"NS09150150":31.58,"NS09200300":84.18,"NS09220300":92.61,"NS09250350":122.77,"NS09300400":168.36,"PS09175250":62.12,"PS09175300":67.73,"PS09200250":70,"PS09200300":74.7,"PS09215300":82.12,"PS09250350":130.3,"GS09150250":50.74,"GS09150300":60.89,"GS09150350":71.03,"GS09150450":91.33,"GS09170250":57.5,"GS09200200":54.12,"GS09200250":67.65,"GS09200300":81.18,"GS09200400":108.24,"GS09250350":118.39,"GS09300400":162.36,"GS09300500":202.95,"GR091506000":3.29,"GR092006000":4.09,"GR092506000":5.45,"GR092806000":5.76,"GR093006000":5.91,"CS09150200":50.27,"CS09185250":77.5,"CS09200300":100.55,"CS09250350":146.64,"CS09300400":201.09,"CS09350600":351.91,"165-0040":70,"165-0041":76.42,"165-0042":89.38,"378-0010":48.92,"378-0011":57.45,"378-0012":101.23,"399-0006":111.95,"399-0007":131,"38W-0003":75.97,"V-20*30 TRX":77.11,"475-0062":2.53,"475-0063":2.95,"493-0028":2.34,"493-0029":2.34,"985.0001":59.83,"979.0001":108.32,"00596":101.88,"60230X30003005":3.45,"602455519034502":5.47,"53246R":50.73,"53239R":65.33,"53244R":104.4,"E-2000":225.86,"TMPP375":59.93,"TMPP500":73.3,"TMPP750":104.57,"TMPP1000":124.41,"TMPP1500":202.37,"V-15*20-80":28.56,"V-15*25 80":35.71,"V-20*20 80":38.08,"V-20*25-80":47.6,"V-20*30 80":57.12,"V-20*25-90":52.56,"V-20*30-90":63.07,"V-25*30-90":78.83,"V-30*40-90":126.12,"V-35*45 90":165.54,"V-35*50-90":183.93,"V-40*60 90":252.26,"V-35*45-120":240.03,"V-35*45-150":289.46,"V-40*60-150":441.08,"V-125*40-90":52.56,"V-14*45 90":66.21,"V-20*40-90":84.09,"V-25*35-90":91.97,"00883-A":33.33,"BC-1":15.46,"BC-2":17.74,"TC-6":6.27,"903000S":1.92};
 
+// ─── Panel de precios v2.39: helpers para datos de tarjeta ───
+function _ppEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function ppData(p){return ' data-pp="1" data-code="'+_ppEsc(p.c)+'" data-name="'+_ppEsc(p.n)+'" data-price="'+_ppEsc(p.p)+'"';}
+
 function getPriceDiff(code, currentPriceStr) {
   if (!PREV_PRICES[code]) return '';
   var prev = PREV_PRICES[code];
@@ -3965,8 +3999,6 @@ async function renderUserList() {
       + '</div>'
       + '<div style="display:flex;gap:6px;flex-wrap:wrap;">'
       + '<span style="font-size:.75rem;padding:2px 8px;border-radius:4px;background:' + (u.activo!==false?'#D1FAE5':'#FEE2E2') + ';color:' + (u.activo!==false?'#065F46':'#991B1B') + '">' + (u.activo!==false?'Activo':'Inactivo') + '</span>'
-      + '<button onclick="editUser(' + i + ')" style="background:var(--accent);color:white;border:none;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer">Editar</button>'
-      + '<button onclick="deleteUser(' + i + ')" style="background:#DC2626;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer">✕</button>'
       + '<button onclick="toggleEnlaceCliente(' + i + ')" style="background:' + (clienteActivo?'#D1FAE5':'#F3F4F6') + ';color:' + (clienteActivo?'#065F46':'#374151') + ';border:1px solid ' + (clienteActivo?'#6EE7B7':'#D1D5DB') + ';border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer" title="' + (clienteActivo?'Desactivar':'Activar') + ' enlace cliente">🔗 ' + (clienteActivo?'Desactivar':'Activar') + '</button>'
       + (clienteActivo ? '<button onclick="copyEnlaceCliente(' + i + ')" style="background:#DBEAFE;color:#1E40AF;border:1px solid #93C5FD;border-radius:6px;padding:4px 10px;font-size:.75rem;cursor:pointer" title="Copiar enlace">📋 Copiar</button>' : '')
       + '</div></div>'
@@ -3976,6 +4008,10 @@ async function renderUserList() {
 }
 
 function showNewUserForm() {
+  alert('Los usuarios se crean y configuran en el CRM. Este catálogo solo los muestra.');
+  return;
+}
+function _disabledShowNewUserForm() {
   document.getElementById('admin-user-form').style.display = 'block';
   document.getElementById('user-form-title').textContent = 'Nuevo usuario';
   document.getElementById('user-form-idx').value = '-1';
@@ -3993,6 +4029,10 @@ function showNewUserForm() {
 }
 
 function editUser(idx) {
+  alert('La configuración de usuarios se realiza en el CRM.');
+  return;
+}
+function _disabledEditUser(idx) {
   var u = APP_USERS[idx];
   document.getElementById('admin-user-form').style.display = 'block';
   document.getElementById('user-form-title').textContent = 'Editar usuario';
@@ -4029,6 +4069,10 @@ function toggleUserCatSection() {
 }
 
 async function saveUserForm() {
+  alert('Los usuarios se gestionan en el CRM. No es posible guardar desde el catálogo.');
+  return;
+}
+async function _disabledSaveUserForm() {
   var idx    = parseInt(document.getElementById('user-form-idx').value);
   var nombre  = document.getElementById('user-form-nombre').value.trim();
   var usuario = document.getElementById('user-form-usuario').value.trim();
@@ -4089,6 +4133,10 @@ async function saveUserForm() {
 }
 
 async function deleteUser(idx) {
+  alert('Los usuarios se gestionan en el CRM. No es posible eliminarlos desde el catálogo.');
+  return;
+}
+async function _disabledDeleteUser(idx) {
   if (!confirm('¿Eliminar este usuario?')) return;
   APP_USERS.splice(idx, 1);
   await saveUsers();
@@ -4654,7 +4702,7 @@ function dRender() {
       if(p.t&&p.t!==_tt){_tt=p.t;hdrs+='<tr><td colspan="6" style="padding:3px 12px 3px 48px;font-size:.65rem;font-weight:600;color:#9C8E7F;font-style:italic">'+p.t+'</td></tr>';}
       var priceDiff=getPriceDiff(p.c,p.p);
       var price=p.p+' €'+priceDiff;
-      return hdrs+'<tr>'
+      return hdrs+'<tr'+ppData(p)+'>'
         +'<td class="t-code">'+p.c+'</td>'
         +'<td class="t-name">'+p.n+'</td>'
         +'<td><span class="t-fmt">'+(p.ca||'—')+'</span></td>'
@@ -4685,7 +4733,7 @@ function dRender() {
       } else {
         lastCell='<span style="color:#1A6B3A;font-weight:600">'+calcDelivery(dCatKey)+'</span>';
       }
-      return '<tr>'
+      return '<tr'+ppData(p)+'>'
         +'<td class="t-code">'+p.c+'</td>'
         +'<td class="t-name">'+p.n+'</td>'
         +'<td><span class="t-fmt">'+f1+'</span></td>'
@@ -4756,7 +4804,7 @@ function mGoSub(sub, el) {
       if(p.t&&p.t!==_mt){_mt=p.t;hdrs+='<div style="padding:2px 12px;font-size:.63rem;font-weight:600;color:#9C8E7F;font-style:italic">'+p.t+'</div>';}
       var priceDiff=getPriceDiff(p.c,p.p);var price=p.p+' €'+priceDiff;
       var _mDel2=calcDelivery(mCatKey);
-      return hdrs+'<div class="m-card"><div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div><div class="m-card-bot"><span class="m-card-code">'+p.c+'</span><span class="m-card-fmt">'+(p.ca||'—')+'</span><span class="m-card-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></div><div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel2+'</div></div>';
+      return hdrs+'<div class="m-card"'+ppData(p)+'><div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div><div class="m-card-bot"><span class="m-card-code">'+p.c+'</span><span class="m-card-fmt">'+(p.ca||'—')+'</span><span class="m-card-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></div><div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel2+'</div></div>';
     }).join('');
   } else {
     cardsHTML=items.map(function(p){
@@ -4780,7 +4828,7 @@ function mGoSub(sub, el) {
       } else {
         lastLine='<div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel+'</div>';
       }
-      return '<div class="m-card">'
+      return '<div class="m-card"'+ppData(p)+'>'
         +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div>'
         +'<div class="m-card-bot"><span class="m-card-code">'+p.c+'</span>'
         +'<span class="m-card-fmt">'+f1+'</span>'
@@ -4853,7 +4901,7 @@ function doSearch(q) {
     document.getElementById('m-s4-results').innerHTML=results.length===0
       ?'<div style="text-align:center;padding:40px;color:var(--muted);font-size:.85rem">Sin resultados</div>'
       :results.map(function(p){
-        return '<div class="m-search-card">'
+        return '<div class="m-search-card"'+ppData(p)+'>'
           +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+(CLIENT_MODE?'—':p.p+' €')+'</div></div>'
           +'<div class="m-card-bot">'
           +'<span class="m-card-code">'+p.c+'</span>'
@@ -4865,7 +4913,7 @@ function doSearch(q) {
     var rows=results.length===0
       ?'<div class="no-results">Sin resultados para "<strong>'+q+'</strong>"</div>'
       :results.map(function(p){
-        return '<div class="search-result">'
+        return '<div class="search-result"'+ppData(p)+'>'
           +'<span class="sr-code">'+p.c+'</span>'
           +'<span class="sr-name">'+p.n+'</span>'
           +'<span class="sr-tag">'+p.catLabel+'</span>'
@@ -5282,6 +5330,10 @@ function renderAdminList() {
 }
 
 async function addAdmin() {
+  alert('Los administradores se gestionan en el CRM.');
+  return;
+}
+async function _disabledAddAdmin() {
   var user = document.getElementById('new-admin-user').value.trim();
   var pass = document.getElementById('new-admin-pass').value.trim();
   if (!user || !pass) { alert('Completa usuario y clave.'); return; }
@@ -6035,5 +6087,74 @@ initApp();
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- ─── Panel de precios v2.39 ─── -->
+<div id="ppOverlay" onclick="closePricePanel()"></div>
+<div id="ppSheet" role="dialog" aria-modal="true">
+  <div class="pp-handle"></div>
+  <div class="pp-head">
+    <button class="pp-close" onclick="closePricePanel()" aria-label="Cerrar">✕</button>
+    <div class="pp-name" id="pp-name">—</div>
+    <div class="pp-code" id="pp-code"></div>
+  </div>
+  <div id="pp-body"></div>
+</div>
+<script>
+(function(){
+  function _ppNum(v){
+    if(v==null) return NaN;
+    var s=String(v).replace(/€/g,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.');
+    // soporta formatos "12,50" y "1.234,50"
+    var n=parseFloat(s);
+    return isNaN(n)?NaN:n;
+  }
+  function _ppFmt(n){return n.toFixed(2).replace('.',',')+' €';}
+  var PP_DESC=[1,2,3,4];
+
+  function _ppRows(base){
+    var h='<div class="pp-row base"><span class="lbl">Precio</span><span class="val">'+_ppFmt(base)+'</span></div>';
+    PP_DESC.forEach(function(d){
+      h+='<div class="pp-row"><span class="lbl">-'+d+'%</span><span class="val">'+_ppFmt(base*(1-d/100))+'</span></div>';
+    });
+    return h;
+  }
+
+  window.openPricePanel=function(code,name,priceRaw){
+    var base=_ppNum(priceRaw);
+    document.getElementById('pp-name').textContent=name||'Producto';
+    document.getElementById('pp-code').textContent=code?('Código: '+code):'';
+    var body=document.getElementById('pp-body');
+    if(isNaN(base)||base<=0){
+      body.innerHTML='<div style="padding:22px 20px;color:var(--muted);font-size:.88rem">Este producto no tiene un precio numérico para calcular descuentos.</div>';
+    } else {
+      var fab=base*0.90;
+      body.innerHTML=''
+        +'<div class="pp-block"><div class="pp-block-h" style="background:#C0392B">🔴 PVP Carnicero</div>'+_ppRows(base)+'</div>'
+        +'<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">🔵 PVP Fabricante <span style="font-size:.78rem;font-weight:700;opacity:.9">−10%</span></div>'+_ppRows(fab)+'</div>';
+    }
+    var url='https://crmwikuk.vercel.app/?accion=estrategia'
+      +'&codigo='+encodeURIComponent(code||'')
+      +'&nombre='+encodeURIComponent(name||'')
+      +'&precio='+encodeURIComponent(priceRaw||'');
+    body.innerHTML+='<button class="pp-crm" onclick="window.open(\''+url.replace(/'/g,"\\'")+'\',\'_blank\')">📋 Solicitar Estrategia en CRM</button>';
+    document.getElementById('ppOverlay').classList.add('open');
+    document.getElementById('ppSheet').classList.add('open');
+    document.body.style.overflow='hidden';
+  };
+  window.closePricePanel=function(){
+    document.getElementById('ppOverlay').classList.remove('open');
+    document.getElementById('ppSheet').classList.remove('open');
+    document.body.style.overflow='';
+  };
+  // Delegación: cualquier producto con data-pp abre el panel
+  document.addEventListener('click',function(e){
+    if(e.target.closest('#ppSheet')) return;
+    var el=e.target.closest('[data-pp]');
+    if(!el) return;
+    openPricePanel(el.getAttribute('data-code'),el.getAttribute('data-name'),el.getAttribute('data-price'));
+  });
+  // Cerrar con Escape
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closePricePanel();});
+})();
+</script>
 </body>
 </html>
