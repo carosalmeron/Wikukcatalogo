@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.70</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.72</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -3214,7 +3214,260 @@ const DATA = {
     }
   },
 
+
+  tripas_naturales: {
+    label:'Tripas Naturales',
+    subs: {
+      'CERDO — CULAR':[
+        {c:'QKI3.65B', n:'CULAR P.CK A ATADO BLANCO', p:'1.23', o:'EUROPA', pr:'CK', q:'A', t:'PIEZA CA', ca:'55/60', me:'65 cm'},
+        {c:'QKI3.65R', n:'CULAR P.CK A  ATADO ROJO', p:'1.23', o:'EUROPA', pr:'CK', q:'A', t:'PIEZA CA', ca:'55/60', me:'65 cm'},
+        {c:'QKI4.65B', n:'CULAR P.CK A ATADO BLANCO', p:'1.52', o:'EUROPA', pr:'CK', q:'A', t:'PIEZA CA', ca:'60/65', me:'65 cm'},
+        {c:'QKI4.65R', n:'CULAR P.CK A ATADO ROJO', p:'1.52', o:'EUROPA', pr:'CK', q:'A', t:'PIEZA CA', ca:'60/65', me:'65 cm'},
+        {c:'QKI4.65V', n:'CULAR P.CK A ATADO VERDE', p:'1.52', o:'EUROPA', pr:'CK', q:'A', t:'PIEZA CA', ca:'60/65', me:'65 cm'},
+        {c:'QKI4.65BV', n:'CULAR P.CK A ATADO BLANCO VERDE', p:'1.52', o:'EUROPA', pr:'CK', q:'A', t:'PIEZA CA', ca:'60/65', me:'65 cm'},
+      ],
+      'CERDO — DELGADO':[
+        {c:'C6.8F', n:'MAD.CERDO P.CF A  EXTRA FUERTE', p:'11.90', o:'EUROPA', pr:'CF', q:'A', t:'TIRA ESTANDAR', ca:'36/38', me:'80 m'},
+        {c:'C7.8F', n:'MAD.CERDO P.CF A  EXTRA FUERTE', p:'11.90', o:'EUROPA', pr:'CF', q:'A', t:'TIRA ESTANDAR', ca:'38/40', me:'80 m'},
+        {c:'C8.8F', n:'MAD.CERDO P.CF A  EXTRA FUERTE', p:'11.90', o:'EUROPA', pr:'CF', q:'A', t:'TIRA ESTANDAR', ca:'40/42', me:'80 m'},
+        {c:'CL6.8F', n:'MAD.CERDO P.CF A XL EXTRA FUERTE', p:'13.10', o:'EUROPA', pr:'CF', q:'A', t:'TIRA LARGA', ca:'36/38', me:'80 m'},
+        {c:'CL7.8F', n:'MAD.CERDO P.CF A XL EXTRA FUERTE', p:'13.10', o:'EUROPA', pr:'CF', q:'A', t:'TIRA LARGA', ca:'38/40', me:'80 m'},
+        {c:'C2.6K', n:'MAD.CERDO P.CK A', p:'24.19', o:'EUROPA', pr:'CK', q:'A', t:'TIRA ESTANDAR', ca:'28/30', me:'60 m'},
+        {c:'C3.6K', n:'MAD.CERDO P.CK A', p:'19.23', o:'EUROPA', pr:'CK', q:'A', t:'TIRA ESTANDAR', ca:'30/32', me:'60 m'},
+        {c:'C4.6K', n:'MAD.CERDO P.CK A', p:'14.12', o:'EUROPA', pr:'CK', q:'A', t:'TIRA ESTANDAR', ca:'32/34', me:'60 m'},
+        {c:'CX40.9K', n:'MAD.CERDO P.CK A XXL', p:'18.26', o:'EUROPA', pr:'CK', q:'A', t:'TIRA EXTRA LARGA', ca:'32/34', me:'90 m'},
+        {c:'CX40.9KF3', n:'MAD.CERDO P.CK A XXL TUBO FLEX', p:'19.84', o:'EUROPA', pr:'CK', q:'A', t:'TIRA EXTRA LARGA', ca:'32/34', me:'90 m'},
+        {c:'CX50.9K', n:'MAD.CERDO P.CK A XXL', p:'15.08', o:'EUROPA', pr:'CK', q:'A', t:'TIRA EXTRA LARGA', ca:'34/36', me:'90 m'},
+        {c:'CX50.9KF3', n:'MAD.CERDO P.CK A XXL TUBO FLEX', p:'16.74', o:'EUROPA', pr:'CK', q:'A', t:'TIRA EXTRA LARGA', ca:'34/36', me:'90 m'},
+        {c:'CX60.9K', n:'MAD.CERDO P.CK A XXL', p:'15.16', o:'EUROPA', pr:'CK', q:'A', t:'TIRA EXTRA LARGA', ca:'36/38', me:'90 m'},
+        {c:'CX60.9KF3', n:'MAD.CERDO P.CK A XXL TUBO FLEX', p:'16.74', o:'EUROPA', pr:'CK', q:'A', t:'TIRA EXTRA LARGA', ca:'36/38', me:'90 m'},
+        {c:'CL40.8K', n:'MAD.CERDO P.CK A XL', p:'15.71', o:'EUROPA', pr:'CK', q:'A', t:'TIRA LARGA', ca:'32/34', me:'80 m'},
+        {c:'CL40.8KF3', n:'MAD.CERDO P.CK A XL TUBO FLEX', p:'17.10', o:'EUROPA', pr:'CK', q:'A', t:'TIRA LARGA', ca:'32/34', me:'80 m'},
+        {c:'CL50.8K', n:'MAD.CERDO P.CK A XL', p:'13.57', o:'EUROPA', pr:'CK', q:'A', t:'TIRA LARGA', ca:'34/36', me:'80 m'},
+        {c:'CL50.8KF3', n:'MAD.CERDO P.CK A XL TUBO FLEX', p:'14.49', o:'EUROPA', pr:'CK', q:'A', t:'TIRA LARGA', ca:'34/36', me:'80 m'},
+        {c:'CL60.8K', n:'MAD.CERDO P.CK A XL', p:'13.57', o:'EUROPA', pr:'CK', q:'A', t:'TIRA LARGA', ca:'36/38', me:'80 m'},
+        {c:'CL60.8KF3', n:'MAD.CERDO P.CK A XL TUBO FLEX', p:'14.49', o:'EUROPA', pr:'CK', q:'A', t:'TIRA LARGA', ca:'36/38', me:'80 m'},
+        {c:'MCH4', n:'MAD.CERCO P.CN A MOÑO', p:'2.31', o:'EUROPA', pr:'CN', q:'A', t:'SHORTS', ca:'28/30', me:'15 m'},
+        {c:'MCH2', n:'MAD.CERCO P.CN A MOÑO', p:'1.67', o:'EUROPA', pr:'CN', q:'A', t:'SHORTS', ca:'36/+', me:'25 m'},
+        {c:'MCH5', n:'MAD.CERCO P.CN A MOÑO', p:'1.11', o:'EUROPA', pr:'CN', q:'A', t:'SHORTS', ca:'36/+', me:'15 m'},
+        {c:'C2.8R', n:'MAD.CERDO P.CR A', p:'26.07', o:'EUROPA', pr:'CR', q:'A', t:'TIRA ESTANDAR', ca:'28/30', me:'75 m'},
+        {c:'C3.8R', n:'MAD.CERDO P.CR A', p:'20.69', o:'EUROPA', pr:'CR', q:'A', t:'TIRA ESTANDAR', ca:'30/32', me:'75 m'},
+        {c:'C4.4R', n:'MAD.CERDO P.CR A', p:'8.17', o:'EUROPA', pr:'CR', q:'A', t:'TIRA ESTANDAR', ca:'32/34', me:'40 m'},
+        {c:'C4.8R', n:'MAD.CERDO P.CR A', p:'14.68', o:'EUROPA', pr:'CR', q:'A', t:'TIRA ESTANDAR', ca:'32/34', me:'75 m'},
+        {c:'C5.4R', n:'MAD.CERDO P.CR A', p:'6.94', o:'EUROPA', pr:'CR', q:'A', t:'TIRA ESTANDAR', ca:'34/36', me:'40 m'},
+        {c:'C5.8R', n:'MAD.CERDO P.CR A', p:'11.90', o:'EUROPA', pr:'CR', q:'A', t:'TIRA ESTANDAR', ca:'34/36', me:'75 m'},
+        {c:'CL5.8R', n:'MAD.CERDO P. CR A XL', p:'14.68', o:'EUROPA', pr:'CR', q:'A', t:'TIRA LARGA', ca:'34/36', me:'80 m'},
+        {c:'NYGB1.15', n:'MAD.CERDO  P.NYG  AB', p:'3.42', o:'EUROPA', pr:'NYG', q:'AB', t:'TIRA ESTANDAR', ca:'34/36', me:'15 m'},
+        {c:'NYGB2.15', n:'MAD.CERDO  P.NYG  AB', p:'5.56', o:'EUROPA', pr:'NYG', q:'AB', t:'TIRA ESTANDAR', ca:'36/38', me:'15 m'},
+        {c:'NYGB4.15', n:'MAD.CERDO  P.NYG  AB', p:'6.50', o:'EUROPA', pr:'NYG', q:'AB', t:'TIRA ESTANDAR', ca:'38/40', me:'15 m'},
+        {c:'NYGB5.15', n:'MAD.CERDO  P.NYG  AB', p:'6.50', o:'EUROPA', pr:'NYG', q:'AB', t:'TIRA ESTANDAR', ca:'40/43', me:'15 m'},
+        {c:'NYGB6.15', n:'MAD.CERDO  P.NYG  AB', p:'6.50', o:'EUROPA', pr:'NYG', q:'AB', t:'TIRA ESTANDAR', ca:'43/46', me:'15 m'},
+        {c:'NYGB7.15', n:'MAD.CERDO  P.NYG  AB', p:'6.50', o:'EUROPA', pr:'NYG', q:'AB', t:'TIRA ESTANDAR', ca:'48/+', me:'15 m'},
+      ],
+      'CERDO — OTROS':[
+        {c:'CIP1', n:'CIEGOS DE CERDO P.CN  A', p:'0.56', o:'EUROPA', pr:'CN', q:'A', t:'PIEZA', ca:'Peq. (0.90kg/1.05kg)'},
+        {c:'CIP2', n:'CIEGOS DE CERDO P.CN A', p:'0.61', o:'EUROPA', pr:'CN', q:'A', t:'PIEZA', ca:'Med. (1.1kg/1.4kg)'},
+        {c:'CIP3', n:'CIEGOS DE CERDO P.CN  A', p:'0.64', o:'EUROPA', pr:'CN', q:'A', t:'PIEZA', ca:'Grand.(1.8kg/2.2kg)'},
+        {c:'VG1', n:'VEJ.CERDO P.CN A', p:'0.62', o:'EUROPA', pr:'VEJIGAS', q:'A', t:'PIEZA', ca:'Pequeña'},
+        {c:'VG2', n:'VEJ.CERDO P.CN A', p:'0.62', o:'EUROPA', pr:'VEJIGAS', q:'A', t:'PIEZA', ca:'Mediana'},
+      ],
+      'CERDO — SEMICULAR':[
+        {c:'SC92', n:'SEMICULAR P.CN A', p:'0.89', o:'EUROPA', pr:'Semicular WB', q:'A', t:'PIEZA', ca:'65+', me:'35 cm'},
+        {c:'SPP2.35B', n:'SEMICULAR P.CN A', p:'0.58', o:'EUROPA', pr:'Semicular WB', q:'E ( ESPECIAL)', t:'PIEZA', ca:'50/55', me:'35 cm'},
+        {c:'SPP3.35J', n:'SEMICULAR P.CN A', p:'0.57', o:'EUROPA', pr:'Semicular WB', q:'E ( ESPECIAL)', t:'PIEZA', ca:'55/60', me:'35 cm'},
+        {c:'SPP2.30B', n:'SEMICULAR P.CN A', p:'0.48', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'50/55', me:'30 cm'},
+        {c:'SPP2.35B', n:'SEMICULAR P.CN A', p:'0.54', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'50/55', me:'35 cm'},
+        {c:'SPP2.40', n:'SEMICULAR P.CN A', p:'0.63', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'50/55', me:'40 cm'},
+        {c:'SC96', n:'SEMICULAR P.CN A', p:'0.64', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'50/55', me:'45 cm'},
+        {c:'SPP3.30B', n:'SEMICULAR P.CN A', p:'0.48', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'55/60', me:'30 cm'},
+        {c:'SPP3.35B', n:'SEMICULAR P.CN A', p:'0.57', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'55/60', me:'35 cm'},
+        {c:'SC88', n:'SEMICULAR P.CN A', p:'0.64', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'55/60', me:'40 cm'},
+        {c:'SPP3.45B', n:'SEMICULAR P.CN A', p:'0.67', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'55/60', me:'45 cm'},
+        {c:'SC108', n:'SEMICULAR P.CN A', p:'0.47', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'60/65', me:'33 cm'},
+        {c:'SC91', n:'SEMICULAR P.CN A', p:'0.64', o:'EUROPA', pr:'Semicular WB', q:'N ( NORMAL)', t:'PIEZA', ca:'60/65', me:'41 cm'},
+        {c:'SPP3.35J', n:'SEMICULAR P.CN A', p:'0.61', o:'EUROPA', pr:'Semicular WB', q:'`P ( ESPECIAL +)', t:'PIEZA', ca:'55/60', me:'35 cm'},
+        {c:'SPP3.40J', n:'SEMICULAR P.CN A', p:'0.70', o:'EUROPA', pr:'Semicular WB', q:'`P ( ESPECIAL +)', t:'PIEZA', ca:'55/60', me:'40 cm'},
+        {c:'SC26', n:'SEMICULAR P.CN A', p:'1.14', o:'EUROPA', pr:'Semicular WB', q:'`P ( ESPECIAL +)', t:'PIEZA', ca:'65+', me:'48 cm'},
+        {c:'SC7', n:'SEMIRRIZADA P.CN A', p:'0.51', o:'EUROPA', pr:'Semirrizada WB', q:'A', t:'PIEZA', ca:'55/60', me:'33 cm'},
+        {c:'SC8', n:'SEMIRRIZADA P.CN A', p:'0.57', o:'EUROPA', pr:'Semirrizada WB', q:'A', t:'PIEZA', ca:'60/65', me:'33 cm'},
+        {c:'SC46', n:'SEMIRRIZADA P.CN A', p:'0.53', o:'EUROPA', pr:'Semirrizada WB', q:'A', t:'PIEZA', ca:'65/70', me:'33 cm'},
+      ],
+      'CERDO — SEMIRRIZADA':[
+        {c:'SRF2.27C', n:'SEMIRRIZADA P.CF A', p:'0.67', o:'EUROPA', pr:'Semirrizada CF', q:'A', t:'PIEZA COSIDA', ca:'50/55', me:'27 m'},
+        {c:'SRF3.27C', n:'SEMIRRIZADA P.CF A', p:'0.70', o:'EUROPA', pr:'Semirrizada CF', q:'A', t:'PIEZA COSIDA', ca:'55/60', me:'27 m'},
+        {c:'SC68', n:'SEMIRRIZADA P.CN A', p:'0.50', o:'EUROPA', pr:'Semirrizada WB', q:'A', t:'PIEZA', ca:'50/55', me:'33 cm'},
+      ],
+      'VACUNO — CIEGOS':[
+        {c:'CI4.90', n:'CIEGOS DE VACUNO P.VG AB XXL', p:'1.14', o:'BRASIL', pr:'VG', q:'AB', t:'PIEZA EXTRA LARGA', ca:'130/+', me:'90Cm'},
+        {c:'CI2.80', n:'CIEGOS DE VACUNO P.VG AB', p:'0.97', o:'BRASIL', pr:'VG', q:'AB', t:'PIEZA LARGA', ca:'95/115', me:'80Cm'},
+        {c:'CI3.80', n:'CIEGOS DE VACUNO P.VG AB', p:'1.06', o:'BRASIL', pr:'VG', q:'AB', t:'PIEZA LARGA', ca:'115/130', me:'80Cm'},
+        {c:'CI4.80', n:'CIEGOS DE VACUNO P.VG AB', p:'1.06', o:'BRASIL', pr:'VG', q:'AB', t:'PIEZA LARGA', ca:'130/+', me:'80Cm'},
+      ],
+      'VACUNO — ORILLA':[
+        {c:'V23.5D', n:'MAD.VACUNOP.VD AB', p:'9.67', o:'BRASIL', pr:'VD', q:'AB', t:'TIRA LARGA', ca:'38/40', me:'50 m'},
+        {c:'V24.5D', n:'MAD.VACUNOP.VD AB', p:'11.11', o:'BRASIL', pr:'VD', q:'AB', t:'TIRA LARGA', ca:'40/43', me:'50 m'},
+        {c:'V31.3D', n:'MAD.VACUNO P.VD DOM', p:'4.53', o:'BRASIL', pr:'VD', q:'DOM', t:'TIRA ESTANDAR', ca:'34/36', me:'30 m'},
+        {c:'V32.3D', n:'MAD.VACUNO P.VD DOM', p:'5.21', o:'BRASIL', pr:'VD', q:'DOM', t:'TIRA ESTANDAR', ca:'36/38', me:'30 m'},
+        {c:'V33.3D', n:'MAD.VACUNO P.VD DOM', p:'5.99', o:'BRASIL', pr:'VD', q:'DOM', t:'TIRA ESTANDAR', ca:'38/40', me:'30 m'},
+        {c:'V34.3D', n:'MAD.VACUNO P.VD DOM', p:'7.20', o:'BRASIL', pr:'VD', q:'DOM', t:'TIRA ESTANDAR', ca:'40/43', me:'30 m'},
+        {c:'V35.3D', n:'MAD.VACUNO P.VD DOM', p:'7.38', o:'BRASIL', pr:'VD', q:'DOM', t:'TIRA ESTANDAR', ca:'43/46', me:'30 m'},
+        {c:'V13.5G', n:'MAD.VACUNOP.VG A', p:'12.56', o:'BRASIL', pr:'VG', q:'A', t:'TIRA LARGA', ca:'38/40', me:'50 m'},
+        {c:'V14.5G', n:'MAD.VACUNOP.VG A', p:'13.29', o:'BRASIL', pr:'VG', q:'A', t:'TIRA LARGA', ca:'40/43', me:'50 m'},
+        {c:'V21.9G', n:'MAD.VACUNOP.VG AB', p:'12.72', o:'BRASIL', pr:'VG', q:'AB', t:'TIRA LARGA', ca:'34/36', me:'90 m'},
+        {c:'V23.5G', n:'MAD.VACUNOP.VG AB', p:'9.67', o:'BRASIL', pr:'VG', q:'AB', t:'TIRA LARGA', ca:'38/40', me:'50 m'},
+        {c:'V24.5G', n:'MAD.VACUNOP.VG AB', p:'10.47', o:'BRASIL', pr:'VG', q:'AB', t:'TIRA LARGA', ca:'40/43', me:'50 m'},
+        {c:'V32.3G', n:'MAD.VACUNO P.VG DOM', p:'5.08', o:'BRASIL', pr:'VG', q:'DOM', t:'TIRA ESTANDAR', ca:'36/38', me:'30 m'},
+        {c:'V33.3G', n:'MAD.VACUNO P.VG DOM', p:'5.71', o:'BRASIL', pr:'VG', q:'DOM', t:'TIRA ESTANDAR', ca:'38/40', me:'30 m'},
+        {c:'V34.3G', n:'MAD.VACUNO P.VG DOM', p:'6.12', o:'BRASIL', pr:'VG', q:'DOM', t:'TIRA ESTANDAR', ca:'40/43', me:'30 m'},
+        {c:'V35.3G', n:'MAD.VACUNO P.VG DOM', p:'7.09', o:'BRASIL', pr:'VG', q:'DOM', t:'TIRA ESTANDAR', ca:'43/46', me:'30 m'},
+        {c:'V36.3G', n:'MAD.VACUNO P.VG DOM', p:'6.84', o:'BRASIL', pr:'VG', q:'DOM', t:'TIRA ESTANDAR', ca:'46/49', me:'30 m'},
+      ],
+      'VACUNO — ROSCAL':[
+        {c:'R0P', n:'MAD.ROSCAL P.VP AB', p:'6.34', o:'BRASIL', pr:'VP', q:'AB', t:'TIRA ESTANDAR', ca:'40/45', me:'9+9'},
+        {c:'R1P', n:'MAD.ROSCAL P.VP AB', p:'6.74', o:'BRASIL', pr:'VP', q:'AB', t:'TIRA ESTANDAR', ca:'45/50', me:'9+9'},
+        {c:'R2P', n:'MAD.ROSCAL P.VP AB', p:'7.93', o:'BRASIL', pr:'VP', q:'AB', t:'TIRA ESTANDAR', ca:'50/55', me:'9+9'},
+        {c:'R3P', n:'MAD.ROSCAL P.VP AB', p:'9.12', o:'BRASIL', pr:'VP', q:'AB', t:'TIRA ESTANDAR', ca:'55/60', me:'9+9'},
+        {c:'R4P', n:'MAD.ROSCAL P.VP AB', p:'16.67', o:'BRASIL', pr:'VP', q:'AB', t:'TIRA ESTANDAR', ca:'60/65', me:'9+9'},
+        {c:'R5P', n:'MAD.ROSCAL P.VP AB', p:'17.46', o:'BRASIL', pr:'VP', q:'AB', t:'TIRA ESTANDAR', ca:'65/+', me:'9+9'},
+      ],
+      'CORDERO':[
+        {c:'FC34.8M', n:'MAD.CORDERO P.FC AB', p:'12.09', o:'CHINA', pr:'FC', q:'AAB', t:'TIRA MEDIA', ca:'20/22', me:'80 m'},
+        {c:'FC36.8N', n:'MAD.CORDERO P.FC AB', p:'15.69', o:'CHINA', pr:'FC', q:'AB', t:'TIRA ESTANDAR', ca:'22/24', me:'80 m'},
+        {c:'FC32.9L', n:'MAD.CORDERO P.FC AB XL', p:'9.92', o:'CHINA', pr:'FC', q:'AB', t:'TIRA LARGA', ca:'19/21', me:'90 m'},
+        {c:'FC33.9L', n:'MAD.CORDERO P.FC AB XL', p:'13.10', o:'CHINA', pr:'FC', q:'AB', t:'TIRA LARGA', ca:'20/21', me:'90 m'},
+        {c:'FC34.9L', n:'MAD.CORDERO P.FC AB XL', p:'15.93', o:'CHINA', pr:'FC', q:'AB', t:'TIRA LARGA', ca:'20/22', me:'90 m'},
+        {c:'FC35.9L', n:'MAD.CORDERO P.FC AB XL', p:'19.20', o:'CHINA', pr:'FC', q:'AB', t:'TIRA LARGA', ca:'22/23', me:'90 m'},
+        {c:'FC36.9L', n:'MAD.CORDERO P.FC AB XL', p:'21.24', o:'CHINA', pr:'FC', q:'AB', t:'TIRA LARGA', ca:'22/24', me:'90 m'},
+        {c:'FU32.8N', n:'MAD.CORDERO P.FU AB', p:'9.83', o:'CHINA', pr:'FU', q:'AB', t:'TIRA ESTANDAR', ca:'19/21', me:'80 m'},
+        {c:'FU33.8N', n:'MAD.CORDERO P.FU AB', p:'11.50', o:'CHINA', pr:'FU', q:'AB', t:'TIRA ESTANDAR', ca:'20/21', me:'80 m'},
+        {c:'FU35.8N', n:'MAD.CORDERO P.FU AB', p:'14.53', o:'CHINA', pr:'FU', q:'AB', t:'TIRA ESTANDAR', ca:'22/23', me:'80 m'},
+        {c:'FU36.8N', n:'MAD.CORDERO P.FU AB', p:'16.74', o:'CHINA', pr:'FU', q:'AB', t:'TIRA ESTANDAR', ca:'22/24', me:'80 m'},
+        {c:'FU37.8N', n:'MAD.CORDERO P.FU AB', p:'17.86', o:'CHINA', pr:'FU', q:'AB', t:'TIRA ESTANDAR', ca:'24/26', me:'80 m'},
+        {c:'FU34.9L', n:'MAD.CORDERO P.FU AB XL', p:'16.20', o:'CHINA', pr:'FU', q:'AB', t:'TIRA LARGA', ca:'20/22', me:'90 m'},
+        {c:'FU35.9L', n:'MAD.CORDERO P.FU AB XL', p:'18.13', o:'CHINA', pr:'FU', q:'AB', t:'TIRA LARGA', ca:'22/23', me:'90 m'},
+        {c:'FU36.9L', n:'MAD.CORDERO P.FU AB XL', p:'21.99', o:'CHINA', pr:'FU', q:'AB', t:'TIRA LARGA', ca:'22/24', me:'90 m'},
+        {c:'IR14.7N', n:'MAD.CORDERO P.IR AA', p:'14.76', o:'IRAN', pr:'IR', q:'AA', t:'TIRA ESTANDAR', ca:'20/22', me:'70 m'},
+        {c:'IR16.7N', n:'MAD.CORDERO P.IR AA', p:'18.23', o:'IRAN', pr:'IR', q:'AA', t:'TIRA ESTANDAR', ca:'22/24', me:'70 m'},
+        {c:'IR18.7N', n:'MAD.CORDERO P.IR AA', p:'20.40', o:'IRAN', pr:'IR', q:'AA', t:'TIRA ESTANDAR', ca:'24/26', me:'70 m'},
+        {c:'IR14.9L', n:'MAD.CORDERO P.IR AA XL', p:'21.27', o:'IRAN', pr:'IR', q:'AA', t:'TIRA LARGA', ca:'20/22', me:'90 m'},
+        {c:'IR24.9L', n:'MAD.CORDERO P.IR AAB XL', p:'14.71', o:'IRAN', pr:'IR', q:'AAB', t:'TIRA LARGA', ca:'20/22', me:'90 m'},
+        {c:'IR32.8N', n:'MAD.CORDERO P.IR AB', p:'7.77', o:'IRAN', pr:'IR', q:'AB', t:'TIRA ESTANDAR', ca:'19/21', me:'80 m'},
+        {c:'IR34.8N', n:'MAD.CORDERO P.IR AB', p:'11.84', o:'IRAN', pr:'IR', q:'AB', t:'TIRA ESTANDAR', ca:'20/22', me:'80 m'},
+        {c:'IR36.8N', n:'MAD.CORDERO P.IR AB', p:'14.30', o:'IRAN', pr:'IR', q:'AB', t:'TIRA ESTANDAR', ca:'22/24', me:'80 m'},
+        {c:'IR38.8N', n:'MAD.CORDERO P.IR AB', p:'16.34', o:'IRAN', pr:'IR', q:'AB', t:'TIRA ESTANDAR', ca:'24/26', me:'80 m'},
+        {c:'GA34.7N', n:'MAD.CORDERO P.GA AB', p:'11.72', o:'MEDIO ORIENTE', pr:'GA', q:'AB', t:'TIRA ESTANDAR', ca:'20/22', me:'70 m'},
+        {c:'GA36.7N', n:'MAD.CORDERO P.GA AB', p:'14.32', o:'MEDIO ORIENTE', pr:'GA', q:'AB', t:'TIRA ESTANDAR', ca:'22/24', me:'70 m'},
+      ],
+      'DESHIDRATADOS — ESPECTA':[
+        {c:'ESPX60.63RB', n:'ESPECTA PRO CR MEDIA', p:'2.67', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'PIEZA', ca:'60', me:'63 cm'},
+        {c:'ESPX60.63RR', n:'ESPECTA PRO CR MEDIA', p:'2.67', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'PIEZA', ca:'60', me:'63 cm'},
+        {c:'ESPX60.63RDT', n:'ESPECTA PRO CR MEDIA', p:'2.67', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'PIEZA', ca:'60', me:'63 cm'},
+        {c:'ESPX60.63RDJ', n:'ESPECTA PRO CR MEDIA', p:'2.67', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'PIEZA', ca:'60', me:'63 cm'},
+        {c:'ESP45.10', n:'ESPECTA PRO CR MEDIA', p:'34.84', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'45', me:'10 m'},
+        {c:'ESP50.10', n:'ESPECTA PRO CR MEDIA', p:'34.84', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'50', me:'10 m'},
+        {c:'ESP55.10', n:'ESPECTA PRO CR MEDIA', p:'34.84', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'55', me:'10 m'},
+        {c:'ESP60.10', n:'ESPECTA PRO CR MEDIA', p:'40.00', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'60', me:'10 m'},
+        {c:'ESP65.10', n:'ESPECTA PRO CR MEDIA', p:'42.78', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'65', me:'10 m'},
+        {c:'ESP70.10', n:'ESPECTA PRO CR MEDIA', p:'43.89', o:'EUROPA', pr:'Especta Pro', q:'Curación Media', t:'TIRA ESTANDAR', ca:'70', me:'10 m'},
+        {c:'ESC45.63', n:'ESPECTA CR CORTA', p:'1.71', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'45', me:'63 cm'},
+        {c:'ESC50.40', n:'ESPECTA CR CORTA', p:'1.08', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'50', me:'40 cm'},
+        {c:'ESC50.63', n:'ESPECTA CR CORTA', p:'1.70', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'50', me:'63 cm'},
+        {c:'ESC60.63', n:'ESPECTA CR CORTA', p:'2.16', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'60', me:'63 cm'},
+        {c:'ESC65.63', n:'ESPECTA CR CORTA', p:'2.41', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'65', me:'63 cm'},
+        {c:'ESC70.63', n:'ESPECTA CR CORTA', p:'2.52', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'70', me:'63 cm'},
+        {c:'ESC75.63', n:'ESPECTA CR CORTA', p:'2.52', o:'EUROPA', pr:'Especta+', q:'Curación Corta', t:'PIEZA', ca:'75', me:'63 cm'},
+        {c:'ESL45.63', n:'ESPECTA CR LARGA', p:'2.70', o:'EUROPA', pr:'Especta+', q:'Curación Larga', t:'PIEZA', ca:'45', me:'63 cm'},
+        {c:'ESL50.63', n:'ESPECTA CR LARGA', p:'2.69', o:'EUROPA', pr:'Especta+', q:'Curación Larga', t:'PIEZA', ca:'50', me:'63 cm'},
+        {c:'ESL55.63', n:'ESPECTA CR LARGA', p:'2.79', o:'EUROPA', pr:'Especta+', q:'Curación Larga', t:'PIEZA', ca:'55', me:'63 cm'},
+        {c:'ESL60.63', n:'ESPECTA CR LARGA', p:'3.28', o:'EUROPA', pr:'Especta+', q:'Curación Larga', t:'PIEZA', ca:'60', me:'63 cm'},
+        {c:'ESL65.63', n:'ESPECTA CR LARGA', p:'3.07', o:'EUROPA', pr:'Especta+', q:'Curación Larga', t:'PIEZA', ca:'65', me:'63 cm'},
+        {c:'ESL70.63', n:'ESPECTA CR LARGA', p:'3.83', o:'EUROPA', pr:'Especta+', q:'Curación Larga', t:'PIEZA', ca:'70', me:'63 cm'},
+        {c:'ESL75.63', n:'ESPECTA CR LARGA', p:'3.83', o:'EUROPA', pr:'Especta+', q:'Curación Larga', t:'PIEZA', ca:'75', me:'63 cm'},
+        {c:'ESN45.63', n:'ESPECTA CR MEDIA', p:'1.87', o:'EUROPA', pr:'Especta+', q:'Curación Media', t:'PIEZA', ca:'45', me:'63 cm'},
+        {c:'ESN50.63', n:'ESPECTA CR MEDIA', p:'1.86', o:'EUROPA', pr:'Especta+', q:'Curación Media', t:'PIEZA', ca:'50', me:'63 cm'},
+        {c:'ESN55.63', n:'ESPECTA CR MEDIA', p:'2.04', o:'EUROPA', pr:'Especta+', q:'Curación Media', t:'PIEZA', ca:'55', me:'63 cm'},
+        {c:'ESN60.63', n:'ESPECTA CR MEDIA', p:'2.63', o:'EUROPA', pr:'Especta+', q:'Curación Media', t:'PIEZA', ca:'60', me:'63 cm'},
+        {c:'ESN65.63', n:'ESPECTA CR MEDIA', p:'3.06', o:'EUROPA', pr:'Especta+', q:'Curación Media', t:'PIEZA', ca:'65', me:'63 cm'},
+        {c:'ESN70.63', n:'ESPECTA CR MEDIA', p:'3.07', o:'EUROPA', pr:'Especta+', q:'Curación Media', t:'PIEZA', ca:'70', me:'63 cm'},
+        {c:'ESN75.63', n:'ESPECTA CR MEDIA', p:'3.41', o:'EUROPA', pr:'Especta+', q:'Curación Media', t:'PIEZA', ca:'75', me:'63 cm'},
+      ],
+      'DESHIDRATADOS — MAEXTRA':[
+        {c:'MXP26.10F1', n:'MAEXTRA PRO (1x10metros) TF CURVA', p:'5.76', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'26', me:'10 m'},
+        {c:'MXP28.10F2', n:'MAEXTRA PRO (1x10metros) TF CURVA', p:'5.76', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'28', me:'10 m'},
+        {c:'MXP30.10F3', n:'MAEXTRA PRO (1x10metros) TF CURVA', p:'5.46', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'30', me:'10 m'},
+        {c:'MXP32.10F4', n:'MAEXTRA PRO (1x10metros) TF CURVA', p:'5.16', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'32', me:'10 m'},
+        {c:'MXP34.10F4', n:'MAEXTRA PRO (1x10metros) TF CURVA', p:'5.03', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'34', me:'10 m'},
+        {c:'MXP36.10F4', n:'MAEXTRA PRO (1x10metros) TF CURVA', p:'4.72', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'36', me:'10 m'},
+        {c:'MXP38.10R1', n:'MAEXTRA PRO (1x10metros) TR CURVA', p:'4.72', o:'EUROPA', pr:'Maextra PRO', q:'1L', t:'STICK', ca:'38', me:'10 m'},
+        {c:'MX243.20R2', n:'MAEXTRA + (1x20metros) 25*50', p:'13.28', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'43', me:'20 m'},
+        {c:'MX245.20R2', n:'MAEXTRA + (1x20metros) 25*50', p:'13.28', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'45', me:'20 m'},
+        {c:'MX248.8-8R2', n:'MAEXTRA + (1x16metros) 25*50', p:'13.68', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'48', me:'16 m'},
+        {c:'MX250.8-8R2', n:'MAEXTRA + (1x16metros) 25*50', p:'13.68', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'50', me:'16 m'},
+        {c:'MX250.20R3', n:'MAEXTRA + (1x20metros) 30*45', p:'17.09', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'50', me:'20 m'},
+        {c:'MX255.20R4', n:'MAEXTRA + (1x20metros) 38*50', p:'19.19', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'55', me:'20 m'},
+        {c:'MX255.20R3', n:'MAEXTRA + (1x20metros) 30*45', p:'19.19', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'55', me:'20 m'},
+        {c:'MX258.8-8R5', n:'MAEXTRA + (1x16metros) 38*45', p:'16.42', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'58', me:'16 m'},
+        {c:'TR2058', n:'MAEXTRA + (1x16metros) TR', p:'16.42', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'60', me:'16 m'},
+        {c:'MX260.8-8R5', n:'MAEXTRA + (1x16metros) 38*45', p:'16.42', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'60', me:'16 m'},
+        {c:'MX260.20R4', n:'MAEXTRA + (1x20metros) 38*50', p:'23.23', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'60', me:'20 m'},
+        {c:'MX264.20R4', n:'MAEXTRA + (1x20metros) 38*50', p:'29.50', o:'EUROPA', pr:'Maextra+', q:'2L', t:'STICK', ca:'64', me:'20 m'},
+        {c:'PX247.35', n:'MAEXTRA PC', p:'0.37', o:'EUROPA', pr:'Maextra+', q:'A', t:'PIEZA', ca:'47*35', me:'35 cm'},
+        {c:'PX255.30', n:'MAEXTRA PC', p:'0.38', o:'EUROPA', pr:'Maextra+', q:'A', t:'PIEZA', ca:'55*30', me:'30 cm'},
+        {c:'PX255.35', n:'MAEXTRA PC', p:'0.44', o:'EUROPA', pr:'Maextra+', q:'A', t:'PIEZA', ca:'55*35', me:'35 cm'},
+        {c:'PX255.40', n:'MAEXTRA PC', p:'0.51', o:'EUROPA', pr:'Maextra+', q:'A', t:'PIEZA', ca:'55*40', me:'40 cm'},
+      ],
+    }
+  },
+
 };
+
+// Firebase product loader - overwrites DATA with fresh products
+var _fbProductsLoaded = false;
+(async function(){
+  try{
+    var base="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
+    var all=[], nextPage=null;
+    do{
+      var url=base+"/productos?pageSize=2000"+(nextPage?"&pageToken="+nextPage:"");
+      var r=await fetch(url,{cache:"no-store"});
+      if(!r.ok) break;
+      var data=await r.json();
+      if(data.documents){
+        data.documents.forEach(function(doc){
+          var f=doc.fields||{};
+          var p={c:(f.codigo&&f.codigo.stringValue)||"",n:(f.nombre&&f.nombre.stringValue)||"",p:(f.precio&&f.precio.stringValue)||"",f:(f.formato&&f.formato.stringValue)||""};
+          var catKey=(f.categoriaKey&&f.categoriaKey.stringValue)||"";
+          var sub=(f.subcategoria&&f.subcategoria.stringValue)||"General";
+          if(f.origen) p.o=(f.origen.stringValue)||"";
+          if(f.produccion) p.pr=(f.produccion.stringValue)||"";
+          if(f.calidad) p.q=(f.calidad.stringValue)||"";
+          if(f.tira) p.t=(f.tira.stringValue)||"";
+          if(f.calibre) p.ca=(f.calibre.stringValue)||"";
+          if(f.medida) p.me=(f.medida.stringValue)||"";
+          if(f.tipoPromo) p.cat=(f.tipoPromo.stringValue)||"";
+          if(p.c && catKey){
+            if(!DATA[catKey]) DATA[catKey]={label:(f.categoria&&f.categoria.stringValue)||catKey, subs:{}};
+            if(!DATA[catKey].subs[sub]) DATA[catKey].subs[sub]=[];
+            all.push({catKey:catKey,sub:sub,product:p});
+          }
+        });
+      }
+      nextPage=(data.nextPageToken)||null;
+    }while(nextPage);
+    if(all.length>100){
+      // Clear existing subs and repopulate from Firebase
+      Object.keys(DATA).forEach(function(k){if(DATA[k].subs) DATA[k].subs={};});
+      all.forEach(function(item){
+        if(!DATA[item.catKey].subs[item.sub]) DATA[item.catKey].subs[item.sub]=[];
+        DATA[item.catKey].subs[item.sub].push(item.product);
+      });
+      console.log("📦 Firebase: "+all.length+" productos cargados");
+    }
+    _fbProductsLoaded=true;
+  }catch(e){_fbProductsLoaded=true;console.error("Firebase products error:",e);}
+})();
+
+
 
 // ═══ DELIVERY & HELPER FUNCTIONS ═══
 var _DAYS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -4384,6 +4637,7 @@ function dRender() {
   const items=cat.subs[dSub]||[];
   const panel=document.getElementById('d-products');
   const _isPromo=isPromo(dCatKey);
+  const _isTripas=dCatKey==='tripas_naturales';
   let _badgeHTML;
   if(_isPromo){
     _badgeHTML='<span style="padding:5px 10px;border-radius:5px;background:#FFF0EB;color:#8B2500;font-size:.72rem;font-weight:600;border:1px solid #FECACA">🏷️ Promociones y Liquidaciones</span>';
@@ -4393,6 +4647,25 @@ function dRender() {
   let rows='';
   if(items.length===0){
     rows='<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">Sin productos</td></tr>';
+  } else if(_isTripas){
+    var _to='',_tp='',_tq='',_tt='';
+    rows=items.map(function(p){
+      var hdrs='';
+      if(p.o&&p.o!==_to){_to=p.o;_tp=_tq=_tt='';hdrs+='<tr><td colspan="6" style="padding:8px 12px;font-size:.78rem;font-weight:600;color:var(--accent);background:#faf8f6;border-top:2px solid var(--border)">'+p.o+'</td></tr>';}
+      if(p.pr&&p.pr!==_tp){_tp=p.pr;_tq=_tt='';hdrs+='<tr><td colspan="6" style="padding:5px 12px 5px 24px;font-size:.72rem;font-weight:600;color:var(--muted);border-top:1px solid #f0ede8">'+p.pr+'</td></tr>';}
+      if(p.q&&p.q!==_tq){_tq=p.q;_tt='';hdrs+='<tr><td colspan="6" style="padding:4px 12px 4px 36px;font-size:.68rem;font-weight:700;color:#5C6B4A;background:#f8f7f4">Calidad: '+p.q+'</td></tr>';}
+      if(p.t&&p.t!==_tt){_tt=p.t;hdrs+='<tr><td colspan="6" style="padding:3px 12px 3px 48px;font-size:.65rem;font-weight:600;color:#9C8E7F;font-style:italic">'+p.t+'</td></tr>';}
+      var priceDiff=getPriceDiff(p.c,p.p);
+      var price=p.p+' €'+priceDiff;
+      return hdrs+'<tr>'
+        +'<td class="t-code">'+p.c+'</td>'
+        +'<td class="t-name">'+p.n+'</td>'
+        +'<td><span class="t-fmt">'+(p.ca||'—')+'</span></td>'
+        +'<td><span class="t-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></td>'
+        +'<td class="t-price">'+price+'</td>'
+        +'<td style="white-space:nowrap;font-size:.68rem;padding-left:8px"><span style="color:#1A6B3A;font-weight:600">'+calcDelivery(dCatKey)+'</span></td>'
+        +'</tr>';
+    }).join('');
   } else {
     rows=items.map(function(p){
       const fmts=p.f?p.f.split(' / '):[p.f1||'—',p.f2||'—'];
@@ -4434,8 +4707,7 @@ function dRender() {
     +'<table class="prod-table">'
     +'<thead><tr>'
     +'<th style="width:88px">Código</th><th>Producto</th>'
-    +'<th style="width:100px">Fmt. mínimo</th>'
-    +'<th style="width:110px">Fmt. agrupado</th>'
+    +(_isTripas?'<th style="width:100px">Calibre</th><th style="width:110px">Medida</th>':'<th style="width:100px">Fmt. mínimo</th><th style="width:110px">Fmt. agrupado</th>')
     +'<th class="r" style="width:75px">PVP / Stock</th>'
     +'<th style="width:145px">Entrega</th>'
     +'</tr></thead>'
@@ -4473,9 +4745,22 @@ function mGoSub(sub, el) {
   document.getElementById('m-s3-title').textContent=tSub(sub);
   document.getElementById('m-s3-tabs').innerHTML='';
     const _mDel=isPromo(mCatKey)?'':calcDelivery(mCatKey);
+  const _mTripas=mCatKey==='tripas_naturales';
   let cardsHTML='';
   if(items.length===0){
     cardsHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:.85rem">Sin productos</div>';
+  } else if(_mTripas){
+    var _mo='',_mp='',_mq='',_mt='';
+    cardsHTML=items.map(function(p){
+      var hdrs='';
+      if(p.o&&p.o!==_mo){_mo=p.o;_mp=_mq=_mt='';hdrs+='<div style="padding:8px 12px;font-size:.78rem;font-weight:600;color:var(--accent);background:#faf8f6;border-radius:8px;margin:8px 0 4px">'+p.o+'</div>';}
+      if(p.pr&&p.pr!==_mp){_mp=p.pr;_mq=_mt='';hdrs+='<div style="padding:4px 12px;font-size:.7rem;font-weight:600;color:var(--muted)">'+p.pr+'</div>';}
+      if(p.q&&p.q!==_mq){_mq=p.q;_mt='';hdrs+='<div style="padding:3px 12px;font-size:.66rem;font-weight:700;color:#5C6B4A">Calidad: '+p.q+'</div>';}
+      if(p.t&&p.t!==_mt){_mt=p.t;hdrs+='<div style="padding:2px 12px;font-size:.63rem;font-weight:600;color:#9C8E7F;font-style:italic">'+p.t+'</div>';}
+      var priceDiff=getPriceDiff(p.c,p.p);var price=p.p+' €'+priceDiff;
+      var _mDel2=calcDelivery(mCatKey);
+      return hdrs+'<div class="m-card"><div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div><div class="m-card-bot"><span class="m-card-code">'+p.c+'</span><span class="m-card-fmt">'+(p.ca||'—')+'</span><span class="m-card-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></div><div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel2+'</div></div>';
+    }).join('');
   } else {
     cardsHTML=items.map(function(p){
       const fmts=p.f?p.f.split(' / '):[p.f1||'—',p.f2||'—'];
