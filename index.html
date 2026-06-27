@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.53</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.54</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -2123,50 +2123,48 @@ async function saveUsers() {
 async 
 function populateUserSelect(){}
 
-function doUserLogin() {
-  var userId = (document.getElementById('loginUserInput')||{}).value||(document.getElementById('loginUserSelect')||{}).value||'';
-  userId=userId.trim();
-  var pass = document.getElementById('vendorPassInput');
-  var passVal = pass ? pass.value.trim() : '';
-  var err = document.getElementById('loginError');
+async function doUserLogin() {
+  var userEl = document.getElementById('loginUserInput');
+  var passEl = document.getElementById('vendorPassInput');
+  var errEl = document.getElementById('loginError');
+  var userId = userEl ? userEl.value.trim() : '';
+  var passVal = passEl ? passEl.value.trim() : '';
 
-  if (!userId) { err.style.display='block'; err.textContent='Selecciona tu nombre.'; return; }
-  if (!window._CRM_EMBEDDED && !passVal) { err.style.display='block'; err.textContent='Introduce tu clave.'; return; }
+  if (!userId) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu usuario.';} return; }
+  if (!passVal) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu clave.';} return; }
 
-  (async function(){
+  var btn=document.getElementById('loginBtn');
+  if(btn){btn.textContent='Entrando...';btn.disabled=true;}
+
+  try {
     await loadUsers();
-    // Wait for products if not loaded yet
-    if(!_fbProductsLoaded){
-      var tries=0;
-      while(!_fbProductsLoaded && tries<20){await new Promise(function(r){setTimeout(r,250)});tries++;}
-    }
-    var found;
-    if (window._CRM_EMBEDDED) {
-      // From CRM: no password check
-      found = APP_USERS.find(function(u) {
-        return (u.usuario||u.crmId||'').toLowerCase() === userId.toLowerCase() && u.activo !== false;
-      });
-    } else {
-      // Direct access: require password
-      found = APP_USERS.find(function(u) {
-        return (u.usuario||u.crmId||'').toLowerCase() === userId.toLowerCase() && u.clave === passVal && u.activo !== false;
-      });
-    }
+    // Wait for products
+    var tries=0;
+    while(!_fbProductsLoaded && tries<20){await new Promise(function(r){setTimeout(r,300)});tries++;}
+
+    var found = APP_USERS.find(function(u) {
+      return (u.usuario||u.crmId||'').toUpperCase() === userId.toUpperCase() && u.clave === passVal;
+    });
 
     if (!found) {
-      err.style.display='block';
-      err.textContent=window._CRM_EMBEDDED?'Usuario no autorizado.':'Usuario o clave incorrectos. Clave por defecto: 1234';
+      if(errEl){errEl.style.display='block'; errEl.textContent='Usuario o clave incorrectos.';}
+      if(btn){btn.textContent='Entrar';btn.disabled=false;}
       return;
     }
 
     ACTIVE_USER = found;
-    err.style.display='none';
+    if(errEl) errEl.style.display='none';
     document.getElementById('entryScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'none';
     registrarAcceso(found.usuario, found.nombre);
     applyUserCatFilter();
     if(typeof initDesktop==='function')initDesktop();
     if(typeof initMobile==='function')initMobile();
-  })();
+  } catch(e) {
+    console.error('Login error:', e);
+    if(errEl){errEl.style.display='block'; errEl.textContent='Error de conexión. Inténtalo de nuevo.';}
+    if(btn){btn.textContent='Entrar';btn.disabled=false;}
+  }
 }
 
 function showLoginScreen() {
@@ -2717,7 +2715,7 @@ function onVendorSelectChange() {
   var conf = AGENT_CONF[code];
   var hasPass = conf && conf.pass;
   passField.style.display = hasPass ? 'block' : 'none';
-  if (hasPass) passField.placeholder = 'Selecciona tu nombre...';
+  if (hasPass) passField.placeholder = 'Introduce tu usuario...';
 }
 
 async function showVendorLogin() {
