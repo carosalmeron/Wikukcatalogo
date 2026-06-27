@@ -278,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.59</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.60</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -320,6 +320,60 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 </div>
 
 
+<script>
+// Login independiente - no depende del script principal
+async function doUserLogin() {
+  var userEl = document.getElementById('loginUserInput');
+  var passEl = document.getElementById('vendorPassInput');
+  var errEl = document.getElementById('loginError');
+  var userId = userEl ? userEl.value.trim() : '';
+  var passVal = passEl ? passEl.value.trim() : '';
+  var btn = document.getElementById('loginBtn');
+
+  if (!userId) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu usuario.';} return; }
+  if (!passVal) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu clave.';} return; }
+
+  if(btn){btn.textContent='Entrando...';btn.disabled=true;}
+
+  try {
+    // Load users from Firebase usuarios collection
+    var FB="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents/usuarios?pageSize=300";
+    var r = await fetch(FB,{cache:"no-store"});
+    if (!r.ok) throw new Error("Firebase error: "+r.status);
+    var data = await r.json();
+    var found = null;
+    (data.documents||[]).forEach(function(doc){
+      var f = doc.fields||{};
+      var vendedor = (f.catalogoVendedor&&f.catalogoVendedor.stringValue)||(f.grupoAgente&&f.grupoAgente.stringValue)||(f.id&&f.id.stringValue)||"";
+      var clave = (f.catalogoClave&&f.catalogoClave.stringValue)||"";
+      var nombre = (f.nombre&&f.nombre.stringValue)||vendedor;
+      if (vendedor.toUpperCase() === userId.toUpperCase() && clave === passVal) {
+        found = {usuario:vendedor, clave:clave, nombre:nombre, activo:true, categorias:"todas"};
+      }
+    });
+
+    if (!found) {
+      if(errEl){errEl.style.display='block'; errEl.textContent='Usuario o clave incorrectos.';}
+      if(btn){btn.textContent='Entrar';btn.disabled=false;}
+      return;
+    }
+
+    // Login success
+    window.ACTIVE_USER = found;
+    if(errEl) errEl.style.display='none';
+    document.getElementById('entryScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'none';
+    // Try to call main script functions if they loaded
+    try{if(typeof registrarAcceso==="function")registrarAcceso(found.usuario,found.nombre);}catch(e){}
+    try{if(typeof applyUserCatFilter==="function")applyUserCatFilter();}catch(e){}
+    try{if(typeof initDesktop==="function")initDesktop();}catch(e){}
+    try{if(typeof initMobile==="function")initMobile();}catch(e){}
+  } catch(e) {
+    if(errEl){errEl.style.display='block'; errEl.textContent='Error: '+e.message;}
+    if(btn){btn.textContent='Entrar';btn.disabled=false;}
+  }
+}
+</script>
 <div class="entry-overlay" id="loginScreen" style="display:none">
   <div class="eo-header">
     <button class="eo-back" onclick="backToEntry()">
@@ -335,7 +389,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;">
     <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." onkeydown="if(event.key==='Enter')doUserLogin().catch(function(e){console.error(e)})" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
     <div id="loginError" style="display:none;color:#B42318;font-size:.82rem;font-weight:600;margin-top:4px;">Usuario o clave incorrectos.</div>
-    <button id="loginBtn" onclick="try{doUserLogin().catch(function(e){alert('Error async: '+e)})}catch(e){alert('Error: '+e.message+' — El script no cargó correctamente')}"
+    <button id="loginBtn" onclick="doUserLogin()"
       style="width:100%;max-width:300px;padding:13px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
       Entrar
     </button>
