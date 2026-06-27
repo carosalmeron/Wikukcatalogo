@@ -256,7 +256,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .pin-input{font-size:1.3rem;letter-spacing:.3em;text-align:center;padding:12px 20px;border:2px solid var(--border);border-radius:10px;width:100%;max-width:260px;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;}
 .pin-input:focus{border-color:var(--accent);}
 /* ─── Panel de precios v2.39 ─── */
-[data-pp]{cursor:pointer;transition:background .12s;}
+[data-pp]{cursor:pointer;transition:background .12s;-webkit-tap-highlight-color:rgba(200,97,42,.12);}
+[data-pp] *{cursor:pointer;}
 .m-card[data-pp]:active{background:#faf7f4;}
 tr[data-pp]:hover{background:#faf7f4;}
 .search-result[data-pp]:hover,.m-search-card[data-pp]:active{background:#faf7f4;}
@@ -302,7 +303,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.76</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.77</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
