@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.42</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.43</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -1100,7 +1100,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       <div style="font-size:2rem;margin-bottom:10px;">✅</div>
       <div style="font-size:.95rem;font-weight:700;margin-bottom:6px;" id="tarifa-applied-msg">Cambios aplicados</div>
       <div style="font-size:.78rem;color:var(--muted);margin-bottom:16px;">Descarga el catálogo para subirlo a Vercel.</div>
-      <button onclick="tarifaDownload()" style="padding:14px 28px;background:var(--accent);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;font-size:.95rem;">📦 Descargar catálogo actualizado</button>
+      <button onclick="tarifaDownload()" style="padding:14px 28px;background:var(--accent);color:white;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;font-size:.95rem;">📦 Descargar copia local (opcional)</button>
       <div style="margin-top:12px;">
         <button onclick="tarifaReset()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.78rem;font-family:Inter,sans-serif;">↺ Hacer otra comparación</button>
       </div>
@@ -4283,7 +4283,58 @@ var _tActiveTab='all';
 function _tRenderResults(){var ct={all:_tChanges.length,up:0,down:0,nw:0,del:0,same:0};var cats=new Set();_tChanges.forEach(function(c){if(c.status==='up')ct.up++;else if(c.status==='down')ct.down++;else if(c.status==='new')ct.nw++;else if(c.status==='del')ct.del++;else ct.same++;if(c.catLabel)cats.add(c.catLabel);});var cards=[{k:'all',l:'Total',n:ct.all,bg:'var(--bg)',co:'var(--text)'},{k:'up',l:'Suben ↑',n:ct.up,bg:'#FEF0EE',co:'#B42318'},{k:'down',l:'Bajan ↓',n:ct.down,bg:'#EDF4F0',co:'#2E6B42'},{k:'new',l:'Nuevos',n:ct.nw,bg:'#EBF2F8',co:'#1E5A8A'},{k:'del',l:'Elim.',n:ct.del,bg:'#F2EEF8',co:'#5C3E8A'},{k:'same',l:'Igual',n:ct.same,bg:'var(--bg)',co:'var(--muted)'}];var ch='';cards.forEach(function(d){var active=_tActiveTab===d.k;ch+='<div onclick="_tSetTab(\''+d.k+'\')" style="background:'+d.bg+';border-radius:6px;padding:6px 2px;text-align:center;cursor:pointer;border:2px solid '+(active?d.co:'transparent')+'"><div style="font-size:1rem;font-weight:700;color:'+d.co+'">'+d.n+'</div><div style="font-size:.5rem;font-weight:600;color:'+d.co+';text-transform:uppercase;letter-spacing:.06em">'+d.l+'</div></div>';});document.getElementById('tarifa-cards').innerHTML=ch;var sel=document.getElementById('tarifa-cat-filter');var pv=sel.value;sel.innerHTML='<option value="">Todas</option>';Array.from(cats).sort().forEach(function(c){sel.innerHTML+='<option value="'+_tEsc(c)+'">'+_tEsc(c)+'</option>';});if(pv)sel.value=pv;tarifaFilter();}
 function _tSetTab(t){_tActiveTab=t;_tRenderResults();}
 function tarifaFilter(){var q=(document.getElementById('tarifa-search').value||'').toLowerCase().trim();var catF=document.getElementById('tarifa-cat-filter').value;var filtered=_tChanges.filter(function(c){if(_tActiveTab!=='all'&&c.status!=={up:'up',down:'down',new:'new',del:'del',same:'same'}[_tActiveTab])return false;if(catF&&(c.catLabel||'')!==catF)return false;if(q){var hay=(c.code||'').toLowerCase().indexOf(q)>-1||(c.name||'').toLowerCase().indexOf(q)>-1||(c.catLabel||'').toLowerCase().indexOf(q)>-1||(c.fmt||'').toLowerCase().indexOf(q)>-1;if(!hay)return false;}return true;});document.getElementById('tarifa-thead').innerHTML='<th style="padding:5px 8px;font-size:.56rem;color:var(--muted)">EST.</th><th style="padding:5px 8px;font-size:.56rem;color:var(--muted)">CÓDIGO</th><th style="padding:5px 8px;font-size:.56rem;color:var(--muted)">NOMBRE</th><th style="padding:5px 8px;font-size:.56rem;color:var(--muted)">CATEGORÍA</th><th style="padding:5px 8px;font-size:.56rem;color:var(--muted)">FMT. MÍN.</th><th style="padding:5px 8px;font-size:.56rem;color:var(--muted)">FMT. AGRUP.</th><th style="padding:5px 4px;font-size:.56rem;text-align:right;color:var(--muted)">ANT.</th><th style="padding:5px 4px;font-size:.56rem;text-align:right;color:var(--muted)">NUEVO</th><th style="padding:5px 8px;font-size:.56rem;text-align:right;color:var(--muted)">DIF.</th>';var tbody='';filtered.slice(0,200).forEach(function(c){var sc=c.status==='up'?'#B42318':c.status==='down'?'#2E6B42':c.status==='new'?'#1E5A8A':c.status==='del'?'#5C3E8A':'var(--muted)';var sl=c.status==='up'?'↑ Sube':c.status==='down'?'↓ Baja':c.status==='new'?'★ Nuevo':c.status==='del'?'✕ Elim.':'=';var oP=c.oldP?c.oldP.toFixed(2).replace('.',','):(c.oldStock||'—');var nP=c.newP?c.newP.toFixed(2).replace('.',','):(c.newStock||'—');var dS=c.diff?((c.diff>0?'+':'')+c.diff.toFixed(2).replace('.',',')):'';tbody+='<tr style="border-bottom:1px solid var(--border)"><td style="padding:4px 8px"><span style="font-size:.55rem;font-weight:700;padding:1px 5px;border-radius:6px;color:'+sc+';background:'+sc+'15">'+sl+'</span></td><td style="padding:4px 8px;font-family:monospace;font-size:.66rem;color:var(--muted)">'+_tEsc(c.code)+'</td><td style="padding:4px 8px;font-size:.73rem;font-weight:500;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_tEsc(c.name)+'</td><td style="padding:4px 8px;font-size:.62rem;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_tEsc(c.catLabel||'')+'</td><td style="padding:4px 8px;font-size:.62rem;color:var(--muted);white-space:nowrap">'+_tEsc(c.env||'')+'</td><td style="padding:4px 8px;font-size:.62rem;color:var(--muted);white-space:nowrap">'+_tEsc(c.fmt||'')+'</td><td style="padding:4px 4px;text-align:right;font-size:.73rem;'+(c.status==='up'||c.status==='down'?'text-decoration:line-through;color:var(--muted)':'')+'">'+oP+'</td><td style="padding:4px 4px;text-align:right;font-weight:700;color:'+sc+'">'+nP+'</td><td style="padding:4px 8px;text-align:right;font-size:.68rem;font-weight:600;color:'+sc+'">'+dS+'</td></tr>';});if(!tbody)tbody='<tr><td colspan="9" style="padding:30px;text-align:center;color:var(--muted)">Sin resultados</td></tr>';document.getElementById('tarifa-tbody').innerHTML=tbody;document.getElementById('tarifa-step1').style.display='none';document.getElementById('tarifa-step2').style.display='block';}
-function tarifaApply(){var applied=0;TARIFF_LOG=[];var _codeMatch=function(a,b){return a===b||a==='0'+b||b==='0'+a||a.replace(/^0+/,'')===b.replace(/^0+/,'');};_tChanges.forEach(function(ch){if(ch.status==='same')return;if(ch.src==='tarifa'){if(ch.status==='up'||ch.status==='down'){Object.keys(DATA).forEach(function(ck){var cd=DATA[ck];if(!cd||!cd.subs)return;Object.keys(cd.subs).forEach(function(sub){cd.subs[sub].forEach(function(item){if(_codeMatch(item.c,ch.code)){var _oldP=parseFloat(String(item.p).replace(',','.'))||0;PREV_PRICES[item.c]=_oldP;TARIFF_LOG.push({c:item.c,n:item.n||ch.name,cat:ch.catLabel||ch.cat,status:ch.status,oldP:_oldP,newP:ch.newP});item.p=ch.newP.toFixed(2).replace('.',',');if(ch.fmt)item.f=ch.fmt;applied++;}});});});}else if(ch.status==='new'){if(!DATA[ch.cat])DATA[ch.cat]={label:ch.catLabel||ch.cat,subs:{}};if(!DATA[ch.cat].subs[ch.sub])DATA[ch.cat].subs[ch.sub]=[];var newItem={c:ch.code,n:ch.name,p:ch.newP.toFixed(2).replace('.',',')};if(ch.cat==='tripas_naturales'&&_tNewTripas&&_tNewTripas[ch.code]){var nt=_tNewTripas[ch.code];if(nt.o)newItem.o=nt.o;if(nt.pr)newItem.pr=nt.pr;if(nt.q)newItem.q=nt.q;if(nt.t)newItem.t=nt.t;if(nt.ca)newItem.ca=nt.ca;if(nt.me)newItem.me=nt.me;}else{newItem.f=ch.fmt;}DATA[ch.cat].subs[ch.sub].push(newItem);TARIFF_LOG.push({c:ch.code,n:ch.name||ch.desc,cat:ch.catLabel||ch.cat,status:'new',oldP:0,newP:ch.newP});applied++;}else if(ch.status==='del'){TARIFF_LOG.push({c:ch.code,n:ch.name,cat:ch.catLabel||ch.cat,status:'del',oldP:ch.oldP,newP:0});Object.keys(DATA).forEach(function(ck){var cd=DATA[ck];if(!cd||!cd.subs)return;Object.keys(cd.subs).forEach(function(sub){cd.subs[sub]=cd.subs[sub].filter(function(item){return !_codeMatch(item.c,ch.code);});});});applied++;}}if(ch.src==='promo'){if(ch.status==='new'){if(!DATA[ch.cat])DATA[ch.cat]={label:ch.catLabel||ch.cat,subs:{}};if(!DATA[ch.cat].subs[ch.sub])DATA[ch.cat].subs[ch.sub]=[];DATA[ch.cat].subs[ch.sub].push({c:ch.code,n:ch.name,p:ch.newStock||'0',cat:ch.newCatType||'Promoción'});applied++;}else if(ch.status==='del'){Object.keys(DATA).forEach(function(ck){var cd=DATA[ck];if(!cd||!cd.subs)return;Object.keys(cd.subs).forEach(function(sub){cd.subs[sub]=cd.subs[sub].filter(function(item){return !_codeMatch(item.c,ch.code);});});});applied++;}else if(ch.status==='up'){Object.keys(DATA).forEach(function(ck){var cd=DATA[ck];if(!cd||!cd.subs)return;Object.keys(cd.subs).forEach(function(sub){cd.subs[sub].forEach(function(item){if(_codeMatch(item.c,ch.code)){item.p=ch.newStock||item.p;applied++;}});});});}}});document.getElementById('tarifa-step2').style.display='none';document.getElementById('tarifa-step3').style.display='block';document.getElementById('tarifa-applied-msg').textContent='✅ '+applied+' cambios aplicados';}
+
+async function syncPricesToFirebase(changes){
+  var fbBase="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
+  var ok=0,err=0,total=changes.length;
+  var msgEl=document.getElementById('tarifa-applied-msg');
+  
+  for(var i=0;i<changes.length;i+=10){
+    var batch=changes.slice(i,i+10);
+    var promises=batch.map(function(ch){
+      var docId=ch.code.replace(/[\/\.#$\[\]]/g,'_');
+      var fields={precio:{stringValue:ch.newP.toFixed(2).replace('.',',')}};
+      // For new products, include all fields
+      if(ch.status==='new'){
+        fields.codigo={stringValue:ch.code};
+        fields.nombre={stringValue:ch.name||''};
+        fields.categoria={stringValue:ch.catLabel||''};
+        fields.categoriaKey={stringValue:ch.cat||''};
+        fields.subcategoria={stringValue:ch.sub||''};
+        if(ch.fmt)fields.formato={stringValue:ch.fmt};
+        if(ch.env)fields.formato={stringValue:ch.env+(ch.fmt?' / '+ch.fmt:'')};
+      }
+      return fetch(fbBase+'/productos/'+encodeURIComponent(docId)+'?updateMask.fieldPaths=precio'+(ch.status==='new'?'&updateMask.fieldPaths=codigo&updateMask.fieldPaths=nombre&updateMask.fieldPaths=categoria&updateMask.fieldPaths=categoriaKey&updateMask.fieldPaths=subcategoria&updateMask.fieldPaths=formato':''),{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({fields:fields})
+      }).then(function(r){if(r.ok)ok++;else err++;}).catch(function(){err++;});
+    });
+    await Promise.all(promises);
+    if(msgEl)msgEl.textContent='🔥 Sincronizando Firebase... '+(i+batch.length)+'/'+total;
+  }
+  
+  // Handle deleted products
+  var delChanges=changes.filter(function(c){return c.status==='del';});
+  for(var d=0;d<delChanges.length;d++){
+    var docId=delChanges[d].code.replace(/[\/\.#$\[\]]/g,'_');
+    try{
+      await fetch(fbBase+'/productos/'+encodeURIComponent(docId),{method:'DELETE'});
+    }catch(e){}
+  }
+  
+  return {ok:ok,err:err};
+}
+
+function tarifaApply(){var applied=0;TARIFF_LOG=[];var _codeMatch=function(a,b){return a===b||a==='0'+b||b==='0'+a||a.replace(/^0+/,'')===b.replace(/^0+/,'');};_tChanges.forEach(function(ch){if(ch.status==='same')return;if(ch.src==='tarifa'){if(ch.status==='up'||ch.status==='down'){Object.keys(DATA).forEach(function(ck){var cd=DATA[ck];if(!cd||!cd.subs)return;Object.keys(cd.subs).forEach(function(sub){cd.subs[sub].forEach(function(item){if(_codeMatch(item.c,ch.code)){var _oldP=parseFloat(String(item.p).replace(',','.'))||0;PREV_PRICES[item.c]=_oldP;TARIFF_LOG.push({c:item.c,n:item.n||ch.name,cat:ch.catLabel||ch.cat,status:ch.status,oldP:_oldP,newP:ch.newP});item.p=ch.newP.toFixed(2).replace('.',',');if(ch.fmt)item.f=ch.fmt;applied++;}});});});}else if(ch.status==='new'){if(!DATA[ch.cat])DATA[ch.cat]={label:ch.catLabel||ch.cat,subs:{}};if(!DATA[ch.cat].subs[ch.sub])DATA[ch.cat].subs[ch.sub]=[];var newItem={c:ch.code,n:ch.name,p:ch.newP.toFixed(2).replace('.',',')};if(ch.cat==='tripas_naturales'&&_tNewTripas&&_tNewTripas[ch.code]){var nt=_tNewTripas[ch.code];if(nt.o)newItem.o=nt.o;if(nt.pr)newItem.pr=nt.pr;if(nt.q)newItem.q=nt.q;if(nt.t)newItem.t=nt.t;if(nt.ca)newItem.ca=nt.ca;if(nt.me)newItem.me=nt.me;}else{newItem.f=ch.fmt;}DATA[ch.cat].subs[ch.sub].push(newItem);TARIFF_LOG.push({c:ch.code,n:ch.name||ch.desc,cat:ch.catLabel||ch.cat,status:'new',oldP:0,newP:ch.newP});applied++;}else if(ch.status==='del'){TARIFF_LOG.push({c:ch.code,n:ch.name,cat:ch.catLabel||ch.cat,status:'del',oldP:ch.oldP,newP:0});Object.keys(DATA).forEach(function(ck){var cd=DATA[ck];if(!cd||!cd.subs)return;Object.keys(cd.subs).forEach(function(sub){cd.subs[sub]=cd.subs[sub].filter(function(item){return !_codeMatch(item.c,ch.code);});});});applied++;}}if(ch.src==='promo'){if(ch.status==='new'){if(!DATA[ch.cat])DATA[ch.cat]={label:ch.catLabel||ch.cat,subs:{}};if(!DATA[ch.cat].subs[ch.sub])DATA[ch.cat].subs[ch.sub]=[];DATA[ch.cat].subs[ch.sub].push({c:ch.code,n:ch.name,p:ch.newStock||'0',cat:ch.newCatType||'Promoción'});applied++;}else if(ch.status==='del'){Object.keys(DATA).forEach(function(ck){var cd=DATA[ck];if(!cd||!cd.subs)return;Object.keys(cd.subs).forEach(function(sub){cd.subs[sub]=cd.subs[sub].filter(function(item){return !_codeMatch(item.c,ch.code);});});});applied++;}else if(ch.status==='up'){Object.keys(DATA).forEach(function(ck){var cd=DATA[ck];if(!cd||!cd.subs)return;Object.keys(cd.subs).forEach(function(sub){cd.subs[sub].forEach(function(item){if(_codeMatch(item.c,ch.code)){item.p=ch.newStock||item.p;applied++;}});});});}}});document.getElementById('tarifa-step2').style.display='none';document.getElementById('tarifa-step3').style.display='block';document.getElementById('tarifa-applied-msg').textContent='✅ '+applied+' cambios aplicados. Sincronizando Firebase...';
+  // Sync to Firebase
+  var _fbChanges=_tChanges.filter(function(c){return c.status!=='same'&&c.src==='tarifa';});
+  if(_fbChanges.length>0){
+    syncPricesToFirebase(_fbChanges).then(function(r){
+      document.getElementById('tarifa-applied-msg').textContent='✅ '+applied+' cambios aplicados · 🔥 Firebase: '+r.ok+' sincronizados'+(r.err?' ('+r.err+' errores)':'');
+    });
+  }
+}
 function tarifaDownload(){
   var dyn=document.getElementById('dynPinOverlay');if(dyn)dyn.remove();
   var esc=function(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ').replace(/\r/g,'');};
