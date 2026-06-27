@@ -303,7 +303,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.77</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.78</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -6146,12 +6146,31 @@ initApp();
     document.getElementById('ppSheet').classList.remove('open');
     document.body.style.overflow='';
   };
-  // Delegación: cualquier producto con data-pp abre el panel
-  document.addEventListener('click',function(e){
-    if(e.target.closest('#ppSheet')) return;
-    var el=e.target.closest('[data-pp]');
+  // Delegación robusta: toque (iOS) + clic (escritorio)
+  var _ppTouch={x:0,y:0,moved:false}, _ppLastTouch=0;
+  function _ppOpenFrom(tgt){
+    if(!tgt||!tgt.closest) return;
+    if(tgt.closest('#ppSheet')||tgt.closest('#ppOverlay')) return;
+    var el=tgt.closest('[data-pp]');
     if(!el) return;
     openPricePanel(el.getAttribute('data-code'),el.getAttribute('data-name'),el.getAttribute('data-price'));
+  }
+  document.addEventListener('touchstart',function(e){
+    var t=e.touches&&e.touches[0]; if(!t) return;
+    _ppTouch.x=t.clientX; _ppTouch.y=t.clientY; _ppTouch.moved=false;
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    var t=e.touches&&e.touches[0]; if(!t) return;
+    if(Math.abs(t.clientX-_ppTouch.x)>10||Math.abs(t.clientY-_ppTouch.y)>10) _ppTouch.moved=true;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(_ppTouch.moved) return;           // fue scroll, no toque
+    _ppLastTouch=Date.now();
+    _ppOpenFrom(e.target);
+  },{passive:true});
+  document.addEventListener('click',function(e){
+    if(Date.now()-_ppLastTouch<800) return; // evita doble disparo tras un toque
+    _ppOpenFrom(e.target);
   });
   // Cerrar con Escape
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closePricePanel();});
