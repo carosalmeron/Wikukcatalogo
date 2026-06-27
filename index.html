@@ -281,6 +281,17 @@ tr[data-pp]:hover{background:#faf7f4;}
 .pp-row .val{font-weight:700;font-variant-numeric:tabular-nums;color:var(--text,#222);}
 .pp-crm{margin:18px 20px 4px;display:block;width:calc(100% - 40px);padding:15px;border:none;border-radius:12px;background:var(--accent,#C8612A);color:#fff;font-size:.95rem;font-weight:800;cursor:pointer;font-family:Inter,sans-serif;text-align:center;}
 .pp-crm:active{filter:brightness(.94);}
+.pp-extras{margin:14px 20px;}
+.pp-extras-h{font-size:.92rem;font-weight:800;margin-bottom:9px;color:var(--text,#222);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.pp-extras-h span{font-size:.68rem;font-weight:600;color:var(--muted,#888);}
+.pp-extras-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pp-extra{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border:1.5px solid var(--border,#e5e5e5);border-radius:10px;background:#fff;cursor:pointer;text-align:left;font-family:inherit;}
+.pp-extra .pe-l{font-size:.73rem;font-weight:600;color:var(--text,#333);line-height:1.2;}
+.pp-extra .pe-p{font-size:.82rem;font-weight:800;color:var(--muted,#888);}
+.pp-extra.on{border-color:var(--accent,#C8612A);background:#FBEFE7;}
+.pp-extra.on .pe-p{color:var(--accent,#C8612A);}
+.pp-extra-total{margin-top:11px;padding:11px 13px;background:var(--bg,#f5f2ee);border-radius:10px;font-size:.84rem;line-height:1.55;color:var(--text,#222);}
+.pp-extra-total b{color:var(--accent,#C8612A);}
 </style>
 </head>
 <body>
@@ -303,7 +314,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.86</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.88</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -4703,7 +4714,7 @@ function dRender() {
       if(p.t&&p.t!==_tt){_tt=p.t;hdrs+='<tr><td colspan="6" style="padding:3px 12px 3px 48px;font-size:.65rem;font-weight:600;color:#9C8E7F;font-style:italic">'+p.t+'</td></tr>';}
       var priceDiff=getPriceDiff(p.c,p.p);
       var price=p.p+' €'+priceDiff;
-      return hdrs+'<tr'+ppData(p)+'>'
+      return hdrs+'<tr'+ppData(p)+(dSub.indexOf('DESHIDRATADOS')!==0?' data-trip="1"':'')+'>'
         +'<td class="t-code">'+p.c+'</td>'
         +'<td class="t-name">'+p.n+'</td>'
         +'<td><span class="t-fmt">'+(p.ca||'—')+'</span></td>'
@@ -4805,7 +4816,7 @@ function mGoSub(sub, el) {
       if(p.t&&p.t!==_mt){_mt=p.t;hdrs+='<div style="padding:2px 12px;font-size:.63rem;font-weight:600;color:#9C8E7F;font-style:italic">'+p.t+'</div>';}
       var priceDiff=getPriceDiff(p.c,p.p);var price=p.p+' €'+priceDiff;
       var _mDel2=calcDelivery(mCatKey);
-      return hdrs+'<div class="m-card"'+ppData(p)+'><div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div><div class="m-card-bot"><span class="m-card-code">'+p.c+'</span><span class="m-card-fmt">'+(p.ca||'—')+'</span><span class="m-card-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></div><div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel2+'</div></div>';
+      return hdrs+'<div class="m-card"'+ppData(p)+(sub.indexOf('DESHIDRATADOS')!==0?' data-trip="1"':'')+'><div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div><div class="m-card-bot"><span class="m-card-code">'+p.c+'</span><span class="m-card-fmt">'+(p.ca||'—')+'</span><span class="m-card-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></div><div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel2+'</div></div>';
     }).join('');
   } else {
     cardsHTML=items.map(function(p){
@@ -6110,13 +6121,44 @@ initApp();
   }catch(e){}
   function _ppNum(v){
     if(v==null) return NaN;
-    var s=String(v).replace(/€/g,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.');
-    // soporta formatos "12,50" y "1.234,50"
+    var s=String(v).replace(/€/g,'').replace(/\s/g,'');
+    if(s.indexOf(',')>=0){ s=s.replace(/\./g,'').replace(',','.'); } // coma = decimal; puntos = miles
+    // sin coma: el punto (si lo hay) es el decimal → no se toca ("24.19" = 24,19)
     var n=parseFloat(s);
     return isNaN(n)?NaN:n;
   }
   function _ppFmt(n){return n.toFixed(2).replace('.',',')+' €';}
   var PP_DESC=[1,2,3,4];
+  // Extras por madeja (precio fijo, independiente del producto). Aplican a tripas excepto deshidratadas.
+  var PP_EXTRAS=[
+    {l:'Entubado Ríg./Flex.', p:1.75},
+    {l:'Entubado Especial', p:2.25},
+    {l:'Envases Especial', p:1.50},
+    {l:'Envases (Cubos)', p:0.50},
+    {l:'Botes', p:0.65},
+    {l:'Atado 100 piezas', p:5.00},
+    {l:'Envase Piezas (por envase)', p:10.00},
+    {l:'Envase Unid. (por unidad)', p:0.03}
+  ];
+  var _ppBase=0, _ppFab=0;
+  function _ppExtrasHtml(){
+    var tags=PP_EXTRAS.map(function(x,i){
+      return '<button type="button" class="pp-extra" data-i="'+i+'" data-p="'+x.p+'"><span class="pe-l">'+x.l+'</span><span class="pe-p">+'+_ppFmt(x.p)+'</span></button>';
+    }).join('');
+    return '<div class="pp-extras"><div class="pp-extras-h">📋 Extras por madeja <span>independientes del precio · toca para sumar</span></div>'
+      +'<div class="pp-extras-grid">'+tags+'</div>'
+      +'<div class="pp-extra-total" id="pp-extra-total"></div></div>';
+  }
+  function _ppRecalc(){
+    var sh=document.getElementById('ppSheet'); if(!sh) return;
+    var el=document.getElementById('pp-extra-total'); if(!el) return;
+    var sum=0, on=sh.querySelectorAll('.pp-extra.on');
+    for(var i=0;i<on.length;i++){ sum+=parseFloat(on[i].getAttribute('data-p'))||0; }
+    if(sum<=0){ el.innerHTML='<span style="color:#888">Toca un extra para sumarlo a la tarifa.</span>'; return; }
+    el.innerHTML='Extras seleccionados: <b>+'+_ppFmt(sum)+'</b><br>'
+      +'🔴 Carnicero + extras: <b>'+_ppFmt(_ppBase+sum)+'</b>'
+      +(_ppFab>0?('<br>🔵 Fabricante + extras: <b>'+_ppFmt(_ppFab+sum)+'</b>'):'');
+  }
 
   function _ppRows(base){
     var h='<div class="pp-row base"><span class="lbl">Precio</span><span class="val">'+_ppFmt(base)+'</span></div>';
@@ -6127,11 +6169,12 @@ initApp();
   }
 
   function _ppEscHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-  window.openPricePanel=function(code,name,priceRaw){
+  window.openPricePanel=function(code,name,priceRaw,isTrip){
     _ppOpenedAt=Date.now();
     var _ov=document.getElementById('ppOverlay'), _sh=document.getElementById('ppSheet');
     if(!_sh) return;
     var base=_ppNum(priceRaw), inner='';
+    _ppBase=isNaN(base)?0:base; _ppFab=isNaN(base)?0:base*0.90;
     inner+='<div class="pp-handle"></div>';
     inner+='<div class="pp-head"><button class="pp-close" onclick="closePricePanel()" aria-label="Cerrar">✕</button>'
       +'<div class="pp-name">'+_ppEscHtml(name||'Producto')+'</div>'
@@ -6143,12 +6186,14 @@ initApp();
       inner+='<div class="pp-block"><div class="pp-block-h" style="background:#C0392B">🔴 PVP Carnicero</div>'+_ppRows(base)+'</div>'
         +'<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">🔵 PVP Fabricante <span style="font-size:.78rem;font-weight:700;opacity:.9">−10%</span></div>'+_ppRows(fab)+'</div>';
     }
+    if(isTrip){ inner+=_ppExtrasHtml(); }
     var url='https://crmwikuk.vercel.app/?accion=estrategia'
       +'&codigo='+encodeURIComponent(code||'')
       +'&nombre='+encodeURIComponent(name||'')
       +'&precio='+encodeURIComponent(priceRaw||'');
     inner+='<button class="pp-crm" onclick="window.open(\''+url.replace(/'/g,"\\'")+'\',\'_blank\')">📋 Solicitar Estrategia en CRM</button>';
     _sh.innerHTML=inner;
+    if(isTrip) _ppRecalc();
     _ov.classList.add('open'); _sh.classList.add('open');
     document.body.style.overflow='hidden';
   };
@@ -6169,12 +6214,20 @@ initApp();
     _ppOv.addEventListener('click',_ppCloseFromOverlay);
     _ppOv.addEventListener('touchend',function(e){ if(!_ppTouch.moved) _ppCloseFromOverlay(); },{passive:true});
   }
+  // Toggle de etiquetas de extras dentro del panel
+  var _ppSheetEl=document.getElementById('ppSheet');
+  if(_ppSheetEl){
+    _ppSheetEl.addEventListener('click',function(e){
+      var b=e.target.closest('.pp-extra'); if(!b) return;
+      b.classList.toggle('on'); _ppRecalc();
+    });
+  }
   function _ppOpenFrom(tgt){
     if(!tgt||!tgt.closest) return;
     if(tgt.closest('#ppSheet')||tgt.closest('#ppOverlay')) return;
     var el=tgt.closest('[data-pp]');
     if(!el) return;
-    openPricePanel(el.getAttribute('data-code'),el.getAttribute('data-name'),el.getAttribute('data-price'));
+    openPricePanel(el.getAttribute('data-code'),el.getAttribute('data-name'),el.getAttribute('data-price'),el.getAttribute('data-trip')==='1');
   }
   document.addEventListener('touchstart',function(e){
     var t=e.touches&&e.touches[0]; if(!t) return;
