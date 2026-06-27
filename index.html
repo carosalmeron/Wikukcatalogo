@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.48</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.49</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -2142,11 +2142,11 @@ function doUserLogin() {
 
 function showLoginScreen() {
   document.getElementById('entryScreen').style.display = 'none';
-  document.getElementById('loginUser').value = '';
-  document.getElementById('loginPass').value = '';
-  document.getElementById('loginError').style.display = 'none';
+  var s=document.getElementById('loginUserSelect');if(s)s.value='';
+  var p=document.getElementById('vendorPassInput');if(p)p.value='';
+  var e=document.getElementById('loginError');if(e)e.style.display='none';
   document.getElementById('loginScreen').style.display = 'flex';
-  setTimeout(function(){ document.getElementById('loginUser').focus(); }, 100);
+  populateUserSelect();
 }
 
 
