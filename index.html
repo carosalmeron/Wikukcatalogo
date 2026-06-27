@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.47</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.48</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -329,11 +329,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   </div>
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:14px;">
     <div style="font-size:2.4rem">🔐</div>
-    <div style="font-size:1rem;font-weight:700;text-align:center" id="lbl-login-sub">Introduce tus credenciales</div>
+    <div style="font-size:1rem;font-weight:700;text-align:center" id="lbl-login-sub">Selecciona tu nombre e introduce tu clave</div>
     <select id="loginUserSelect" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;background:var(--white);appearance:none;-webkit-appearance:none;cursor:pointer;" onclick="populateUserSelect()" onfocus="populateUserSelect()">
       <option value="">— Selecciona tu nombre —</option>
     </select>
-    <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">Usuario o clave incorrectos.</div>
+    <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
+    <div id="loginError" style="display:none;color:#B42318;font-size:.82rem;font-weight:600;margin-top:4px;">Usuario o clave incorrectos.</div>
     <button id="loginBtn" onclick="doUserLogin()"
       style="width:100%;max-width:300px;padding:13px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
       Entrar
@@ -1150,7 +1151,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 var LANG='es';
 var T={
 es:{
-  entry_tagline:'CATÁLOGO DE PRODUCTOS',entry_general:'Tarifa General',entry_general_sub:'Acceso con usuario y clave',login_title:'Acceso Agentes',login_sub:'Introduce tus credenciales',login_user:'Usuario',login_pass:'Clave',login_btn:'Entrar',
+  entry_tagline:'CATÁLOGO DE PRODUCTOS',entry_general:'Tarifa General',entry_general_sub:'Acceso con usuario y clave',login_title:'Acceso Agentes',login_sub:'Selecciona tu nombre e introduce tu clave',login_user:'Usuario',login_pass:'Clave',login_btn:'Entrar',
   entry_cliente:'Tarifa Cliente',entry_cliente_sub:'Acceso con código de vendedor',
   entry_muestras:'Muestras',entry_muestras_sub:'Seguimiento y estadísticas',
   vendor_title:'Selecciona tu grupo',vendor_who:'¿Quién eres?',
@@ -1637,7 +1638,8 @@ var _fbProductsLoaded = false;
     _fbProductsLoaded=true;
     // Rebuild code-to-category lookup
     try{_tCODE_CAT={};Object.keys(DATA).forEach(function(k){if(DATA[k].subs){Object.keys(DATA[k].subs).forEach(function(sub){var items=DATA[k].subs[sub];if(Array.isArray(items))items.forEach(function(it){if(it.c){_tCODE_CAT[it.c]=k;var s=it.c.replace(/^0+/,"");if(s&&s!==it.c)_tCODE_CAT[s]=k;}});});}});}catch(e){}
-    console.log("📦 Catálogo Firebase: "+all.length+" → DATA poblado con "+Object.keys(DATA).length+" categorías");
+    var totalProds=0;Object.keys(DATA).forEach(function(k){if(DATA[k].subs)Object.keys(DATA[k].subs).forEach(function(s){totalProds+=DATA[k].subs[s].length;});});
+    console.log("📦 Catálogo Firebase: "+totalProds+" productos en "+Object.keys(DATA).length+" categorías");
     // Update loading indicator
     var li=document.getElementById("fb-loading");if(li)li.style.display="none";
   }catch(e){
@@ -2104,6 +2106,11 @@ function doUserLogin() {
 
   (async function(){
     await loadUsers();
+    // Wait for products if not loaded yet
+    if(!_fbProductsLoaded){
+      var tries=0;
+      while(!_fbProductsLoaded && tries<20){await new Promise(function(r){setTimeout(r,250)});tries++;}
+    }
     var found;
     if (window._CRM_EMBEDDED) {
       // From CRM: no password check
