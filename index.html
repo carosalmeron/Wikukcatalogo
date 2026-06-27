@@ -258,7 +258,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 </style>
 </head>
 <body>
-<script>window.onerror=function(msg,url,line){document.title='ERR:'+line+':'+msg;var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;right:0;background:red;color:white;padding:10px;z-index:999999;font-size:12px;word-break:break-all';d.textContent='JS Error línea '+line+': '+msg;document.body.appendChild(d);return false;};</script>
+
 
 
 <script>
@@ -278,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.64</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.66</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -1220,8 +1220,6 @@ async function doUserLogin() {
         <button onclick="addAdmin()" style="padding:11px;background:#1A1816;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Añadir administrad
 
 <script>
-try {
-
 
 // Auto-login from CRM: #auto=user:clave
 (function(){
@@ -2745,6 +2743,8 @@ function showTariffChanges(filterStatus){
   d.innerHTML=h+s+b;
   document.body.appendChild(d);
 }
+
+</script>
 
 
 function showProductPanel(code, name, priceStr, extra1, extra2, catKey) {
@@ -4533,10 +4533,5 @@ initApp();
 
 
 
-} catch(e) {
-  var d=document.createElement('div');
-  d.style.cssText='position:fixed;top:0;left:0;right:0;background:red;color:white;padding:10px;z-index:999999;font-size:11px;word-break:break-all;max-height:40vh;overflow:auto';
-  d.textContent='SCRIPT ERROR: '+e.message+' | Stack: '+(e.stack||'').substring(0,500);
-  document.body.appendChild(d);
-}
+
 
