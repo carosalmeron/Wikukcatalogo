@@ -303,7 +303,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.82</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.83</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -6122,13 +6122,13 @@ initApp();
   window.openPricePanel=function(code,name,priceRaw){
     _ppOpenedAt=Date.now();
     var _ov=document.getElementById('ppOverlay'), _sh=document.getElementById('ppSheet');
-    // 1) Mostrar el panel SIEMPRE primero (clases + estilos directos)
+    // DIAGNÓSTICO v2.83
+    if(!_sh){ alert('DIAG: el panel #ppSheet NO existe en el DOM → el HTML del panel no está desplegado.'); return; }
+    // Forzar visibilidad TOTAL (a pantalla completa, sin depender de CSS)
     _ov.classList.add('open'); _sh.classList.add('open');
-    _ov.style.opacity='1'; _ov.style.pointerEvents='auto'; _ov.style.zIndex='1000000';
-    _sh.style.zIndex='1000001';
-    _sh.style.transform=(window.innerWidth>700?'translateX(0)':'translateY(0)');
+    _ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2147483646;opacity:1;pointer-events:auto;';
+    _sh.style.cssText='position:fixed;left:0;right:0;bottom:0;top:0;z-index:2147483647;background:#fff;transform:none;overflow-y:auto;padding:0 0 24px;';
     document.body.style.overflow='hidden';
-    // 2) Rellenar contenido (protegido)
     try{
       var base=_ppNum(priceRaw);
       document.getElementById('pp-name').textContent=name||'Producto';
@@ -6148,14 +6148,15 @@ initApp();
         +'&precio='+encodeURIComponent(priceRaw||'');
       body.innerHTML+='<button class="pp-crm" onclick="window.open(\''+url.replace(/'/g,"\\'")+'\',\'_blank\')">📋 Solicitar Estrategia en CRM</button>';
     }catch(err){
-      try{document.getElementById('pp-body').innerHTML='<div style="padding:22px 20px;color:#B42318">Error mostrando precios: '+err.message+'</div>';}catch(e){}
+      try{document.getElementById('pp-body').innerHTML='<div style="padding:22px 20px;color:#B42318">Error: '+err.message+'</div>';}catch(e){}
     }
+    var r=_sh.getBoundingClientRect();
+    alert('DIAG: panel mostrado. visible='+(r.width>0&&r.height>0)+' top='+Math.round(r.top)+' alto='+Math.round(r.height));
   };
   window.closePricePanel=function(){
     var _ov=document.getElementById('ppOverlay'), _sh=document.getElementById('ppSheet');
-    _ov.classList.remove('open'); _sh.classList.remove('open');
-    _ov.style.opacity=''; _ov.style.pointerEvents='';
-    _sh.style.transform=(window.innerWidth>700?'translateX(110%)':'translateY(110%)');
+    if(_ov){_ov.classList.remove('open'); _ov.style.cssText='';}
+    if(_sh){_sh.classList.remove('open'); _sh.style.cssText='';}
     document.body.style.overflow='';
   };
   // Delegación robusta: toque (iOS) + clic (escritorio)
