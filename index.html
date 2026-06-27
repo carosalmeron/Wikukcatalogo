@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.49</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.50</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -329,10 +329,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   </div>
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:14px;">
     <div style="font-size:2.4rem">🔐</div>
-    <div style="font-size:1rem;font-weight:700;text-align:center" id="lbl-login-sub">Selecciona tu nombre e introduce tu clave</div>
-    <select id="loginUserSelect" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;background:var(--white);appearance:none;-webkit-appearance:none;cursor:pointer;" onclick="populateUserSelect()" onfocus="populateUserSelect()">
-      <option value="">— Selecciona tu nombre —</option>
-    </select>
+    <div style="font-size:1rem;font-weight:700;text-align:center" id="lbl-login-sub">Introduce tu usuario y clave</div>
+    <input id="loginUserInput" type="text" placeholder="Usuario..." autocomplete="username"
+      style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;">
     <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
     <div id="loginError" style="display:none;color:#B42318;font-size:.82rem;font-weight:600;margin-top:4px;">Usuario o clave incorrectos.</div>
     <button id="loginBtn" onclick="doUserLogin()"
@@ -352,7 +351,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:14px;">
     <div style="font-size:2.4rem">👥</div>
     <div style="font-size:1rem;font-weight:700;text-align:center" id="lbl-vendor-who">Selecciona tu nombre</div>
-    <div style="font-size:.82rem;color:var(--muted);text-align:center" id="lbl-vendor-sub">Selecciona tu nombre e introduce tu clave</div>
+    <div style="font-size:.82rem;color:var(--muted);text-align:center" id="lbl-vendor-sub">Introduce tu usuario y clave</div>
     <div style="width:100%;max-width:320px;position:relative;">
       <select id="vendorSelect"
         style="width:100%;padding:13px 40px 13px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;color:var(--text);background:var(--white);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;box-sizing:border-box;">
@@ -1151,7 +1150,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 var LANG='es';
 var T={
 es:{
-  entry_tagline:'CATÁLOGO DE PRODUCTOS',entry_general:'Tarifa General',entry_general_sub:'Acceso con usuario y clave',login_title:'Acceso Agentes',login_sub:'Selecciona tu nombre e introduce tu clave',login_user:'Usuario',login_pass:'Clave',login_btn:'Entrar',
+  entry_tagline:'CATÁLOGO DE PRODUCTOS',entry_general:'Tarifa General',entry_general_sub:'Acceso con usuario y clave',login_title:'Acceso Agentes',login_sub:'Introduce tu usuario y clave',login_user:'Usuario',login_pass:'Clave',login_btn:'Entrar',
   entry_cliente:'Tarifa Cliente',entry_cliente_sub:'Acceso con código de vendedor',
   entry_muestras:'Muestras',entry_muestras_sub:'Seguimiento y estadísticas',
   vendor_title:'Selecciona tu grupo',vendor_who:'¿Quién eres?',
@@ -2095,8 +2094,8 @@ async function populateUserSelect(){
 }
 
 function doUserLogin() {
-  var sel = document.getElementById('loginUserSelect');
-  var userId = sel ? sel.value : '';
+  var userId = (document.getElementById('loginUserInput')||{}).value||(document.getElementById('loginUserSelect')||{}).value||'';
+  userId=userId.trim();
   var pass = document.getElementById('vendorPassInput');
   var passVal = pass ? pass.value.trim() : '';
   var err = document.getElementById('loginError');
@@ -2142,7 +2141,7 @@ function doUserLogin() {
 
 function showLoginScreen() {
   document.getElementById('entryScreen').style.display = 'none';
-  var s=document.getElementById('loginUserSelect');if(s)s.value='';
+  var s=document.getElementById('loginUserInput');if(s)s.value='';
   var p=document.getElementById('vendorPassInput');if(p)p.value='';
   var e=document.getElementById('loginError');if(e)e.style.display='none';
   document.getElementById('loginScreen').style.display = 'flex';
