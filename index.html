@@ -261,9 +261,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .m-card[data-pp]:active{background:#faf7f4;}
 tr[data-pp]:hover{background:#faf7f4;}
 .search-result[data-pp]:hover,.m-search-card[data-pp]:active{background:#faf7f4;}
-#ppOverlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:3000;opacity:0;pointer-events:none;transition:opacity .22s;}
+#ppOverlay{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:1000000;opacity:0;pointer-events:none;transition:opacity .22s;}
 #ppOverlay.open{opacity:1;pointer-events:auto;}
-#ppSheet{position:fixed;left:0;right:0;bottom:0;z-index:3001;background:var(--white,#fff);border-radius:18px 18px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.25);transform:translateY(110%);transition:transform .28s cubic-bezier(.4,0,.2,1);max-height:90vh;overflow-y:auto;padding:0 0 24px;}
+#ppSheet{position:fixed;left:0;right:0;bottom:0;z-index:1000001;background:var(--white,#fff);border-radius:18px 18px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.25);transform:translateY(110%);transition:transform .28s cubic-bezier(.4,0,.2,1);max-height:90vh;overflow-y:auto;padding:0 0 24px;}
 #ppSheet.open{transform:translateY(0);}
 @media(min-width:701px){#ppSheet{left:auto;right:0;top:0;bottom:0;width:420px;max-width:92vw;border-radius:18px 0 0 18px;transform:translateX(110%);max-height:100vh;box-shadow:-8px 0 40px rgba(0,0,0,.25);}#ppSheet.open{transform:translateX(0);}}
 .pp-handle{width:40px;height:4px;background:#d8d2cb;border-radius:3px;margin:10px auto 4px;}
@@ -303,7 +303,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.80</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.82</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -6121,30 +6121,41 @@ initApp();
 
   window.openPricePanel=function(code,name,priceRaw){
     _ppOpenedAt=Date.now();
-    var base=_ppNum(priceRaw);
-    document.getElementById('pp-name').textContent=name||'Producto';
-    document.getElementById('pp-code').textContent=code?('Código: '+code):'';
-    var body=document.getElementById('pp-body');
-    if(isNaN(base)||base<=0){
-      body.innerHTML='<div style="padding:22px 20px;color:var(--muted);font-size:.88rem">Este producto no tiene un precio numérico para calcular descuentos.</div>';
-    } else {
-      var fab=base*0.90;
-      body.innerHTML=''
-        +'<div class="pp-block"><div class="pp-block-h" style="background:#C0392B">🔴 PVP Carnicero</div>'+_ppRows(base)+'</div>'
-        +'<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">🔵 PVP Fabricante <span style="font-size:.78rem;font-weight:700;opacity:.9">−10%</span></div>'+_ppRows(fab)+'</div>';
-    }
-    var url='https://crmwikuk.vercel.app/?accion=estrategia'
-      +'&codigo='+encodeURIComponent(code||'')
-      +'&nombre='+encodeURIComponent(name||'')
-      +'&precio='+encodeURIComponent(priceRaw||'');
-    body.innerHTML+='<button class="pp-crm" onclick="window.open(\''+url.replace(/'/g,"\\'")+'\',\'_blank\')">📋 Solicitar Estrategia en CRM</button>';
-    document.getElementById('ppOverlay').classList.add('open');
-    document.getElementById('ppSheet').classList.add('open');
+    var _ov=document.getElementById('ppOverlay'), _sh=document.getElementById('ppSheet');
+    // 1) Mostrar el panel SIEMPRE primero (clases + estilos directos)
+    _ov.classList.add('open'); _sh.classList.add('open');
+    _ov.style.opacity='1'; _ov.style.pointerEvents='auto'; _ov.style.zIndex='1000000';
+    _sh.style.zIndex='1000001';
+    _sh.style.transform=(window.innerWidth>700?'translateX(0)':'translateY(0)');
     document.body.style.overflow='hidden';
+    // 2) Rellenar contenido (protegido)
+    try{
+      var base=_ppNum(priceRaw);
+      document.getElementById('pp-name').textContent=name||'Producto';
+      document.getElementById('pp-code').textContent=code?('Código: '+code):'';
+      var body=document.getElementById('pp-body');
+      if(isNaN(base)||base<=0){
+        body.innerHTML='<div style="padding:22px 20px;color:var(--muted);font-size:.88rem">Este producto no tiene un precio numérico para calcular descuentos.</div>';
+      } else {
+        var fab=base*0.90;
+        body.innerHTML=''
+          +'<div class="pp-block"><div class="pp-block-h" style="background:#C0392B">🔴 PVP Carnicero</div>'+_ppRows(base)+'</div>'
+          +'<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">🔵 PVP Fabricante <span style="font-size:.78rem;font-weight:700;opacity:.9">−10%</span></div>'+_ppRows(fab)+'</div>';
+      }
+      var url='https://crmwikuk.vercel.app/?accion=estrategia'
+        +'&codigo='+encodeURIComponent(code||'')
+        +'&nombre='+encodeURIComponent(name||'')
+        +'&precio='+encodeURIComponent(priceRaw||'');
+      body.innerHTML+='<button class="pp-crm" onclick="window.open(\''+url.replace(/'/g,"\\'")+'\',\'_blank\')">📋 Solicitar Estrategia en CRM</button>';
+    }catch(err){
+      try{document.getElementById('pp-body').innerHTML='<div style="padding:22px 20px;color:#B42318">Error mostrando precios: '+err.message+'</div>';}catch(e){}
+    }
   };
   window.closePricePanel=function(){
-    document.getElementById('ppOverlay').classList.remove('open');
-    document.getElementById('ppSheet').classList.remove('open');
+    var _ov=document.getElementById('ppOverlay'), _sh=document.getElementById('ppSheet');
+    _ov.classList.remove('open'); _sh.classList.remove('open');
+    _ov.style.opacity=''; _ov.style.pointerEvents='';
+    _sh.style.transform=(window.innerWidth>700?'translateX(110%)':'translateY(110%)');
     document.body.style.overflow='';
   };
   // Delegación robusta: toque (iOS) + clic (escritorio)
