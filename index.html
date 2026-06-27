@@ -4738,7 +4738,7 @@ function mGoSub(sub, el) {
   const cat=DATA[mCatKey];
   const items=cat.subs[sub]||[];
 
-  document.getElementById('m-s3-back').textContent=tCat(cat.label);
+  var _s3back=document.getElementById('m-s3-back');if(_s3back)_s3back.textContent=tCat(cat.label);
   document.getElementById('m-s3-title').textContent=tSub(sub);
   document.getElementById('m-s3-tabs').innerHTML='';
     const _mDel=isPromo(mCatKey)?'':calcDelivery(mCatKey);
