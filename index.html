@@ -278,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.60</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.61</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -353,7 +353,17 @@ async function doUserLogin() {
     });
 
     if (!found) {
-      if(errEl){errEl.style.display='block'; errEl.textContent='Usuario o clave incorrectos.';}
+      var userList=[];
+      (data.documents||[]).forEach(function(doc){
+        var f=doc.fields||{};
+        var v=(f.catalogoVendedor&&f.catalogoVendedor.stringValue)||"";
+        var g=(f.grupoAgente&&f.grupoAgente.stringValue)||"";
+        var i=(f.id&&f.id.stringValue)||"";
+        var n=(f.nombre&&f.nombre.stringValue)||"";
+        var c=(f.catalogoClave&&f.catalogoClave.stringValue)||"";
+        if(v||g||c) userList.push((v||g||i)+" ("+n+") clave:"+(c?"sí":"no"));
+      });
+      if(errEl){errEl.style.display='block'; errEl.textContent='No encontrado. Usuarios disponibles: '+userList.join(", ");}
       if(btn){btn.textContent='Entrar';btn.disabled=false;}
       return;
     }
