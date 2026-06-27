@@ -278,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.69</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.70</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -1245,38 +1245,6 @@ async function doUserLogin() {
 <script>
 
 
-// Auto-login from CRM: #auto=user:clave
-(function(){
-  var hash=window.location.hash;
-  if(hash&&hash.indexOf('#auto=')===0){
-    var parts=decodeURIComponent(hash.replace('#auto=','')).split(':');
-    if(parts.length>=2){
-      window._AUTO_USER=parts[0];
-      window._AUTO_PASS=parts.slice(1).join(':');
-      document.addEventListener('DOMContentLoaded',function(){
-        setTimeout(async function(){
-          await loadUsers();
-          var found=APP_USERS.find(function(u){
-            return u.usuario.toUpperCase()===window._AUTO_USER.toUpperCase() && u.clave===window._AUTO_PASS;
-          });
-          if(found){
-            ACTIVE_USER=found;
-            document.getElementById('entryScreen').style.display='none';
-            registrarAcceso(found.usuario,found.nombre);
-            applyUserCatFilter();
-            if(typeof initDesktop==='function')initDesktop();
-            if(typeof initMobile==='function')initMobile();
-            window.location.hash='';
-          }
-        },500);
-      });
-    }
-  }
-})();
-
-
-
-
 // CRM Embedded Mode
 (function(){
   var params=new URLSearchParams(window.location.search);
@@ -1286,21 +1254,13 @@ async function doUserLogin() {
     window._CRM_NAME=params.get('crm_name')||'';
     // Auto-login and hide entry screen after load
     document.addEventListener('DOMContentLoaded',function(){
-      setTimeout(async function(){
-        // Auto-login with CRM user
-        await loadUsers();
-        var crmUser = window._CRM_USER;
-        var found = APP_USERS.find(function(u){
-          return (u.usuario||u.crmId||'').toLowerCase() === crmUser.toLowerCase() && u.activo !== false;
-        });
-        if(found){
-          ACTIVE_USER = found;
-          document.getElementById('entryScreen').style.display = 'none';
-          registrarAcceso(found.usuario, found.nombre);
-          applyUserCatFilter();
-          if(typeof initDesktop==='function')initDesktop();
-          if(typeof initMobile==='function')initMobile();
-        }
+      setTimeout(function(){
+        // Simulate clicking "Tarifa General" with auto-login
+        var es=document.getElementById('entryScreen');
+        if(es)es.style.display='none';
+        // Try to find and trigger the general tariff entry
+        var btn=document.querySelector('[onclick*="loginGeneral"]')||document.querySelector('[onclick*="general"]');
+        if(btn)btn.click();
       },500);
     });
   }
@@ -1310,7 +1270,7 @@ async function doUserLogin() {
 var LANG='es';
 var T={
 es:{
-  entry_tagline:'CATÁLOGO DE PRODUCTOS',entry_general:'Tarifa General',entry_general_sub:'Acceso con usuario y clave',login_title:'Acceso Agentes',login_sub:'Introduce tu usuario y clave',login_user:'Usuario',login_pass:'Clave',login_btn:'Entrar',
+  entry_tagline:'CATÁLOGO DE PRODUCTOS',entry_general:'Tarifa General',entry_general_sub:'Acceso con usuario y clave',login_title:'Acceso Agentes',login_sub:'Introduce tus credenciales',login_user:'Usuario',login_pass:'Clave',login_btn:'Entrar',
   entry_cliente:'Tarifa Cliente',entry_cliente_sub:'Acceso con código de vendedor',
   entry_muestras:'Muestras',entry_muestras_sub:'Seguimiento y estadísticas',
   vendor_title:'Selecciona tu grupo',vendor_who:'¿Quién eres?',
@@ -1797,8 +1757,7 @@ var _fbProductsLoaded = false;
     _fbProductsLoaded=true;
     // Rebuild code-to-category lookup
     try{_tCODE_CAT={};Object.keys(DATA).forEach(function(k){if(DATA[k].subs){Object.keys(DATA[k].subs).forEach(function(sub){var items=DATA[k].subs[sub];if(Array.isArray(items))items.forEach(function(it){if(it.c){_tCODE_CAT[it.c]=k;var s=it.c.replace(/^0+/,"");if(s&&s!==it.c)_tCODE_CAT[s]=k;}});});}});}catch(e){}
-    var totalProds=0;Object.keys(DATA).forEach(function(k){if(DATA[k].subs)Object.keys(DATA[k].subs).forEach(function(s){totalProds+=DATA[k].subs[s].length;});});
-    console.log("📦 Catálogo Firebase: "+totalProds+" productos en "+Object.keys(DATA).length+" categorías");
+    console.log("📦 Catálogo Firebase: "+all.length+" → DATA poblado con "+Object.keys(DATA).length+" categorías");
     // Update loading indicator
     var li=document.getElementById("fb-loading");if(li)li.style.display="none";
   }catch(e){
@@ -1999,21 +1958,21 @@ async function loadAccesos() {
 }
 
 async function saveAccesos() {
-  var FB_CAT="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
   try {
     if (ACCESOS_LOG.length > 100) ACCESOS_LOG = ACCESOS_LOG.slice(-100);
-    // Load latest to merge
+    // Load latest from JSONBin first to avoid overwriting other users' entries
     try {
-      var lr = await fetch(FB_CAT+"/catalogo/config",{cache:"no-store"});
+      var lr = await _jbFetch('/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
       if (lr.ok) {
-        var ld = await lr.json();
-        var f = ld.fields || {};
-        var remoteAccesos = f.accesos && f.accesos.stringValue ? JSON.parse(f.accesos.stringValue) : [];
-        var remoteUsers = f.usuarios && f.usuarios.stringValue ? JSON.parse(f.usuarios.stringValue) : APP_USERS;
+        var ld = JSON.parse(await lr.text());
+        var remoteAccesos = (ld.record && ld.record.accesos) ? ld.record.accesos : [];
+        var remoteUsers = (ld.record && ld.record.usuarios) ? ld.record.usuarios : APP_USERS;
+        // Merge: keep all remote entries + add our new ones (by id)
         var remoteIds = new Set(remoteAccesos.map(function(a){ return a.id; }));
         ACCESOS_LOG.forEach(function(a) {
           if (!remoteIds.has(a.id)) remoteAccesos.push(a);
           else {
+            // Update existing entry (duration, exit time)
             var idx = remoteAccesos.findIndex(function(x){ return x.id === a.id; });
             if (idx > -1 && (a.duracion || a.salida)) remoteAccesos[idx] = a;
           }
@@ -2021,22 +1980,24 @@ async function saveAccesos() {
         ACCESOS_LOG = remoteAccesos.slice(-100);
         APP_USERS = remoteUsers;
       }
-    } catch(e) {}
-    var r = await fetch(FB_CAT+"/catalogo/config",{
-      method:"PATCH",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({fields:{
-        usuarios:{stringValue:JSON.stringify(APP_USERS)},
-        accesos:{stringValue:JSON.stringify(ACCESOS_LOG)}
-      }})
+    } catch(e) { /* continue with local data if load fails */ }
+    var body = { usuarios: APP_USERS, accesos: ACCESOS_LOG };
+    var r = await _jbFetch('', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+      body: JSON.stringify(body)
     });
     if (r.ok) {
       try {
         localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
-          ver: _WK_CACHE_VER, usuarios: APP_USERS, accesos: ACCESOS_LOG,
+          ver: _WK_CACHE_VER,
+          usuarios: APP_USERS,
+          accesos: ACCESOS_LOG,
           expiry: Date.now() + _WK_CACHE_TTL
         }));
       } catch(e) {}
+    } else {
+      console.error('saveAccesos error:', r.status);
     }
   } catch(e) { console.error('Error saving accesos:', e); }
 }
@@ -2166,56 +2127,39 @@ var _WK_CACHE_TTL = 12 * 60 * 60 * 1000; // 12 horas
 
 async function loadUsers(forceRemote) {
   if (_loadUsersPromise) return _loadUsersPromise;
-  var FB_USR="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents/usuarios?pageSize=300";
+  // Si no es forzado, intentar desde caché local primero
   if (!forceRemote) {
     try {
       var cached = localStorage.getItem(_WK_CACHE_KEY);
       if (cached) {
         var obj = JSON.parse(cached);
         if (obj.ver === _WK_CACHE_VER && obj.expiry > Date.now() && Array.isArray(obj.usuarios) && obj.usuarios.length > 0) {
-          APP_USERS = obj.usuarios;
+          APP_USERS   = obj.usuarios;
+          ACCESOS_LOG = obj.accesos || [];
           return;
+        } else {
+          localStorage.removeItem(_WK_CACHE_KEY);
         }
       }
-    } catch(e) {}
+    } catch(e) { localStorage.removeItem(_WK_CACHE_KEY); }
   }
   _loadUsersPromise = (async function() {
     try {
-      var r = await fetch(FB_USR,{cache:"no-store"});
-      if (r.ok) {
-        var data = await r.json();
-        var users = [];
-        (data.documents||[]).forEach(function(doc){
-          var f = doc.fields||{};
-          var vendedor = (f.catalogoVendedor&&f.catalogoVendedor.stringValue)||(f.grupoAgente&&f.grupoAgente.stringValue)||(f.id&&f.id.stringValue)||"";
-          var clave = (f.catalogoClave&&f.catalogoClave.stringValue)||"";
-          var nombre = (f.nombre&&f.nombre.stringValue)||vendedor;
-          var rol = (f.rol&&f.rol.stringValue)||"";
-          if (vendedor && clave) {
-            users.push({
-              usuario: vendedor,
-              clave: clave,
-              nombre: nombre,
-              activo: true,
-              categorias: "todas",
-              crmId: (f.id&&f.id.stringValue)||"",
-              rol: rol
-            });
-          }
-        });
-        if (users.length > 0) {
-          APP_USERS = users;
-          console.log("📦 Usuarios CRM Firebase: "+users.length+" con acceso catálogo");
-        }
-        try {
-          localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
-            ver: _WK_CACHE_VER, usuarios: APP_USERS,
-            expiry: Date.now() + _WK_CACHE_TTL
-          }));
-        } catch(e) {}
-      }
+      var r = await _jbFetch('/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var data = JSON.parse(await r.text());
+      APP_USERS   = (data.record && data.record.usuarios) ? data.record.usuarios : [];
+      ACCESOS_LOG = (data.record && data.record.accesos)  ? data.record.accesos  : [];
+      // Guardar en caché local
+      try {
+        localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+          usuarios: APP_USERS, accesos: ACCESOS_LOG,
+          expiry: Date.now() + _WK_CACHE_TTL
+        }));
+      } catch(e) {}
     } catch(e) {
-      console.error('Error loading CRM users:', e);
+      console.error('Error loading users:', e);
+      APP_USERS = []; ACCESOS_LOG = [];
     }
     _loadUsersPromise = null;
   })();
@@ -2224,18 +2168,24 @@ async function loadUsers(forceRemote) {
 
 // ── Save users to JSONBin ──
 async function saveUsers() {
-  var FB_CAT="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
+  // Limitar accesos a los últimos 100 para no superar límite JSONBin (100KB)
   var accesosToSave = ACCESOS_LOG.length > 100 ? ACCESOS_LOG.slice(-100) : ACCESOS_LOG;
-  try {
-    var r = await fetch(FB_CAT+"/catalogo/config",{
-      method:"PATCH",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({fields:{
-        usuarios:{stringValue:JSON.stringify(APP_USERS)},
-        accesos:{stringValue:JSON.stringify(accesosToSave)}
-      }})
-    });
-    if (r.ok) {
+  var payload = {usuarios: APP_USERS, accesos: accesosToSave};
+  var body = JSON.stringify(payload);
+
+  // Reintentar hasta 3 veces si falla la red
+  for (var attempt = 1; attempt <= 3; attempt++) {
+    try {
+      var r = await _jbFetch('', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+        body: body
+      });
+      if (!r.ok) {
+        var rt = await r.text();
+        throw new Error('HTTP ' + r.status + ': ' + rt.substring(0, 100));
+      }
+      // Solo actualizar caché DESPUÉS de confirmar save exitoso
       try {
         localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
           ver: _WK_CACHE_VER,
@@ -2243,23 +2193,30 @@ async function saveUsers() {
           expiry: Date.now() + _WK_CACHE_TTL
         }));
       } catch(e) {}
-    } else { console.error('saveUsers error:', r.status); }
-  } catch(e) { console.error('Error saving users:', e); }
+      return true;
+    } catch(e) {
+      console.warn('saveUsers intento ' + attempt + ' fallido:', e.message);
+      if (attempt === 3) {
+        alert('❌ Error al guardar (intento ' + attempt + '/3): ' + e.message + '\n\nComprueba tu conexión e inténtalo de nuevo.');
+        return false;
+      }
+      // Esperar antes de reintentar (1s, 2s)
+      await new Promise(function(res){ setTimeout(res, attempt * 1000); });
+    }
+  }
 }
 
 // ── Login ──
-async 
-function populateUserSelect(){}
+async // doUserLogin handled by separate script
 
-// doUserLogin in separate script above
 
 function showLoginScreen() {
   document.getElementById('entryScreen').style.display = 'none';
-  var s=document.getElementById('loginUserInput');if(s)s.value='';
-  var p=document.getElementById('vendorPassInput');if(p)p.value='';
-  var e=document.getElementById('loginError');if(e)e.style.display='none';
+  try{document.getElementById('loginUserInput').value = '';}catch(e){}
+  try{document.getElementById('vendorPassInput').value = '';}catch(e){}
+  document.getElementById('loginError').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
-  populateUserSelect();
+  setTimeout(function(){ try{document.getElementById('loginUserInput').focus();}catch(e){} }, 100);
 }
 
 
@@ -2801,7 +2758,7 @@ function onVendorSelectChange() {
   var conf = AGENT_CONF[code];
   var hasPass = conf && conf.pass;
   passField.style.display = hasPass ? 'block' : 'none';
-  if (hasPass) passField.placeholder = 'Introduce tu usuario...';
+  if (hasPass) passField.placeholder = 'Introduce tu clave...';
 }
 
 async function showVendorLogin() {
@@ -3406,7 +3363,7 @@ function showAdminPin() {
   d.style.cssText = 'display:flex;position:fixed;top:0;left:0;width:100%;height:100%;background:#F7F5F2;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
   d.innerHTML = '<div style="font-size:2rem">🔐</div>'
     + '<div style="font-size:1.1rem;font-weight:800">Zona Administrador</div>'
-    + '<div style="font-size:.82rem;color:#999;margin-bottom:12px">Selecciona tu nombre de acceso</div>'
+    + '<div style="font-size:.82rem;color:#999;margin-bottom:12px">Introduce tu clave de acceso</div>'
     + '<input id="dynPinInput" type="password" placeholder="••••••••" style="width:240px;padding:12px;border:1.5px solid #ddd;border-radius:10px;font-size:1rem;text-align:center;font-family:Inter,sans-serif;outline:none;">'
     + '<div id="dynPinErr" style="color:#DC2626;font-size:.82rem;display:none">Clave incorrecta.</div>'
     + '<button id="dynPinBtn" style="width:240px;padding:12px;background:#1A1816;color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>'
@@ -4509,7 +4466,6 @@ function _tEsc(s){if(!s)return'';var d=document.createElement('div');d.textConte
 function _tFmtSplit(f,idx){if(!f)return'';var sep=f.indexOf(' / ')>-1?' / ':(f.indexOf(' · ')>-1?' · ':null);if(!sep)return idx===0?f:'';var parts=f.split(sep);return parts[idx]||'';}
 
 initApp();
-
 
 
 </script>
