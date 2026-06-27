@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.54</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.57</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -332,9 +332,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
     <div style="font-size:1rem;font-weight:700;text-align:center" id="lbl-login-sub">Introduce tu usuario y clave</div>
     <input id="loginUserInput" type="text" placeholder="Usuario..." autocomplete="username"
       style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;">
-    <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
+    <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." onkeydown="if(event.key==='Enter')doUserLogin().catch(function(e){console.error(e)})" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
     <div id="loginError" style="display:none;color:#B42318;font-size:.82rem;font-weight:600;margin-top:4px;">Usuario o clave incorrectos.</div>
-    <button id="loginBtn" onclick="doUserLogin()"
+    <button id="loginBtn" onclick="doUserLogin().catch(function(e){console.error(e)})"
       style="width:100%;max-width:300px;padding:13px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
       Entrar
     </button>
@@ -359,7 +359,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </select>
       <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
+    <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." onkeydown="if(event.key==='Enter')doUserLogin().catch(function(e){console.error(e)})" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
     <div id="vendorPassError" style="color:#DC2626;font-size:.82rem;display:none;">Clave incorrecta.</div>
     <button onclick="vendorLoginWithPass()" id="lbl-vendor-btn"
       style="width:100%;max-width:320px;padding:13px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>
@@ -2147,7 +2147,7 @@ async function doUserLogin() {
     });
 
     if (!found) {
-      if(errEl){errEl.style.display='block'; errEl.textContent='Usuario o clave incorrectos.';}
+      if(errEl){errEl.style.display='block'; errEl.textContent='Usuario o clave incorrectos. ('+APP_USERS.length+' usuarios cargados, buscando: '+userId+')';}
       if(btn){btn.textContent='Entrar';btn.disabled=false;}
       return;
     }
@@ -2168,12 +2168,13 @@ async function doUserLogin() {
 }
 
 function showLoginScreen() {
+  try{
   document.getElementById('entryScreen').style.display = 'none';
   var s=document.getElementById('loginUserInput');if(s)s.value='';
   var p=document.getElementById('vendorPassInput');if(p)p.value='';
   var e=document.getElementById('loginError');if(e)e.style.display='none';
   document.getElementById('loginScreen').style.display = 'flex';
-  populateUserSelect();
+  }catch(e){alert('Error showLogin: '+e.message);}
 }
 
 
