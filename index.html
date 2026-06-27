@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.51</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.53</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -1116,6 +1116,37 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <button onclick="addAdmin()" style="padding:11px;background:#1A1816;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Añadir administrad
 
 <script>
+
+// Auto-login from CRM: #auto=user:clave
+(function(){
+  var hash=window.location.hash;
+  if(hash&&hash.indexOf('#auto=')===0){
+    var parts=decodeURIComponent(hash.replace('#auto=','')).split(':');
+    if(parts.length>=2){
+      window._AUTO_USER=parts[0];
+      window._AUTO_PASS=parts.slice(1).join(':');
+      document.addEventListener('DOMContentLoaded',function(){
+        setTimeout(async function(){
+          await loadUsers();
+          var found=APP_USERS.find(function(u){
+            return u.usuario.toUpperCase()===window._AUTO_USER.toUpperCase() && u.clave===window._AUTO_PASS;
+          });
+          if(found){
+            ACTIVE_USER=found;
+            document.getElementById('entryScreen').style.display='none';
+            registrarAcceso(found.usuario,found.nombre);
+            applyUserCatFilter();
+            if(typeof initDesktop==='function')initDesktop();
+            if(typeof initMobile==='function')initMobile();
+            window.location.hash='';
+          }
+        },500);
+      });
+    }
+  }
+})();
+
+
 
 
 // CRM Embedded Mode
@@ -2007,15 +2038,14 @@ var _WK_CACHE_TTL = 12 * 60 * 60 * 1000; // 12 horas
 
 async function loadUsers(forceRemote) {
   if (_loadUsersPromise) return _loadUsersPromise;
-  var FB_CAT="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
+  var FB_USR="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents/usuarios?pageSize=300";
   if (!forceRemote) {
     try {
       var cached = localStorage.getItem(_WK_CACHE_KEY);
       if (cached) {
         var obj = JSON.parse(cached);
         if (obj.ver === _WK_CACHE_VER && obj.expiry > Date.now() && Array.isArray(obj.usuarios) && obj.usuarios.length > 0) {
-          APP_USERS   = obj.usuarios;
-          ACCESOS_LOG = obj.accesos || [];
+          APP_USERS = obj.usuarios;
           return;
         }
       }
@@ -2023,31 +2053,41 @@ async function loadUsers(forceRemote) {
   }
   _loadUsersPromise = (async function() {
     try {
-      var r = await fetch(FB_CAT+"/catalogo/config",{cache:"no-store"});
+      var r = await fetch(FB_USR,{cache:"no-store"});
       if (r.ok) {
         var data = await r.json();
-        var f = data.fields || {};
-        APP_USERS = f.usuarios && f.usuarios.stringValue ? JSON.parse(f.usuarios.stringValue) : [];
-        ACCESOS_LOG = f.accesos && f.accesos.stringValue ? JSON.parse(f.accesos.stringValue) : [];
-      } else {
-        // Fallback to JSONBin
-        var r2 = await _jbFetch('/latest', { headers: { 'X-Master-Key': JSONBIN_KEY } });
-        if (r2.ok) {
-          var data2 = JSON.parse(await r2.text());
-          APP_USERS = (data2.record && data2.record.usuarios) ? data2.record.usuarios : [];
-          ACCESOS_LOG = (data2.record && data2.record.accesos) ? data2.record.accesos : [];
+        var users = [];
+        (data.documents||[]).forEach(function(doc){
+          var f = doc.fields||{};
+          var vendedor = (f.catalogoVendedor&&f.catalogoVendedor.stringValue)||(f.grupoAgente&&f.grupoAgente.stringValue)||(f.id&&f.id.stringValue)||"";
+          var clave = (f.catalogoClave&&f.catalogoClave.stringValue)||"";
+          var nombre = (f.nombre&&f.nombre.stringValue)||vendedor;
+          var rol = (f.rol&&f.rol.stringValue)||"";
+          if (vendedor && clave) {
+            users.push({
+              usuario: vendedor,
+              clave: clave,
+              nombre: nombre,
+              activo: true,
+              categorias: "todas",
+              crmId: (f.id&&f.id.stringValue)||"",
+              rol: rol
+            });
+          }
+        });
+        if (users.length > 0) {
+          APP_USERS = users;
+          console.log("📦 Usuarios CRM Firebase: "+users.length+" con acceso catálogo");
         }
+        try {
+          localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
+            ver: _WK_CACHE_VER, usuarios: APP_USERS,
+            expiry: Date.now() + _WK_CACHE_TTL
+          }));
+        } catch(e) {}
       }
-      try {
-        localStorage.setItem(_WK_CACHE_KEY, JSON.stringify({
-          ver: _WK_CACHE_VER,
-          usuarios: APP_USERS, accesos: ACCESOS_LOG,
-          expiry: Date.now() + _WK_CACHE_TTL
-        }));
-      } catch(e) {}
     } catch(e) {
-      console.error('Error loading users:', e);
-      APP_USERS = []; ACCESOS_LOG = [];
+      console.error('Error loading CRM users:', e);
     }
     _loadUsersPromise = null;
   })();
@@ -2115,7 +2155,7 @@ function doUserLogin() {
 
     if (!found) {
       err.style.display='block';
-      err.textContent=window._CRM_EMBEDDED?'Usuario no autorizado.':'Usuario o clave incorrectos.';
+      err.textContent=window._CRM_EMBEDDED?'Usuario no autorizado.':'Usuario o clave incorrectos. Clave por defecto: 1234';
       return;
     }
 
