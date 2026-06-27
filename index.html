@@ -278,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.66</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.68</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -337,9 +337,10 @@ async function doUserLogin() {
   try {
     var FB="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
     // Load both collections
-    var [r1, r2] = await Promise.all([
+    var [r1, r2, r3] = await Promise.all([
       fetch(FB+"/usuarios?pageSize=300",{cache:"no-store"}),
-      fetch(FB+"/portal_users?pageSize=300",{cache:"no-store"})
+      fetch(FB+"/portal_users?pageSize=300",{cache:"no-store"}),
+      fetch(FB+"/catalogo/config",{cache:"no-store"})
     ]);
     var allUsers = [];
     
@@ -378,6 +379,28 @@ async function doUserLogin() {
           password:(f.password&&f.password.stringValue)||(f.clave&&f.clave.stringValue)||"",
           src:"portal"
         });
+      });
+    }
+
+    // Parse catalogo/config (migrated catalog users)
+    if(r3.ok){
+      var d3 = await r3.json();
+      var f3 = d3.fields||{};
+      var catUsers = f3.usuarios&&f3.usuarios.stringValue?JSON.parse(f3.usuarios.stringValue):[];
+      catUsers.forEach(function(u){
+        if(u.usuario||u.nombre){
+          allUsers.push({
+            username:u.usuario||"",
+            vendedor:u.usuario||"",
+            grupo:"",
+            id:u.crmId||u.usuario||"",
+            nombre:u.nombre||"",
+            user:u.usuario||"",
+            clave:u.clave||"",
+            password:u.clave||"",
+            src:"catalogo"
+          });
+        }
       });
     }
 
@@ -2227,49 +2250,7 @@ async function saveUsers() {
 async 
 function populateUserSelect(){}
 
-async function doUserLogin() {
-  var userEl = document.getElementById('loginUserInput');
-  var passEl = document.getElementById('vendorPassInput');
-  var errEl = document.getElementById('loginError');
-  var userId = userEl ? userEl.value.trim() : '';
-  var passVal = passEl ? passEl.value.trim() : '';
-
-  if (!userId) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu usuario y clave.';} return; }
-  if (!passVal) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu clave.';} return; }
-
-  var btn=document.getElementById('loginBtn');
-  if(btn){btn.textContent='Entrando...';btn.disabled=true;}
-
-  try {
-    await loadUsers();
-    // Wait for products
-    var tries=0;
-    while(!_fbProductsLoaded && tries<20){await new Promise(function(r){setTimeout(r,300)});tries++;}
-
-    var found = APP_USERS.find(function(u) {
-      return (u.usuario||u.crmId||'').toUpperCase() === userId.toUpperCase() && u.clave === passVal;
-    });
-
-    if (!found) {
-      if(errEl){errEl.style.display='block'; errEl.textContent='Usuario o clave incorrectos. ('+APP_USERS.length+' usuarios cargados, buscando: '+userId+')';}
-      if(btn){btn.textContent='Entrar';btn.disabled=false;}
-      return;
-    }
-
-    ACTIVE_USER = found;
-    if(errEl) errEl.style.display='none';
-    document.getElementById('entryScreen').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'none';
-    registrarAcceso(found.usuario, found.nombre);
-    applyUserCatFilter();
-    if(typeof initDesktop==='function')initDesktop();
-    if(typeof initMobile==='function')initMobile();
-  } catch(e) {
-    console.error('Login error:', e);
-    if(errEl){errEl.style.display='block'; errEl.textContent='Error de conexión. Inténtalo de nuevo.';}
-    if(btn){btn.textContent='Entrar';btn.disabled=false;}
-  }
-}
+// doUserLogin moved to separate script
 
 function showLoginScreen() {
   try{
