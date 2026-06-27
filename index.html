@@ -303,7 +303,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.78</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.79</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -6152,7 +6152,14 @@ initApp();
     if(!tgt||!tgt.closest) return;
     if(tgt.closest('#ppSheet')||tgt.closest('#ppOverlay')) return;
     var el=tgt.closest('[data-pp]');
-    if(!el) return;
+    if(!el){
+      // DIAGNÓSTICO TEMPORAL (v2.79)
+      if(tgt.closest('.m-card,.m-search-card,.search-result,tr')){
+        alert('DIAG: tocaste una tarjeta pero NO tiene data-pp → el archivo desplegado es antiguo.');
+      }
+      return;
+    }
+    alert('DIAG: detectado producto '+el.getAttribute('data-code')+' → abriendo panel');
     openPricePanel(el.getAttribute('data-code'),el.getAttribute('data-name'),el.getAttribute('data-price'));
   }
   document.addEventListener('touchstart',function(e){
