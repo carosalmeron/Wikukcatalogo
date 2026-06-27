@@ -258,6 +258,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 </style>
 </head>
 <body>
+<script>window.onerror=function(msg,url,line){document.title='ERR:'+line+':'+msg;var d=document.createElement('div');d.style.cssText='position:fixed;top:0;left:0;right:0;background:red;color:white;padding:10px;z-index:999999;font-size:12px;word-break:break-all';d.textContent='JS Error línea '+line+': '+msg;document.body.appendChild(d);return false;};</script>
 
 
 <script>
@@ -277,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.58</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.59</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -334,7 +335,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;">
     <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." onkeydown="if(event.key==='Enter')doUserLogin().catch(function(e){console.error(e)})" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
     <div id="loginError" style="display:none;color:#B42318;font-size:.82rem;font-weight:600;margin-top:4px;">Usuario o clave incorrectos.</div>
-    <button id="loginBtn" onclick="doUserLogin().catch(function(e){console.error(e)})"
+    <button id="loginBtn" onclick="try{doUserLogin().catch(function(e){alert('Error async: '+e)})}catch(e){alert('Error: '+e.message+' — El script no cargó correctamente')}"
       style="width:100%;max-width:300px;padding:13px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
       Entrar
     </button>
