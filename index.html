@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.44</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.46</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -330,13 +330,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:14px;">
     <div style="font-size:2.4rem">🔐</div>
     <div style="font-size:1rem;font-weight:700;text-align:center" id="lbl-login-sub">Introduce tus credenciales</div>
-    <input id="loginUser" type="text" id="loginUserInput" placeholder="Usuario"
-      style="width:100%;max-width:300px;padding:13px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;"
-      onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
-    <input id="loginPass" type="password" id="loginPassInput" placeholder="Clave"
-      style="width:100%;max-width:300px;padding:13px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;"
-      onkeydown="if(event.key==='Enter')doUserLogin()">
-    <div id="loginError" style="color:#DC2626;font-size:.82rem;display:none">Usuario o clave incorrectos.</div>
+    <select id="loginUserSelect" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;background:var(--white);appearance:none;-webkit-appearance:none;cursor:pointer;" onclick="populateUserSelect()" onfocus="populateUserSelect()">
+      <option value="">— Selecciona tu nombre —</option>
+    </select>
+    <!-- password removed -->Usuario o clave incorrectos.</div>
     <button id="loginBtn" onclick="doUserLogin()"
       style="width:100%;max-width:300px;padding:13px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
       Entrar
@@ -354,7 +351,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:14px;">
     <div style="font-size:2.4rem">👥</div>
     <div style="font-size:1rem;font-weight:700;text-align:center" id="lbl-vendor-who">Selecciona tu nombre</div>
-    <div style="font-size:.82rem;color:var(--muted);text-align:center" id="lbl-vendor-sub">Selecciona tu nombre e introduce tu clave</div>
+    <div style="font-size:.82rem;color:var(--muted);text-align:center" id="lbl-vendor-sub">Selecciona tu nombre para acceder</div>
     <div style="width:100%;max-width:320px;position:relative;">
       <select id="vendorSelect"
         style="width:100%;padding:13px 40px 13px 16px;border:1.5px solid var(--border);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;color:var(--text);background:var(--white);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;box-sizing:border-box;">
@@ -362,9 +359,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
       </select>
       <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..."
-      style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;text-align:center;outline:none;box-sizing:border-box;display:none;"
-      onkeydown="if(event.key==='Enter')vendorLoginWithPass()">
+    <!-- password removed -->
     <div id="vendorPassError" style="color:#DC2626;font-size:.82rem;display:none;">Clave incorrecta.</div>
     <button onclick="vendorLoginWithPass()" id="lbl-vendor-btn"
       style="width:100%;max-width:320px;padding:13px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>
@@ -907,7 +902,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 <div id="adminPinScreen" style="display:none;position:fixed;inset:0;background:#F7F5F2;z-index:1200;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:16px;">
   <div style="font-size:2rem;margin-bottom:8px">🔐</div>
   <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px">Zona Administrador</div>
-  <div style="font-size:.82rem;color:var(--muted);margin-bottom:20px;text-align:center">Introduce tu clave de acceso</div>
+  <div style="font-size:.82rem;color:var(--muted);margin-bottom:20px;text-align:center">Selecciona tu nombre de acceso</div>
   <input class="pin-input" id="adminPinInput" type="password" placeholder="••••••••"
     onkeydown="if(event.key==='Enter')submitAdminPin()">
   <div id="adminPinError" style="color:#DC2626;font-size:.82rem;display:none">Clave incorrecta.</div>
@@ -2075,53 +2070,47 @@ async function saveUsers() {
 }
 
 // ── Login ──
-async function doUserLogin() {
-  var user = document.getElementById('loginUser').value.trim();
-  var pass = document.getElementById('loginPass').value.trim();
-  var err  = document.getElementById('loginError');
-  var btn  = document.getElementById('loginBtn');
-
-  if (!user || !pass) { err.style.display='block'; err.textContent='Introduce usuario y clave.'; return; }
-
-  btn.textContent = 'Entrando...';
-  btn.disabled = true;
+async 
+async function populateUserSelect(){
   await loadUsers();
-  btn.textContent = 'Entrar';
-  btn.disabled = false;
-
-  var found = APP_USERS.find(function(u) {
-    return u.usuario.toLowerCase() === user.toLowerCase() && u.clave === pass && u.activo !== false;
+  var sel=document.getElementById('loginUserSelect');
+  if(!sel)return;
+  sel.innerHTML='<option value="">— Selecciona tu nombre —</option>';
+  APP_USERS.filter(function(u){return u.activo!==false;}).forEach(function(u){
+    var opt=document.createElement('option');
+    opt.value=u.usuario||u.crmId||'';
+    opt.textContent=u.nombre||u.usuario;
+    sel.appendChild(opt);
   });
+}
 
-  if (!found) {
-    err.style.display='block';
-    err.textContent='Usuario o clave incorrectos.';
-    return;
-  }
+function doUserLogin() {
+  var sel = document.getElementById('loginUserSelect');
+  var userId = sel ? sel.value : '';
+  var err = document.getElementById('loginError');
 
-  ACTIVE_USER = found;
-  ACTIVE_VENDOR_CATS = found.categorias === 'todas' ? null : found.categorias;
-  registrarAcceso(found.usuario, found.nombre);
-  setTimeout(_updateShareBtn, 300);
+  if (!userId) { err.style.display='block'; err.textContent='Selecciona tu nombre.'; return; }
 
-  // Guardar sesión 12 horas en localStorage
-  try {
-    localStorage.setItem('wk_session', JSON.stringify({
-      usuario: found.usuario,
-      expiry: Date.now() + 12 * 60 * 60 * 1000
-    }));
-  } catch(e) {}
+  (async function(){
+    await loadUsers();
+    var found = APP_USERS.find(function(u) {
+      return (u.usuario||u.crmId||'').toLowerCase() === userId.toLowerCase() && u.activo !== false;
+    });
 
-  document.getElementById('loginScreen').style.display = 'none';
-  // Show user badge
-  var badge = document.getElementById('clientBadge');
-  if (badge) {
-    document.getElementById('clientBadgeText').textContent = found.nombre || found.usuario;
-    badge.classList.add('visible');
-    badge.style.cursor = 'default';
-    badge.onclick = null;
-  }
-  applyVendorCatFilter();
+    if (!found) {
+      err.style.display='block';
+      err.textContent='Usuario no autorizado. Contacta con el administrador.';
+      return;
+    }
+
+    ACTIVE_USER = found;
+    err.style.display='none';
+    document.getElementById('entryScreen').style.display = 'none';
+    registrarAcceso(found.usuario, found.nombre);
+    applyUserCatFilter();
+    if(typeof initDesktop==='function')initDesktop();
+    if(typeof initMobile==='function')initMobile();
+  })();
 }
 
 function showLoginScreen() {
@@ -2492,7 +2481,7 @@ function goBackToEntry() {
     var el=document.getElementById(id);
     if(el) el.className='m-screen';
   });
-  document.getElementById('entryScreen').style.display = 'flex';
+  document.getElementById('entryScreen').style.display = 'flex';setTimeout(populateUserSelect,200);
 }
 
 
@@ -2672,7 +2661,7 @@ function onVendorSelectChange() {
   var conf = AGENT_CONF[code];
   var hasPass = conf && conf.pass;
   passField.style.display = hasPass ? 'block' : 'none';
-  if (hasPass) passField.placeholder = 'Introduce tu clave...';
+  if (hasPass) passField.placeholder = 'Selecciona tu nombre...';
 }
 
 async function showVendorLogin() {
@@ -3277,7 +3266,7 @@ function showAdminPin() {
   d.style.cssText = 'display:flex;position:fixed;top:0;left:0;width:100%;height:100%;background:#F7F5F2;z-index:99999;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
   d.innerHTML = '<div style="font-size:2rem">🔐</div>'
     + '<div style="font-size:1.1rem;font-weight:800">Zona Administrador</div>'
-    + '<div style="font-size:.82rem;color:#999;margin-bottom:12px">Introduce tu clave de acceso</div>'
+    + '<div style="font-size:.82rem;color:#999;margin-bottom:12px">Selecciona tu nombre de acceso</div>'
     + '<input id="dynPinInput" type="password" placeholder="••••••••" style="width:240px;padding:12px;border:1.5px solid #ddd;border-radius:10px;font-size:1rem;text-align:center;font-family:Inter,sans-serif;outline:none;">'
     + '<div id="dynPinErr" style="color:#DC2626;font-size:.82rem;display:none">Clave incorrecta.</div>'
     + '<button id="dynPinBtn" style="width:240px;padding:12px;background:#1A1816;color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>'
