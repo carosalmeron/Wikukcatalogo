@@ -277,7 +277,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.50</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.51</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -1116,6 +1116,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
         <button onclick="addAdmin()" style="padding:11px;background:#1A1816;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Añadir administrad
 
 <script>
+
 
 // CRM Embedded Mode
 (function(){
@@ -2080,18 +2081,7 @@ async function saveUsers() {
 
 // ── Login ──
 async 
-async function populateUserSelect(){
-  await loadUsers();
-  var sel=document.getElementById('loginUserSelect');
-  if(!sel)return;
-  sel.innerHTML='<option value="">— Selecciona tu nombre —</option>';
-  APP_USERS.filter(function(u){return u.activo!==false;}).forEach(function(u){
-    var opt=document.createElement('option');
-    opt.value=u.usuario||u.crmId||'';
-    opt.textContent=u.nombre||u.usuario;
-    sel.appendChild(opt);
-  });
-}
+function populateUserSelect(){}
 
 function doUserLogin() {
   var userId = (document.getElementById('loginUserInput')||{}).value||(document.getElementById('loginUserSelect')||{}).value||'';
@@ -2507,7 +2497,7 @@ function goBackToEntry() {
     var el=document.getElementById(id);
     if(el) el.className='m-screen';
   });
-  document.getElementById('entryScreen').style.display = 'flex';setTimeout(populateUserSelect,200);
+  document.getElementById('entryScreen').style.display = 'flex';
 }
 
 
@@ -4396,7 +4386,5 @@ function _tFmtSplit(f,idx){if(!f)return'';var sep=f.indexOf(' / ')>-1?' / ':(f.i
 
 initApp();
 
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-</body>
-</html>
+
+
