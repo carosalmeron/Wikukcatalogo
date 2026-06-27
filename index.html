@@ -278,7 +278,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.61</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.63</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -321,7 +321,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 
 
 <script>
-// Login independiente - no depende del script principal
+// Login independiente - lee de Firebase usuarios + portal_users
 async function doUserLogin() {
   var userEl = document.getElementById('loginUserInput');
   var passEl = document.getElementById('vendorPassInput');
@@ -330,50 +330,89 @@ async function doUserLogin() {
   var passVal = passEl ? passEl.value.trim() : '';
   var btn = document.getElementById('loginBtn');
 
-  if (!userId) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu usuario.';} return; }
-  if (!passVal) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu clave.';} return; }
+  if (!userId) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu usuario y clave.';} return; }
 
   if(btn){btn.textContent='Entrando...';btn.disabled=true;}
 
   try {
-    // Load users from Firebase usuarios collection
-    var FB="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents/usuarios?pageSize=300";
-    var r = await fetch(FB,{cache:"no-store"});
-    if (!r.ok) throw new Error("Firebase error: "+r.status);
-    var data = await r.json();
+    var FB="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
+    // Load both collections
+    var [r1, r2] = await Promise.all([
+      fetch(FB+"/usuarios?pageSize=300",{cache:"no-store"}),
+      fetch(FB+"/portal_users?pageSize=300",{cache:"no-store"})
+    ]);
+    var allUsers = [];
+    
+    // Parse usuarios
+    if(r1.ok){
+      var d1 = await r1.json();
+      (d1.documents||[]).forEach(function(doc){
+        var f=doc.fields||{};
+        allUsers.push({
+          username:(f.username&&f.username.stringValue)||"",
+          vendedor:(f.catalogoVendedor&&f.catalogoVendedor.stringValue)||"",
+          grupo:(f.grupoAgente&&f.grupoAgente.stringValue)||"",
+          id:(f.id&&f.id.stringValue)||"",
+          nombre:(f.nombre&&f.nombre.stringValue)||"",
+          user:(f.user&&f.user.stringValue)||"",
+          clave:(f.catalogoClave&&f.catalogoClave.stringValue)||"",
+          password:(f.password&&f.password.stringValue)||"",
+          src:"usuarios"
+        });
+      });
+    }
+    
+    // Parse portal_users
+    if(r2.ok){
+      var d2 = await r2.json();
+      (d2.documents||[]).forEach(function(doc){
+        var f=doc.fields||{};
+        allUsers.push({
+          username:(f.username&&f.username.stringValue)||"",
+          vendedor:(f.catalogoVendedor&&f.catalogoVendedor.stringValue)||"",
+          grupo:(f.grupoAgente&&f.grupoAgente.stringValue)||"",
+          id:(f.id&&f.id.stringValue)||"",
+          nombre:(f.nombre&&f.nombre.stringValue)||"",
+          user:(f.user&&f.user.stringValue)||"",
+          clave:(f.catalogoClave&&f.catalogoClave.stringValue)||"",
+          password:(f.password&&f.password.stringValue)||(f.clave&&f.clave.stringValue)||"",
+          src:"portal"
+        });
+      });
+    }
+
+    // Try to find matching user
+    var uid = userId.toUpperCase();
     var found = null;
-    (data.documents||[]).forEach(function(doc){
-      var f = doc.fields||{};
-      var vendedor = (f.catalogoVendedor&&f.catalogoVendedor.stringValue)||(f.grupoAgente&&f.grupoAgente.stringValue)||(f.id&&f.id.stringValue)||"";
-      var clave = (f.catalogoClave&&f.catalogoClave.stringValue)||"";
-      var nombre = (f.nombre&&f.nombre.stringValue)||vendedor;
-      if (vendedor.toUpperCase() === userId.toUpperCase() && clave === passVal) {
-        found = {usuario:vendedor, clave:clave, nombre:nombre, activo:true, categorias:"todas"};
+    allUsers.forEach(function(u){
+      var match = (u.username&&u.username.toUpperCase()===uid)
+        || (u.vendedor&&u.vendedor.toUpperCase()===uid)
+        || (u.grupo&&u.grupo.toUpperCase()===uid)
+        || (u.id&&u.id.toUpperCase()===uid)
+        || (u.nombre&&u.nombre.toUpperCase()===uid)
+        || (u.user&&u.user.toUpperCase()===uid);
+      if(match){
+        // Check password: try catalogoClave, then password field
+        var validPass = !passVal 
+          || (u.clave && u.clave===passVal) 
+          || (u.password && u.password===passVal)
+          || (!u.clave && !u.password);
+        if(validPass){
+          found = {usuario:u.vendedor||u.grupo||u.id||u.username, nombre:u.nombre, activo:true, categorias:"todas"};
+        }
       }
     });
 
     if (!found) {
-      var userList=[];
-      (data.documents||[]).forEach(function(doc){
-        var f=doc.fields||{};
-        var v=(f.catalogoVendedor&&f.catalogoVendedor.stringValue)||"";
-        var g=(f.grupoAgente&&f.grupoAgente.stringValue)||"";
-        var i=(f.id&&f.id.stringValue)||"";
-        var n=(f.nombre&&f.nombre.stringValue)||"";
-        var c=(f.catalogoClave&&f.catalogoClave.stringValue)||"";
-        if(v||g||c) userList.push((v||g||i)+" ("+n+") clave:"+(c?"sí":"no"));
-      });
-      if(errEl){errEl.style.display='block'; errEl.textContent='No encontrado. Usuarios disponibles: '+userList.join(", ");}
+      if(errEl){errEl.style.display='block'; errEl.textContent='Usuario o clave incorrectos.';}
       if(btn){btn.textContent='Entrar';btn.disabled=false;}
       return;
     }
 
-    // Login success
     window.ACTIVE_USER = found;
     if(errEl) errEl.style.display='none';
     document.getElementById('entryScreen').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'none';
-    // Try to call main script functions if they loaded
     try{if(typeof registrarAcceso==="function")registrarAcceso(found.usuario,found.nombre);}catch(e){}
     try{if(typeof applyUserCatFilter==="function")applyUserCatFilter();}catch(e){}
     try{if(typeof initDesktop==="function")initDesktop();}catch(e){}
@@ -397,7 +436,7 @@ async function doUserLogin() {
     <div style="font-size:1rem;font-weight:700;text-align:center" id="lbl-login-sub">Introduce tu usuario y clave</div>
     <input id="loginUserInput" type="text" placeholder="Usuario..." autocomplete="username"
       style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;">
-    <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." onkeydown="if(event.key==='Enter')doUserLogin().catch(function(e){console.error(e)})" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
+    <input id="vendorPassInput" type="password" placeholder="Tu clave..." onkeydown="if(event.key==='Enter')doUserLogin().catch(function(e){console.error(e)})" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
     <div id="loginError" style="display:none;color:#B42318;font-size:.82rem;font-weight:600;margin-top:4px;">Usuario o clave incorrectos.</div>
     <button id="loginBtn" onclick="doUserLogin()"
       style="width:100%;max-width:300px;padding:13px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
@@ -424,7 +463,7 @@ async function doUserLogin() {
       </select>
       <svg style="position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
     </div>
-    <input id="vendorPassInput" type="password" placeholder="Introduce tu clave..." onkeydown="if(event.key==='Enter')doUserLogin().catch(function(e){console.error(e)})" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
+    <input id="vendorPassInput" type="password" placeholder="Tu clave..." onkeydown="if(event.key==='Enter')doUserLogin().catch(function(e){console.error(e)})" style="width:100%;max-width:320px;padding:13px 16px;border:2px solid var(--accent);border-radius:10px;font-size:.95rem;font-family:Inter,sans-serif;outline:none;margin-top:8px;">
     <div id="vendorPassError" style="color:#DC2626;font-size:.82rem;display:none;">Clave incorrecta.</div>
     <button onclick="vendorLoginWithPass()" id="lbl-vendor-btn"
       style="width:100%;max-width:320px;padding:13px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Entrar</button>
@@ -2195,7 +2234,7 @@ async function doUserLogin() {
   var userId = userEl ? userEl.value.trim() : '';
   var passVal = passEl ? passEl.value.trim() : '';
 
-  if (!userId) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu usuario.';} return; }
+  if (!userId) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu usuario y clave.';} return; }
   if (!passVal) { if(errEl){errEl.style.display='block'; errEl.textContent='Introduce tu clave.';} return; }
 
   var btn=document.getElementById('loginBtn');
@@ -2781,7 +2820,7 @@ function onVendorSelectChange() {
   var conf = AGENT_CONF[code];
   var hasPass = conf && conf.pass;
   passField.style.display = hasPass ? 'block' : 'none';
-  if (hasPass) passField.placeholder = 'Introduce tu usuario...';
+  if (hasPass) passField.placeholder = 'Introduce tu usuario y clave...';
 }
 
 async function showVendorLogin() {
