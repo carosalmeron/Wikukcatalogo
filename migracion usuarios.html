@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Migrar Usuarios JSONBin → Firebase</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#F7F5F2;padding:20px;max-width:600px;margin:0 auto}h1{font-size:1.2rem;margin-bottom:16px}.card{background:white;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #E8E4DF}.stat{display:flex;justify-content:space-between;padding:6px 0;font-size:.85rem}.stat span:last-child{font-weight:700}button{width:100%;padding:14px;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px}.btn-go{background:#C8612A;color:white}.btn-go:disabled{background:#ccc}#log{background:#1A1816;color:#4ADE80;padding:12px;border-radius:8px;font-family:monospace;font-size:.72rem;max-height:300px;overflow-y:auto;margin-top:12px;white-space:pre-wrap}</style>
+</head><body>
+<h1>🔑 Migrar Usuarios → Firebase</h1>
+<div class="card">
+<div class="stat"><span>Origen:</span><span>JSONBin</span></div>
+<div class="stat"><span>Destino:</span><span>Firebase catalogo/config</span></div>
+<div class="stat"><span>Estado:</span><span id="status">Listo</span></div>
+</div>
+<button class="btn-go" id="goBtn" onclick="migrate()">🚀 Migrar Usuarios</button>
+<div id="log"></div>
+<script>
+var JSONBIN_URL="https://api.jsonbin.io/v3/b/6a1696f3f47d5c455c3bef68";
+var JSONBIN_KEY="$2a$10$zAhfxxS6FB8.waypGH3B4eJ7ha4RqASNb9LvAH4ZHbuE/eV7nknfG";
+var FB="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
+var CORS="https://corsproxy.io/?";
+var _log=document.getElementById("log");
+function log(m){_log.textContent+=m+"\n";_log.scrollTop=_log.scrollHeight;}
+
+async function migrate(){
+  document.getElementById("goBtn").disabled=true;
+  document.getElementById("status").textContent="Migrando...";
+  
+  // 1. Read from JSONBin
+  log("📥 Leyendo usuarios de JSONBin...");
+  var r;
+  try{
+    r=await fetch(JSONBIN_URL+"/latest",{headers:{"X-Master-Key":JSONBIN_KEY}});
+    if(!r.ok){
+      r=await fetch(CORS+JSONBIN_URL+"/latest",{headers:{"X-Master-Key":JSONBIN_KEY}});
+    }
+  }catch(e){
+    r=await fetch(CORS+JSONBIN_URL+"/latest",{headers:{"X-Master-Key":JSONBIN_KEY}});
+  }
+  
+  if(!r.ok){log("❌ Error leyendo JSONBin: "+r.status);return;}
+  var data=JSON.parse(await r.text());
+  var usuarios=(data.record&&data.record.usuarios)?data.record.usuarios:[];
+  var accesos=(data.record&&data.record.accesos)?data.record.accesos:[];
+  
+  log("✅ JSONBin: "+usuarios.length+" usuarios, "+accesos.length+" accesos");
+  usuarios.forEach(function(u){log("   👤 "+u.usuario+" — "+u.nombre);});
+  
+  // 2. Write to Firebase
+  log("\n📤 Escribiendo en Firebase catalogo/config...");
+  var r2=await fetch(FB+"/catalogo/config",{
+    method:"PATCH",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({fields:{
+      usuarios:{stringValue:JSON.stringify(usuarios)},
+      accesos:{stringValue:JSON.stringify(accesos)}
+    }})
+  });
+  
+  if(r2.ok){
+    log("\n✅ Migración completada!");
+    log("   "+usuarios.length+" usuarios migrados a Firebase");
+    log("   "+accesos.length+" registros de acceso migrados");
+    document.getElementById("status").textContent="✅ Completado";
+  }else{
+    log("❌ Error escribiendo Firebase: "+r2.status);
+    document.getElementById("status").textContent="❌ Error";
+  }
+}
+</script></body></html>
