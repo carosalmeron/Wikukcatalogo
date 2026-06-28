@@ -6505,8 +6505,12 @@ initApp();
     var _f=function(n){return (parseFloat(n)||0).toFixed(2).replace('.',',')+'€';};
     var composicion='Base '+_f(precioBaseNum)+' − '+dtoTotal+'% = '+_f(precioConDto);
     if(extrasImporte>0){ composicion+=' + extras ('+extrasLabels.join(', ')+') '+_f(extrasImporte)+' = '+_f(precioFinalNum); }
+    // (v3.41) Calibre y metros: las tripas tienen pr.ca y pr.me; otros productos usan pr.f
+    var _calibre=pr.ca||pr.f||'';
+    var _metros=pr.me||'';
     try{ window.parent.postMessage({type:'WK_PRODUCTO', producto:{
       codigo:codigo||'', nombre:nombre||(pr.n||''), formato:pr.f||'',
+      calibre:_calibre, metros:_metros,
       precio:precioFinalNum.toFixed(2),            // precio FINAL con extras (Opción B)
       precioConDto:precioConDto.toFixed(2),         // precio con dto, sin extras
       precioBase:precioBaseNum.toFixed(2), dto:dto,
