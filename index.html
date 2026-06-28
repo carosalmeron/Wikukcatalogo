@@ -6205,6 +6205,20 @@ initApp();
       };
     }catch(e){ return null; }
   })();
+  // (v3.41) Recibir cliente desde el CRM por postMessage (por si no llegó en la URL)
+  try{
+    window.addEventListener('message', function(ev){
+      var d=ev&&ev.data;
+      if(d&&d.type==='WK_SET_CLIENTE'&&d.cliente&&d.cliente.dto!=null){
+        PP_CLI={
+          cat:d.cliente.cat||'',
+          dto:parseFloat(d.cliente.dto)||0,
+          margen:Math.max(0,parseFloat(d.cliente.margen)||0),
+          nombre:d.cliente.nombre||''
+        };
+      }
+    });
+  }catch(e){}
   // Extras por madeja (precio fijo, independiente del producto). Aplican a tripas excepto deshidratadas.
   var PP_EXTRAS=[
     {l:'Entubado Ríg./Flex.', p:1.75},
