@@ -315,9 +315,61 @@ tr[data-pp]:hover{background:#faf7f4;}
 })();
 </script>
 
+<script>
+// ── PUENTE DE PORTAL ───────────────────────────────────────────────
+// Cuando este catálogo se carga DENTRO del portal (en un iframe), no debe
+// volver a pedir login: entra directo y aplica las secciones permitidas
+// que el portal pasa por ?secciones=key1,key2,...  (sin secciones = todas,
+// p.ej. CEO/Dirección/Admin). Si se abre suelto (público) o como enlace de
+// cliente, NO hace nada y se mantiene el flujo normal.
+(function () {
+  var embedded = false;
+  try { embedded = (window.self !== window.top); } catch (e) { embedded = true; }
+  var isCliente = window.location.search.indexOf('cliente=') !== -1;
+  if (!embedded || isCliente) return; // solo en portal y nunca en enlace de cliente
+
+  // Ocultar de inmediato la pantalla de entrada para evitar parpadeo de login
+  document.write('<style id="portalBridgeStyle">#entryScreen,#loginScreen{display:none!important}</style>');
+
+  function entrarDesdePortal() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var secs = params.get('secciones');
+      if (secs && secs.trim()) {
+        var map = {};
+        secs.split(',').forEach(function (k) { k = k.trim(); if (k) map[k] = true; });
+        ACTIVE_VENDOR_CATS = map;            // solo las secciones permitidas
+      } else {
+        ACTIVE_VENDOR_CATS = null;           // sin restricción → todas
+      }
+      window.ACTIVE_USER = { usuario: 'PORTAL', nombre: 'Portal', activo: true,
+        categorias: ACTIVE_VENDOR_CATS || 'todas' };
+
+      var es = document.getElementById('entryScreen'); if (es) es.style.display = 'none';
+      var ls = document.getElementById('loginScreen');  if (ls) ls.style.display = 'none';
+      var bs = document.getElementById('portalBridgeStyle'); if (bs) bs.remove();
+
+      try { applyVendorCatFilter(); } catch (e) {}
+    } catch (e) {}
+  }
+
+  function arrancar() {
+    entrarDesdePortal();
+    // Re-aplicar por si alguna inicialización posterior reinicia el filtro
+    setTimeout(function () { try { applyVendorCatFilter(); } catch (e) {} }, 400);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', arrancar);
+  } else {
+    arrancar();
+  }
+})();
+</script>
+
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.89</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v2.90</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -5036,6 +5088,7 @@ var ALL_CATS = [
   {key:'taberner_esp', label:'Taberner — Especias'},
   {key:'taberner_prep',label:'Taberner — Preparados'},
   {key:'campana_gen',  label:'La Campana'},
+  {key:'tripas_naturales',label:'Tripas Naturales'},
   {key:'spot_wikuk',   label:'Spot Wikuk'},
   {key:'spot_ceylan',  label:'Spot Ceylan'},
   {key:'spot_taberner',label:'Spot Taberner'},
