@@ -6258,8 +6258,12 @@ initApp();
     var rows=[];
     // Fila destacada: precio del cliente (su tarifa)
     rows.push({t:'⭐ Precio '+(cli.cat||'cliente')+' (−'+cli.dto+'%)', p:precioCli, sel:true, extra:0, aprob:false});
-    // Descuentos adicionales que el vendedor puede aplicar: 1..(margen+algunos que requieren aprobación)
-    var maxMostrar=Math.max(cli.margen, 4); // mostramos al menos hasta 4% para que vea los de aprobación
+    // Filas de descuento extra elegibles directamente: 1..margen (tope visual 10)
+    var margenVisible=Math.min(cli.margen, 10);
+    // Filas que requieren aprobación: hasta 3 por encima del margen (tope visual)
+    var maxMostrar=Math.min(margenVisible+3, 10);
+    // Si el margen es enorme (CEO), no añadir filas de "aprobación" (no aplican)
+    if(cli.margen>=10) maxMostrar=10;
     for(var d=1; d<=maxMostrar; d++){
       var totalDto=cli.dto+d; // descuento acumulado total sobre base
       var precio=base*(1-totalDto/100);
