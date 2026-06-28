@@ -6370,12 +6370,37 @@ initApp();
     return selVal+sum;
   }
 
+  function extrasSeleccionados(){
+    var sh=document.getElementById('ppSheet'); if(!sh) return '';
+    var on=sh.querySelectorAll('.pp-extra.on'); var labels=[];
+    for(var i=0;i<on.length;i++){ var l=on[i].querySelector('.pe-l'); if(l) labels.push((l.textContent||'').trim()); }
+    return labels.join(', ');
+  }
+
+  function precioDesglose(){
+    var sh=document.getElementById('ppSheet'); if(!sh) return null;
+    var selRow=sh.querySelector('.pp-row.sel'); if(!selRow) return null;
+    var selVal=parseFloat(selRow.getAttribute('data-val'))||0;
+    var lbl=selRow.getAttribute('data-lbl')||'';
+    var m=lbl.match(/-(\d+)\s*%/);
+    var dto=m?parseInt(m[1],10):0;
+    var base=selVal;
+    var block=selRow.closest?selRow.closest('.pp-block'):null;
+    if(block){ var baseRow=block.querySelector('.pp-row.base'); if(baseRow) base=parseFloat(baseRow.getAttribute('data-val'))||selVal; }
+    return {base:base, dto:dto, final:selVal};
+  }
+
   function devolver(codigo, nombre, precioElegido){
     var pr=buscarProducto(codigo)||{};
+    var desg=precioDesglose();
     var precio=(precioElegido!=null && !isNaN(precioElegido) && precioElegido>0)
-      ? precioElegido.toFixed(2) : (pr.p||'');
+      ? precioElegido.toFixed(2) : (desg? desg.final.toFixed(2) : (pr.p||''));
+    var precioBase=desg? desg.base.toFixed(2) : (pr.p||'');
+    var dto=desg? desg.dto : 0;
     try{ window.parent.postMessage({type:'WK_PRODUCTO', producto:{
-      codigo:codigo||'', nombre:nombre||(pr.n||''), formato:pr.f||'', precio:precio
+      codigo:codigo||'', nombre:nombre||(pr.n||''), formato:pr.f||'',
+      precio:precio, precioBase:precioBase, dto:dto,
+      descripcion:extrasSeleccionados()
     }}, '*'); }catch(e){}
   }
 
