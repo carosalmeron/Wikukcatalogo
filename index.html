@@ -6447,11 +6447,23 @@ initApp();
   function devolver(codigo, nombre, precioElegido){
     var pr=buscarProducto(codigo)||{};
     var desg=precioDesglose();
-    var precio=(precioElegido!=null && !isNaN(precioElegido) && precioElegido>0)
-      ? precioElegido.toFixed(2) : (desg? desg.final.toFixed(2) : (pr.p||''));
-    var precioBase=desg? desg.base.toFixed(2) : (pr.p||'');
+    // Precio de la fila elegida (con dto, SIN extras)
+    var precioConDto=desg? desg.final : (parseFloat(pr.p)||0);
+    var precioBaseNum=desg? desg.base : (parseFloat(pr.p)||0);
     var dto=desg? desg.dto : 0;
-    // (v3.41) En modo cliente, leer dto total y flag de aprobación de la fila elegida
+    // (v3.41) Extras seleccionados: importe y etiquetas
+    var extrasImporte=0, extrasLabels=[];
+    try{
+      var sh0=document.getElementById('ppSheet');
+      var on=sh0?sh0.querySelectorAll('.pp-extra.on'):[];
+      for(var k=0;k<on.length;k++){
+        extrasImporte+=parseFloat(on[k].getAttribute('data-p'))||0;
+        var le=on[k].querySelector('.pe-l'); if(le) extrasLabels.push((le.textContent||'').trim());
+      }
+    }catch(e){}
+    // Precio final = precio con dto + extras
+    var precioFinalNum=precioConDto+extrasImporte;
+    // dto total acumulado y flag aprobación (modo cliente)
     var dtoTotal=dto, requiereAprob=false, dtoTarifaCli=null;
     try{
       var sh=document.getElementById('ppSheet');
@@ -6463,11 +6475,19 @@ initApp();
         dtoTarifaCli=PP_CLI.dto;
       }
     }catch(e){}
+    // (v3.41) Composición en texto: precio base − dto% + extras = total
+    var _f=function(n){return (parseFloat(n)||0).toFixed(2).replace('.',',')+'€';};
+    var composicion='Base '+_f(precioBaseNum)+' − '+dtoTotal+'% = '+_f(precioConDto);
+    if(extrasImporte>0){ composicion+=' + extras ('+extrasLabels.join(', ')+') '+_f(extrasImporte)+' = '+_f(precioFinalNum); }
     try{ window.parent.postMessage({type:'WK_PRODUCTO', producto:{
       codigo:codigo||'', nombre:nombre||(pr.n||''), formato:pr.f||'',
-      precio:precio, precioBase:precioBase, dto:dto,
+      precio:precioFinalNum.toFixed(2),            // precio FINAL con extras (Opción B)
+      precioConDto:precioConDto.toFixed(2),         // precio con dto, sin extras
+      precioBase:precioBaseNum.toFixed(2), dto:dto,
       dtoTotal:dtoTotal, requiereAprobacion:requiereAprob, dtoTarifaCliente:dtoTarifaCli,
-      descripcion:extrasSeleccionados()
+      extrasImporte:extrasImporte.toFixed(2), extras:extrasLabels.join(', '),
+      composicion:composicion,
+      descripcion:extrasLabels.join(', ')
     }}, '*'); }catch(e){}
   }
 
