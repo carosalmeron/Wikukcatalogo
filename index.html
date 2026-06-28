@@ -6473,6 +6473,9 @@ initApp();
         if(!isNaN(td)) dtoTotal=td;
         requiereAprob=selRow.getAttribute('data-aprob')==='1';
         dtoTarifaCli=PP_CLI.dto;
+        // (v3.41 fix) En modo cliente, la base REAL es el precio de tarifa 0 (_ppBase),
+        // no el precio ya rebajado de la fila del cliente.
+        if(!isNaN(_ppBase)&&_ppBase>0) precioBaseNum=_ppBase;
       }
     }catch(e){}
     // (v3.41) Composición en texto: precio base − dto% + extras = total
