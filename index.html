@@ -323,10 +323,14 @@ tr[data-pp]:hover{background:#faf7f4;}
 // p.ej. CEO/Dirección/Admin). Si se abre suelto (público) o como enlace de
 // cliente, NO hace nada y se mantiene el flujo normal.
 (function () {
+  var _bp = new URLSearchParams(window.location.search);
+  var portalFlag = _bp.get('portal') === '1';
   var embedded = false;
   try { embedded = (window.self !== window.top); } catch (e) { embedded = true; }
   var isCliente = window.location.search.indexOf('cliente=') !== -1;
-  if (!embedded || isCliente) return; // solo en portal y nunca en enlace de cliente
+  // Entra sin login si va embebido en el portal (iframe) O lleva ?portal=1
+  // (botón del CRM en pestaña nueva). Nunca en enlace de cliente.
+  if ((!embedded && !portalFlag) || isCliente) return;
 
   // Ocultar de inmediato la pantalla de entrada para evitar parpadeo de login
   document.write('<style id="portalBridgeStyle">#entryScreen,#loginScreen{display:none!important}</style>');
@@ -6317,6 +6321,58 @@ initApp();
   });
   // Cerrar con Escape
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closePricePanel();});
+})();
+</script>
+<script>
+// ── MODO SELECCIÓN PARA EL CRM ──────────────────────────────────
+// Si el catálogo se abre con ?seleccion=1 (botón 📖 del CRM), al pulsar un
+// producto se DEVUELVE al CRM (postMessage con código, nombre, formato y
+// precio) en lugar de rellenar la solicitud de muestra. Además abre el
+// buscador de productos directamente.
+(function () {
+  var p = new URLSearchParams(location.search);
+  if (p.get('seleccion') !== '1') return;
+  window.WK_SELECCION = true;
+
+  function buscarProducto(codigo) {
+    var found = null;
+    try {
+      Object.keys(DATA).forEach(function (k) {
+        var subs = (DATA[k] && DATA[k].subs) || {};
+        Object.keys(subs).forEach(function (sk) {
+          (subs[sk] || []).forEach(function (pr) {
+            if (!found && pr && pr.c === codigo) found = pr;
+          });
+        });
+      });
+    } catch (e) {}
+    return found;
+  }
+
+  function enviarAlCRM(codigo, nombre, familia) {
+    var pr = buscarProducto(codigo) || {};
+    var payload = {
+      codigo: codigo || '',
+      nombre: nombre || pr.n || '',
+      formato: pr.f || '',
+      precio: pr.p || '',
+      familia: familia || ''
+    };
+    try { window.parent.postMessage({ type: 'WK_PRODUCTO', producto: payload }, '*'); } catch (e) {}
+  }
+
+  function activar() {
+    // Sustituir la acción de elegir producto por "devolver al CRM"
+    window.elegirProducto = function (codigo, nombre, familia) { enviarAlCRM(codigo, nombre, familia); };
+    // Abrir el buscador de productos directamente
+    try { if (typeof abrirBuscadorProducto === 'function') abrirBuscadorProducto(); } catch (e) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { setTimeout(activar, 400); });
+  } else {
+    setTimeout(activar, 400);
+  }
 })();
 </script>
 </body>
