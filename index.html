@@ -6216,6 +6216,14 @@ initApp();
           margen:Math.max(0,parseFloat(d.cliente.margen)||0),
           nombre:d.cliente.nombre||''
         };
+        // Si el panel de precios está abierto, reabrirlo con el cliente ya aplicado
+        try{
+          var _sh=document.getElementById('ppSheet');
+          var abierto=_sh&&(_sh.classList.contains('open')||_sh.style.display==='block'||_sh.offsetParent!==null);
+          if(abierto&&window._ppUltimo&&typeof window.openPricePanel==='function'){
+            window.openPricePanel(window._ppUltimo.code,window._ppUltimo.name,window._ppUltimo.priceRaw,window._ppUltimo.isTrip);
+          }
+        }catch(e2){}
       }
     });
   }catch(e){}
@@ -6296,6 +6304,7 @@ initApp();
 
   window.openPricePanel=function(code,name,priceRaw,isTrip){
     _ppOpenedAt=Date.now();
+    window._ppUltimo={code:code,name:name,priceRaw:priceRaw,isTrip:isTrip};
     var _ov=document.getElementById('ppOverlay'), _sh=document.getElementById('ppSheet');
     if(!_sh) return;
     var base=_ppNum(priceRaw), inner='';
