@@ -6557,5 +6557,16 @@ initApp();
   }
 })();
 </script>
+<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.41.0</div>
+<script>
+// Mostrar si llegó cliente, para diagnóstico
+(function(){
+  function pinta(){
+    var b=document.getElementById('catVerBadge'); if(!b) return;
+    try{ b.textContent='cat v3.41.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
+  }
+  setInterval(pinta, 800);
+})();
+</script>
 </body>
 </html>
