@@ -373,7 +373,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.42</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.45</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -3546,6 +3546,9 @@ var _fbProductsLoaded = false;
           var _me=(f.medida&&f.medida.stringValue)||(f.metros&&f.metros.stringValue)||(f.me&&f.me.stringValue)||(f.metro&&f.metro.stringValue)||(f.longitud&&f.longitud.stringValue)||(f.largo&&f.largo.stringValue)||"";
           if(_me) p.me=_me;
           if(f.tipoPromo) p.cat=(f.tipoPromo.stringValue)||"";
+          // (v3.45) Precio anterior desde Firebase para flecha ↑/↓
+          var _pa=(f.precioAnterior&&f.precioAnterior.stringValue)||"";
+          if(_pa){var _paN=parseFloat(String(_pa).replace(",","."));if(!isNaN(_paN)&&_paN>0&&p.c){window.FB_PREV_PRICES=window.FB_PREV_PRICES||{};window.FB_PREV_PRICES[p.c]=_paN;}}
           if(p.c && catKey){
             if(!DATA[catKey]) DATA[catKey]={label:(f.categoria&&f.categoria.stringValue)||catKey, subs:{}};
             if(!DATA[catKey].subs[sub]) DATA[catKey].subs[sub]=[];
@@ -3640,8 +3643,9 @@ function _ppEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/
 function ppData(p){return ' data-pp="1" data-code="'+_ppEsc(p.c)+'" data-name="'+_ppEsc(p.n)+'" data-price="'+_ppEsc(p.p)+'" data-ca="'+_ppEsc(p.ca||'')+'" data-me="'+_ppEsc(p.me||'')+'" data-fmt="'+_ppEsc(p.f||'')+'"';}
 
 function getPriceDiff(code, currentPriceStr) {
-  if (!PREV_PRICES[code]) return '';
-  var prev = PREV_PRICES[code];
+  // (v3.45) Prioridad: precio anterior de Firebase; si no, PREV_PRICES local
+  var prev=(window.FB_PREV_PRICES&&window.FB_PREV_PRICES[code])||PREV_PRICES[code];
+  if (!prev) return '';
   var curr = parseFloat(currentPriceStr.replace(',','.'));
   if (isNaN(curr) || curr === prev) return '';
   var pct = ((curr - prev) / prev * 100).toFixed(1);
@@ -6554,8 +6558,8 @@ initApp();
     // (v3.41) Mostrar versión y estado del cliente para diagnóstico
     setInterval(function(){
       try{
-        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.42.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
-        else { b.style.background='#2E6B42'; b.textContent='v3.42.0 · sin cliente — toca un artículo'; }
+        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.45.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
+        else { b.style.background='#2E6B42'; b.textContent='v3.45.0 · sin cliente — toca un artículo'; }
       }catch(e){}
     }, 700);
   }
@@ -6589,13 +6593,13 @@ initApp();
   }
 })();
 </script>
-<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.42.0</div>
+<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.45.0</div>
 <script>
 // Mostrar si llegó cliente, para diagnóstico
 (function(){
   function pinta(){
     var b=document.getElementById('catVerBadge'); if(!b) return;
-    try{ b.textContent='cat v3.42.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
+    try{ b.textContent='cat v3.45.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
   }
   setInterval(pinta, 800);
 })();
