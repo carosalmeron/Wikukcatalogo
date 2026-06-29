@@ -373,7 +373,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.51</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.52</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -6295,6 +6295,17 @@ initApp();
     var rows=[];
     // Fila destacada: precio del cliente (su tarifa)
     rows.push({t:'⭐ Precio '+(cli.cat||'cliente')+' (−'+cli.dto+'%)', p:precioCli, sel:true, extra:0, aprob:false});
+    // (v3.52) Si el descuento del cliente ya es ≥25%, no ofrecer descuentos extra
+    if(cli.dto>=25){
+      return rows.map(function(r){
+        var cls='pp-row'+(r.sel?' base sel':'');
+        var lblTxt=(cli.cat||'Cliente')+' '+r.t;
+        var badge=r.aprob?'<span style="font-size:.62rem;font-weight:800;color:#fff;background:#C0392B;border-radius:6px;padding:1px 6px;margin-left:6px">APROBACIÓN</span>':'';
+        return '<div class="'+cls+'" data-val="'+r.p.toFixed(4)+'" data-lbl="'+_ppEscHtml(lblTxt)+'"'
+          +' data-extra="'+r.extra+'" data-aprob="'+(r.aprob?'1':'0')+'" data-totaldto="'+(cli.dto+r.extra)+'">'
+          +'<span class="lbl">'+r.t+badge+'</span><span class="val">'+_ppFmt(r.p)+'</span></div>';
+      }).join('');
+    }
     // Filas de descuento extra elegibles directamente: 1..margen (tope visual 10)
     var margenVisible=Math.min(cli.margen, 10);
     // Filas que requieren aprobación: hasta 3 por encima del margen (tope visual)
@@ -6304,7 +6315,7 @@ initApp();
     for(var d=1; d<=maxMostrar; d++){
       var totalDto=cli.dto+d; // descuento acumulado total sobre base
       var precio=base*(1-totalDto/100);
-      var requiereAprob=(d>cli.margen);
+      var requiereAprob=false; // (v3.52) sin aprobación: añadir línea directamente
       rows.push({t:'−'+d+'% extra (total −'+totalDto+'%)', p:precio, sel:false, extra:d, aprob:requiereAprob});
     }
     return rows.map(function(r){
@@ -6514,7 +6525,7 @@ initApp();
       if(selRow && PP_CLI){
         var td=parseFloat(selRow.getAttribute('data-totaldto'));
         if(!isNaN(td)) dtoTotal=td;
-        requiereAprob=selRow.getAttribute('data-aprob')==='1';
+        requiereAprob=false; // (v3.52) catálogo no envía a estrategia: se añade la línea directamente
         dtoTarifaCli=PP_CLI.dto;
         // (v3.41 fix) En modo cliente, la base REAL es el precio de tarifa 0 (_ppBase),
         // no el precio ya rebajado de la fila del cliente.
@@ -6561,8 +6572,8 @@ initApp();
     // (v3.41) Mostrar versión y estado del cliente para diagnóstico
     setInterval(function(){
       try{
-        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.51.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
-        else { b.style.background='#2E6B42'; b.textContent='v3.51.0 · sin cliente — toca un artículo'; }
+        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.52.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
+        else { b.style.background='#2E6B42'; b.textContent='v3.52.0 · sin cliente — toca un artículo'; }
       }catch(e){}
     }, 700);
   }
@@ -6596,13 +6607,13 @@ initApp();
   }
 })();
 </script>
-<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.51.0</div>
+<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.52.0</div>
 <script>
 // Mostrar si llegó cliente, para diagnóstico
 (function(){
   function pinta(){
     var b=document.getElementById('catVerBadge'); if(!b) return;
-    try{ b.textContent='cat v3.51.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
+    try{ b.textContent='cat v3.52.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
   }
   setInterval(pinta, 800);
 })();
