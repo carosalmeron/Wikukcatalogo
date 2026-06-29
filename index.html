@@ -373,7 +373,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.41</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.42</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -3539,8 +3539,12 @@ var _fbProductsLoaded = false;
           if(f.produccion) p.pr=(f.produccion.stringValue)||"";
           if(f.calidad) p.q=(f.calidad.stringValue)||"";
           if(f.tira) p.t=(f.tira.stringValue)||"";
-          if(f.calibre) p.ca=(f.calibre.stringValue)||"";
-          if(f.medida) p.me=(f.medida.stringValue)||"";
+          // calibre: probar varios nombres
+          var _ca=(f.calibre&&f.calibre.stringValue)||(f.ca&&f.ca.stringValue)||"";
+          if(_ca) p.ca=_ca;
+          // metros/medida: probar varios nombres
+          var _me=(f.medida&&f.medida.stringValue)||(f.metros&&f.metros.stringValue)||(f.me&&f.me.stringValue)||(f.metro&&f.metro.stringValue)||(f.longitud&&f.longitud.stringValue)||(f.largo&&f.largo.stringValue)||"";
+          if(_me) p.me=_me;
           if(f.tipoPromo) p.cat=(f.tipoPromo.stringValue)||"";
           if(p.c && catKey){
             if(!DATA[catKey]) DATA[catKey]={label:(f.categoria&&f.categoria.stringValue)||catKey, subs:{}};
@@ -3552,10 +3556,17 @@ var _fbProductsLoaded = false;
       nextPage=(data.nextPageToken)||null;
     }while(nextPage);
     if(all.length>100){
+      // (v3.41) Guardar ca/me/f de los productos hardcodeados ANTES de sobreescribir,
+      // para usarlos como respaldo si Firebase no los trae.
+      var _backup={};
+      try{ Object.keys(DATA).forEach(function(k){var subs=(DATA[k]&&DATA[k].subs)||{};Object.keys(subs).forEach(function(sk){(subs[sk]||[]).forEach(function(pr){if(pr&&pr.c)_backup[pr.c]={ca:pr.ca||'',me:pr.me||'',f:pr.f||''};});});}); }catch(e){}
       // Clear existing subs and repopulate from Firebase
       Object.keys(DATA).forEach(function(k){if(DATA[k].subs) DATA[k].subs={};});
       all.forEach(function(item){
         if(!DATA[item.catKey].subs[item.sub]) DATA[item.catKey].subs[item.sub]=[];
+        // Respaldo: si Firebase no trae ca/me, usar el hardcodeado por código
+        var _b=_backup[item.product.c];
+        if(_b){ if(!item.product.ca&&_b.ca)item.product.ca=_b.ca; if(!item.product.me&&_b.me)item.product.me=_b.me; if(!item.product.f&&_b.f)item.product.f=_b.f; }
         DATA[item.catKey].subs[item.sub].push(item.product);
       });
       console.log("📦 Firebase: "+all.length+" productos cargados");
@@ -6501,8 +6512,15 @@ initApp();
         // (v3.41 fix) En modo cliente, la base REAL es el precio de tarifa 0 (_ppBase),
         // no el precio ya rebajado de la fila del cliente.
         if(!isNaN(_ppBase)&&_ppBase>0) precioBaseNum=_ppBase;
+        // (v3.41 fix) Si no se detectó dto en la fila, usar el dto de la tarifa del cliente
+        if((!dtoTotal||dtoTotal===0)&&PP_CLI.dto) dtoTotal=PP_CLI.dto;
       }
     }catch(e){}
+    // (v3.41) Recalcular precioConDto desde la base real y el dto total (coherencia)
+    if(!isNaN(precioBaseNum)&&precioBaseNum>0&&dtoTotal>0){
+      precioConDto=precioBaseNum*(1-dtoTotal/100);
+      precioFinalNum=precioConDto+extrasImporte;
+    }
     // (v3.41) Composición en texto: precio base − dto% + extras = total
     var _f=function(n){return (parseFloat(n)||0).toFixed(2).replace('.',',')+'€';};
     var composicion='Base '+_f(precioBaseNum)+' − '+dtoTotal+'% = '+_f(precioConDto);
@@ -6536,8 +6554,8 @@ initApp();
     // (v3.41) Mostrar versión y estado del cliente para diagnóstico
     setInterval(function(){
       try{
-        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.41.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
-        else { b.style.background='#2E6B42'; b.textContent='v3.41.0 · sin cliente — toca un artículo'; }
+        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.42.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
+        else { b.style.background='#2E6B42'; b.textContent='v3.42.0 · sin cliente — toca un artículo'; }
       }catch(e){}
     }, 700);
   }
@@ -6571,13 +6589,13 @@ initApp();
   }
 })();
 </script>
-<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.41.0</div>
+<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.42.0</div>
 <script>
 // Mostrar si llegó cliente, para diagnóstico
 (function(){
   function pinta(){
     var b=document.getElementById('catVerBadge'); if(!b) return;
-    try{ b.textContent='cat v3.41.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
+    try{ b.textContent='cat v3.42.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
   }
   setInterval(pinta, 800);
 })();
