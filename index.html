@@ -373,7 +373,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.45</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.51</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -6476,8 +6476,11 @@ initApp();
     var selRow=sh.querySelector('.pp-row.sel'); if(!selRow) return null;
     var selVal=parseFloat(selRow.getAttribute('data-val'))||0;
     var lbl=selRow.getAttribute('data-lbl')||'';
-    var m=lbl.match(/-(\d+)\s*%/);
-    var dto=m?parseInt(m[1],10):0;
+    // (v3.51) Si la fila es de descuento extra, el dto real es el "total −XX%"; si no, el primer −XX%
+    var dto=0;
+    var _td=parseFloat(selRow.getAttribute('data-totaldto'));
+    if(!isNaN(_td)){ dto=_td; }
+    else { var mTot=lbl.match(/total\s*−?-?(\d+)\s*%/i); var m=lbl.match(/-(\d+)\s*%/); dto=mTot?parseInt(mTot[1],10):(m?parseInt(m[1],10):0); }
     var base=selVal;
     var block=selRow.closest?selRow.closest('.pp-block'):null;
     if(block){ var baseRow=block.querySelector('.pp-row.base'); if(baseRow) base=parseFloat(baseRow.getAttribute('data-val'))||selVal; }
@@ -6558,8 +6561,8 @@ initApp();
     // (v3.41) Mostrar versión y estado del cliente para diagnóstico
     setInterval(function(){
       try{
-        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.45.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
-        else { b.style.background='#2E6B42'; b.textContent='v3.45.0 · sin cliente — toca un artículo'; }
+        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.51.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
+        else { b.style.background='#2E6B42'; b.textContent='v3.51.0 · sin cliente — toca un artículo'; }
       }catch(e){}
     }, 700);
   }
@@ -6593,13 +6596,13 @@ initApp();
   }
 })();
 </script>
-<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.45.0</div>
+<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.51.0</div>
 <script>
 // Mostrar si llegó cliente, para diagnóstico
 (function(){
   function pinta(){
     var b=document.getElementById('catVerBadge'); if(!b) return;
-    try{ b.textContent='cat v3.45.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
+    try{ b.textContent='cat v3.51.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
   }
   setInterval(pinta, 800);
 })();
