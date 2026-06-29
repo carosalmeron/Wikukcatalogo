@@ -373,7 +373,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.52</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.53</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -6306,12 +6306,11 @@ initApp();
           +'<span class="lbl">'+r.t+badge+'</span><span class="val">'+_ppFmt(r.p)+'</span></div>';
       }).join('');
     }
-    // Filas de descuento extra elegibles directamente: 1..margen (tope visual 10)
-    var margenVisible=Math.min(cli.margen, 10);
-    // Filas que requieren aprobación: hasta 3 por encima del margen (tope visual)
-    var maxMostrar=Math.min(margenVisible+3, 10);
-    // Si el margen es enorme (CEO), no añadir filas de "aprobación" (no aplican)
-    if(cli.margen>=10) maxMostrar=10;
+    // (v3.53) Filas de descuento extra: hasta el margen real del usuario (límite por rol)
+    // Tope de seguridad: nunca más de 40 filas y nunca llegar a dto total 99%
+    var margenReal=Math.max(0, Math.floor(cli.margen||0));
+    var maxPorTotal=Math.max(0, 98-cli.dto); // no permitir que el total llegue a 99%+
+    var maxMostrar=Math.min(margenReal, maxPorTotal, 40);
     for(var d=1; d<=maxMostrar; d++){
       var totalDto=cli.dto+d; // descuento acumulado total sobre base
       var precio=base*(1-totalDto/100);
@@ -6572,8 +6571,8 @@ initApp();
     // (v3.41) Mostrar versión y estado del cliente para diagnóstico
     setInterval(function(){
       try{
-        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.52.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
-        else { b.style.background='#2E6B42'; b.textContent='v3.52.0 · sin cliente — toca un artículo'; }
+        if(PP_CLI){ b.style.background='#1D4ED8'; b.textContent='✅ v3.53.0 · Cliente: '+(PP_CLI.cat||'?')+' (−'+PP_CLI.dto+'%) — toca un artículo'; }
+        else { b.style.background='#2E6B42'; b.textContent='v3.53.0 · sin cliente — toca un artículo'; }
       }catch(e){}
     }, 700);
   }
@@ -6607,13 +6606,13 @@ initApp();
   }
 })();
 </script>
-<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.52.0</div>
+<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.53.0</div>
 <script>
 // Mostrar si llegó cliente, para diagnóstico
 (function(){
   function pinta(){
     var b=document.getElementById('catVerBadge'); if(!b) return;
-    try{ b.textContent='cat v3.52.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
+    try{ b.textContent='cat v3.53.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
   }
   setInterval(pinta, 800);
 })();
