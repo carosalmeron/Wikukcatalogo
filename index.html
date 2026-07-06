@@ -1713,16 +1713,16 @@ function stockGrupo(c){
   c=String(c).trim().toUpperCase();
   if(!WK_STOCK._memo)WK_STOCK._memo={};
   if(WK_STOCK._memo[c]!==undefined)return WK_STOCK._memo[c];
-  var ex=WK_STOCK.exact||{},envs=[],tot=0,lleg=0,pref=c+'.';
+  var ex=WK_STOCK.exact||{},envs=[],tot=0,lleg=0,comp=0,pref=c+'.';
   for(var k in ex){
     if(k===c||k.indexOf(pref)===0){
-      var st=ex[k][0]||0,lg=ex[k][1]||0;
-      envs.push([k,st,lg]);tot+=st;lleg+=lg;
+      var v=ex[k]||[],st=v[0]||0,lg=v[1]||0,cm=v[2]||0;
+      envs.push([k,st,lg,cm]);tot+=st;lleg+=lg;comp+=cm;
     }
   }
   if(!envs.length){WK_STOCK._memo[c]=null;return null;}
   envs.sort(function(a,b){return b[1]-a[1];});
-  var r={total:Math.round(tot*100)/100,lleg:Math.round(lleg*100)/100,envases:envs};
+  var r={total:Math.round(tot*100)/100,lleg:Math.round(lleg*100)/100,comp:Math.round(comp*100)/100,envases:envs};
   WK_STOCK._memo[c]=r;return r;
 }
 // compat: stock del código exacto (por si algo lo usa)
@@ -1740,23 +1740,40 @@ function stockChip(c){
   if(g.lleg>0)chip+='<span class="stk-chip in" title="Entradas previstas">+'+g.lleg.toLocaleString('es-ES')+'</span>';
   return chip;
 }
-// Popup con el desglose por envases
+// Popup con el desglose por envases (stock · entradas · comprometido · disponible)
 function showStockDetalle(el){
   try{
     var c=el.getAttribute('data-stkcode');if(!c)return;
     var g=stockGrupo(c);if(!g)return;
+    function nf(n){return (Math.round((n||0)*100)/100).toLocaleString('es-ES');}
+    var GRID='display:grid;grid-template-columns:1.35fr .72fr .72fr .72fr .82fr;gap:6px;align-items:center';
+    var head='<div style="'+GRID+';font-size:.63rem;color:#8A8078;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:6px 0;border-bottom:2px solid #EDE8E1">'
+      +'<span>Envase</span><span style="text-align:right">Stock</span><span style="text-align:right">Entr.</span><span style="text-align:right">Comp.</span><span style="text-align:right">Disp.</span></div>';
     var rows=g.envases.map(function(e){
-      var etq=e[0]===c?(e[0]+' · base'):e[0];
-      var lg=e[2]>0?(' <span style="color:#2563EB;font-weight:600">+'+e[2].toLocaleString('es-ES')+'</span>'):'';
-      var col=e[1]>0?'#166534':'#9CA3AF';
-      return '<div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid #F0EDE8"><span style="color:#4A443E">'+etq+'</span><span style="font-weight:700;color:'+col+'">'+e[1].toLocaleString('es-ES')+lg+'</span></div>';
+      var cod=e[0],st=e[1]||0,lg=e[2]||0,cm=e[3]||0,dp=Math.round((st-cm)*100)/100;
+      var etq=cod===c?(cod+' · base'):cod;
+      var stCol=st>0?'#166534':'#9CA3AF';
+      var dpCol=dp>0?'#166534':(dp<0?'#B91C1C':'#9CA3AF');
+      return '<div style="'+GRID+';font-size:.8rem;padding:6px 0;border-bottom:1px solid #F0EDE8">'
+        +'<span style="color:#4A443E;word-break:break-all">'+etq+'</span>'
+        +'<span style="text-align:right;font-weight:700;color:'+stCol+'">'+nf(st)+'</span>'
+        +'<span style="text-align:right;color:'+(lg>0?'#2563EB':'#C7C1B8')+'">'+(lg>0?nf(lg):'·')+'</span>'
+        +'<span style="text-align:right;color:'+(cm>0?'#D97706':'#C7C1B8')+'">'+(cm>0?nf(cm):'·')+'</span>'
+        +'<span style="text-align:right;font-weight:700;color:'+dpCol+'">'+nf(dp)+'</span></div>';
     }).join('');
-    var html='<div id="stk-modal-bg" onclick="closeStockDetalle()" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px">'
-      +'<div onclick="event.stopPropagation()" style="background:#fff;border-radius:16px;max-width:440px;width:100%;max-height:82vh;overflow:auto;padding:20px 22px;font-family:inherit;box-shadow:0 16px 48px rgba(0,0,0,.28)">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><strong style="font-size:1.05rem;color:#2A2420">📦 Stock por envase</strong><button onclick="closeStockDetalle()" style="border:none;background:#F0EDE8;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:1.2rem;color:#6B645C">×</button></div>'
-      +'<div style="font-size:.85rem;color:#8A8078;margin-bottom:4px">'+c+'</div>'
-      +'<div style="font-size:.82rem;color:#6B645C;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #EDE8E1">Total <strong style="color:#166534;font-size:1rem">'+g.total.toLocaleString('es-ES')+'</strong>'+(g.lleg>0?' · entradas previstas <strong style="color:#2563EB">+'+g.lleg.toLocaleString('es-ES')+'</strong>':'')+' · SAP a '+WK_STOCK.fecha+'</div>'
-      +rows
+    var dispTot=Math.round((g.total-(g.comp||0))*100)/100;
+    var totRow='<div style="'+GRID+';font-size:.82rem;padding:8px 0 2px;border-top:2px solid #EDE8E1;font-weight:800">'
+      +'<span style="color:#2A2420">TOTAL</span>'
+      +'<span style="text-align:right;color:#166534">'+nf(g.total)+'</span>'
+      +'<span style="text-align:right;color:'+((g.lleg||0)>0?'#2563EB':'#C7C1B8')+'">'+((g.lleg||0)>0?nf(g.lleg):'·')+'</span>'
+      +'<span style="text-align:right;color:'+((g.comp||0)>0?'#D97706':'#C7C1B8')+'">'+((g.comp||0)>0?nf(g.comp):'·')+'</span>'
+      +'<span style="text-align:right;color:'+(dispTot>0?'#166534':(dispTot<0?'#B91C1C':'#9CA3AF'))+'">'+nf(dispTot)+'</span></div>';
+    var html='<div id="stk-modal-bg" onclick="closeStockDetalle()" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px">'
+      +'<div onclick="event.stopPropagation()" style="background:#fff;border-radius:16px;max-width:480px;width:100%;max-height:82vh;overflow:auto;padding:18px 20px;font-family:inherit;box-shadow:0 16px 48px rgba(0,0,0,.28)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><strong style="font-size:1.05rem;color:#2A2420">📦 Stock por envase</strong><button onclick="closeStockDetalle()" style="border:none;background:#F0EDE8;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:1.2rem;color:#6B645C">×</button></div>'
+      +'<div style="font-size:.85rem;color:#8A8078;margin-bottom:10px">'+c+' · SAP a '+WK_STOCK.fecha+'</div>'
+      +head+rows+totRow
+      +'<div style="font-size:.68rem;color:#A39A8F;margin-top:10px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas</div>'
       +'</div></div>';
     var d=document.createElement('div');d.id='stk-modal-wrap';d.innerHTML=html;document.body.appendChild(d);
   }catch(e){}
