@@ -1731,12 +1731,11 @@ function stockChip(c){
   if(!SHOW_STOCK)return'';
   var g=stockGrupo(c);if(!g)return'';
   var multi=g.envases.length>1;
-  var cc=String(c).trim().toUpperCase().replace(/"/g,'');
-  var clickable=multi?(' data-stkcode="'+cc+'" onclick="event.stopPropagation();showStockDetalle(this)" style="cursor:pointer" title="Stock SAP a '+WK_STOCK.fecha+' — pulsa para ver envases"'):(' title="Stock SAP a '+WK_STOCK.fecha+'"');
   var flecha=multi?' ▾':'';
+  var tt=' title="Stock SAP a '+WK_STOCK.fecha+(multi?' — toca el producto para ver envases':'')+'"';
   var chip=g.total>0
-    ?'<span class="stk-chip ok"'+clickable+'>📦 '+g.total.toLocaleString('es-ES')+flecha+'</span>'
-    :'<span class="stk-chip no"'+clickable+'>Sin stock'+flecha+'</span>';
+    ?'<span class="stk-chip ok"'+tt+'>📦 '+g.total.toLocaleString('es-ES')+flecha+'</span>'
+    :'<span class="stk-chip no"'+tt+'>Sin stock'+flecha+'</span>';
   if(g.lleg>0)chip+='<span class="stk-chip in" title="Entradas previstas">+'+g.lleg.toLocaleString('es-ES')+'</span>';
   return chip;
 }
@@ -1779,6 +1778,38 @@ function showStockDetalle(el){
   }catch(e){}
 }
 function closeStockDetalle(){var w=document.getElementById('stk-modal-wrap');if(w)w.remove();}
+// Bloque de stock por envase para incrustar dentro de la ficha del producto (openPricePanel)
+function _ppStockHtml(code){
+  if(!SHOW_STOCK)return'';
+  var g=stockGrupo(code);if(!g)return'';
+  function nf(n){return (Math.round((n||0)*100)/100).toLocaleString('es-ES');}
+  var GRID='display:grid;grid-template-columns:1.3fr .72fr .72fr .72fr .82fr;gap:6px;align-items:center';
+  var head='<div style="'+GRID+';font-size:.6rem;color:#8A8078;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:5px 0;border-bottom:2px solid #EDE8E1">'
+    +'<span>Envase</span><span style="text-align:right">Stock</span><span style="text-align:right">Entr.</span><span style="text-align:right">Comp.</span><span style="text-align:right">Disp.</span></div>';
+  var rows=g.envases.map(function(e){
+    var cod=e[0],st=e[1]||0,lg=e[2]||0,cm=e[3]||0,dp=Math.round((st-cm)*100)/100;
+    var etq=cod===code?(cod+' · base'):cod;
+    var stCol=st>0?'#166534':'#9CA3AF',dpCol=dp>0?'#166534':(dp<0?'#B91C1C':'#9CA3AF');
+    return '<div style="'+GRID+';font-size:.8rem;padding:6px 0;border-bottom:1px solid #F3F0EB">'
+      +'<span style="color:#4A443E;word-break:break-all">'+etq+'</span>'
+      +'<span style="text-align:right;font-weight:700;color:'+stCol+'">'+nf(st)+'</span>'
+      +'<span style="text-align:right;color:'+(lg>0?'#2563EB':'#C7C1B8')+'">'+(lg>0?nf(lg):'·')+'</span>'
+      +'<span style="text-align:right;color:'+(cm>0?'#D97706':'#C7C1B8')+'">'+(cm>0?nf(cm):'·')+'</span>'
+      +'<span style="text-align:right;font-weight:700;color:'+dpCol+'">'+nf(dp)+'</span></div>';
+  }).join('');
+  var dispTot=Math.round((g.total-(g.comp||0))*100)/100;
+  var totRow='<div style="'+GRID+';font-size:.82rem;padding:8px 0 2px;border-top:2px solid #EDE8E1;font-weight:800">'
+    +'<span style="color:#2A2420">TOTAL</span>'
+    +'<span style="text-align:right;color:#166534">'+nf(g.total)+'</span>'
+    +'<span style="text-align:right;color:'+((g.lleg||0)>0?'#2563EB':'#C7C1B8')+'">'+((g.lleg||0)>0?nf(g.lleg):'·')+'</span>'
+    +'<span style="text-align:right;color:'+((g.comp||0)>0?'#D97706':'#C7C1B8')+'">'+((g.comp||0)>0?nf(g.comp):'·')+'</span>'
+    +'<span style="text-align:right;color:'+(dispTot>0?'#166534':(dispTot<0?'#B91C1C':'#9CA3AF'))+'">'+nf(dispTot)+'</span></div>';
+  return '<div style="margin:12px 16px 4px;border:1px solid #E6E0D8;border-radius:12px;overflow:hidden">'
+    +'<div style="background:#2E6B42;color:#fff;font-weight:800;font-size:.85rem;padding:9px 13px">📦 Stock por envase · SAP a '+WK_STOCK.fecha+'</div>'
+    +'<div style="padding:6px 13px 11px">'+head+rows+totRow
+    +'<div style="font-size:.66rem;color:#A39A8F;margin-top:8px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas</div>'
+    +'</div></div>';
+}
 // Carga el resumen de stock desde Firebase (solo si el modo stock está activo)
 async function loadStockCatalogo(){
   if(!SHOW_STOCK||WK_STOCK.cargado)return;
@@ -6458,6 +6489,7 @@ initApp();
     inner+='<div class="pp-head"><button class="pp-close" onclick="closePricePanel()" aria-label="Cerrar">✕</button>'
       +'<div class="pp-name">'+_ppEscHtml(name||'Producto')+'</div>'
       +'<div class="pp-code">'+(code?('Código: '+_ppEscHtml(code)):'')+'</div></div>';
+    inner+=_ppStockHtml(code);
     if(isNaN(base)||base<=0){
       inner+='<div style="padding:22px 20px;color:#888;font-size:.88rem">Este producto no tiene un precio numérico para calcular descuentos.</div>';
     } else if(PP_CLI){
