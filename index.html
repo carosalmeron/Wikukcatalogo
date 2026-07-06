@@ -82,6 +82,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);displ
 .t-name{font-weight:500;}
 .t-fmt{font-size:.7rem;padding:2px 7px;border-radius:3px;background:var(--bg);color:var(--muted);border:1px solid var(--border);white-space:nowrap;}
 .t-price{font-size:.92rem;font-weight:700;color:var(--accent);text-align:right;white-space:nowrap;}
+/* STOCK (solo jefes) */
+.stk-chip{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:9px;font-size:.62rem;font-weight:700;vertical-align:middle;white-space:nowrap;}
+.stk-chip.ok{background:#EDF4F0;color:#2E6B42;border:1px solid #C0E8CC;}
+.stk-chip.no{background:#F5F5F4;color:#A8A29E;border:1px solid #E7E5E4;}
+.stk-chip.in{background:#EBF2F8;color:#1E5A8A;border:1px solid #C8DFF0;}
 
 /* SEARCH */
 .search-result{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--white);border:1px solid var(--border);border-radius:6px;margin-bottom:6px;font-size:.83rem;}
@@ -1682,6 +1687,104 @@ function tSub(sub) {
 // ═══════════════════════════════════════════════
 //  DATA
 // ═══════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// STOCK SAP (United Caro) — visible solo para jefes/CEO
+// Se activa con ?stock=1 en la URL (lo añade el portal) y se
+// recuerda 30 días en este dispositivo. ?stock=0 lo desactiva.
+// ═══════════════════════════════════════════════════════════
+// Stock leído desde Firebase (proyecto grupo-consolidado-crm). Sin datos incrustados.
+const FB_STOCK="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
+var WK_STOCK={fecha:"",exact:{},base:{},cargado:false};
+var SHOW_STOCK=false;
+(function(){
+  try{
+    var p=new URLSearchParams(location.search);
+    if(p.get('stock')==='0'){localStorage.removeItem('wk_stock_ok');return;}
+    if(p.get('stock')==='1'){SHOW_STOCK=true;localStorage.setItem('wk_stock_ok',JSON.stringify({t:Date.now()}));return;}
+    var s=localStorage.getItem('wk_stock_ok');
+    if(s){var o=JSON.parse(s);if(Date.now()-o.t<30*24*3600*1000)SHOW_STOCK=true;else localStorage.removeItem('wk_stock_ok');}
+  }catch(e){}
+})();
+// Agrupa por código general: el propio código + todos sus envases (código + '.SUFIJO').
+// Devuelve {total, lleg, envases:[[cod,stock,llegadas]...]} o null.
+function stockGrupo(c){
+  if(!c)return null;
+  c=String(c).trim().toUpperCase();
+  if(!WK_STOCK._memo)WK_STOCK._memo={};
+  if(WK_STOCK._memo[c]!==undefined)return WK_STOCK._memo[c];
+  var ex=WK_STOCK.exact||{},envs=[],tot=0,lleg=0,pref=c+'.';
+  for(var k in ex){
+    if(k===c||k.indexOf(pref)===0){
+      var st=ex[k][0]||0,lg=ex[k][1]||0;
+      envs.push([k,st,lg]);tot+=st;lleg+=lg;
+    }
+  }
+  if(!envs.length){WK_STOCK._memo[c]=null;return null;}
+  envs.sort(function(a,b){return b[1]-a[1];});
+  var r={total:Math.round(tot*100)/100,lleg:Math.round(lleg*100)/100,envases:envs};
+  WK_STOCK._memo[c]=r;return r;
+}
+// compat: stock del código exacto (por si algo lo usa)
+function stockFor(c){if(!c)return null;c=String(c).trim().toUpperCase();return (WK_STOCK.exact&&WK_STOCK.exact[c])||null;}
+function stockChip(c){
+  if(!SHOW_STOCK)return'';
+  var g=stockGrupo(c);if(!g)return'';
+  var multi=g.envases.length>1;
+  var cc=String(c).trim().toUpperCase().replace(/"/g,'');
+  var clickable=multi?(' data-stkcode="'+cc+'" onclick="event.stopPropagation();showStockDetalle(this)" style="cursor:pointer" title="Stock SAP a '+WK_STOCK.fecha+' — pulsa para ver envases"'):(' title="Stock SAP a '+WK_STOCK.fecha+'"');
+  var flecha=multi?' ▾':'';
+  var chip=g.total>0
+    ?'<span class="stk-chip ok"'+clickable+'>📦 '+g.total.toLocaleString('es-ES')+flecha+'</span>'
+    :'<span class="stk-chip no"'+clickable+'>Sin stock'+flecha+'</span>';
+  if(g.lleg>0)chip+='<span class="stk-chip in" title="Entradas previstas">+'+g.lleg.toLocaleString('es-ES')+'</span>';
+  return chip;
+}
+// Popup con el desglose por envases
+function showStockDetalle(el){
+  try{
+    var c=el.getAttribute('data-stkcode');if(!c)return;
+    var g=stockGrupo(c);if(!g)return;
+    var rows=g.envases.map(function(e){
+      var etq=e[0]===c?(e[0]+' · base'):e[0];
+      var lg=e[2]>0?(' <span style="color:#2563EB;font-weight:600">+'+e[2].toLocaleString('es-ES')+'</span>'):'';
+      var col=e[1]>0?'#166534':'#9CA3AF';
+      return '<div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid #F0EDE8"><span style="color:#4A443E">'+etq+'</span><span style="font-weight:700;color:'+col+'">'+e[1].toLocaleString('es-ES')+lg+'</span></div>';
+    }).join('');
+    var html='<div id="stk-modal-bg" onclick="closeStockDetalle()" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px">'
+      +'<div onclick="event.stopPropagation()" style="background:#fff;border-radius:16px;max-width:440px;width:100%;max-height:82vh;overflow:auto;padding:20px 22px;font-family:inherit;box-shadow:0 16px 48px rgba(0,0,0,.28)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><strong style="font-size:1.05rem;color:#2A2420">📦 Stock por envase</strong><button onclick="closeStockDetalle()" style="border:none;background:#F0EDE8;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:1.2rem;color:#6B645C">×</button></div>'
+      +'<div style="font-size:.85rem;color:#8A8078;margin-bottom:4px">'+c+'</div>'
+      +'<div style="font-size:.82rem;color:#6B645C;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #EDE8E1">Total <strong style="color:#166534;font-size:1rem">'+g.total.toLocaleString('es-ES')+'</strong>'+(g.lleg>0?' · entradas previstas <strong style="color:#2563EB">+'+g.lleg.toLocaleString('es-ES')+'</strong>':'')+' · SAP a '+WK_STOCK.fecha+'</div>'
+      +rows
+      +'</div></div>';
+    var d=document.createElement('div');d.id='stk-modal-wrap';d.innerHTML=html;document.body.appendChild(d);
+  }catch(e){}
+}
+function closeStockDetalle(){var w=document.getElementById('stk-modal-wrap');if(w)w.remove();}
+// Carga el resumen de stock desde Firebase (solo si el modo stock está activo)
+async function loadStockCatalogo(){
+  if(!SHOW_STOCK||WK_STOCK.cargado)return;
+  try{
+    var r=await fetch(FB_STOCK+"/stock_sap/resumen");
+    if(!r.ok)return;
+    var d=await r.json();var f=(d.fields)||{};
+    WK_STOCK.fecha=(f.fecha&&f.fecha.stringValue)||"";
+    try{WK_STOCK.exact=JSON.parse((f.exact&&f.exact.stringValue)||"{}");}catch(e){WK_STOCK.exact={};}
+    try{WK_STOCK.base=JSON.parse((f.base&&f.base.stringValue)||"{}");}catch(e){WK_STOCK.base={};}
+    WK_STOCK._memo={};
+    WK_STOCK.cargado=true;
+    // Re-render de la vista actual para que aparezcan los chips
+    try{ if(typeof rerenderStock==='function') rerenderStock(); }catch(e){}
+  }catch(e){}
+}
+// Re-dibuja lo que esté visible para incrustar los chips ya cargados
+function rerenderStock(){
+  try{ if(typeof dRender==='function'){ dRender(); } }catch(e){}
+  try{ if(typeof mGoSub==='function' && typeof mCatKey!=='undefined' && mCatKey && typeof mSub!=='undefined' && mSub){ mGoSub(mSub); } }catch(e){}
+  try{ if(typeof doSearch==='function'){ var sb=document.getElementById('searchInput'); if(sb&&sb.value&&sb.value.trim()) doSearch(sb.value); } }catch(e){}
+}
+if(SHOW_STOCK){ if(document.readyState!=='loading') loadStockCatalogo(); else document.addEventListener('DOMContentLoaded',loadStockCatalogo); }
 
 const DATA = {
 
@@ -4790,7 +4893,7 @@ function dRender() {
       var price=p.p+' €'+priceDiff;
       return hdrs+'<tr'+ppData(p)+(dSub.indexOf('DESHIDRATADOS')!==0?' data-trip="1"':'')+'>'
         +'<td class="t-code">'+p.c+'</td>'
-        +'<td class="t-name">'+p.n+'</td>'
+        +'<td class="t-name">'+p.n+stockChip(p.c)+'</td>'
         +'<td><span class="t-fmt">'+(p.ca||'—')+'</span></td>'
         +'<td><span class="t-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></td>'
         +'<td class="t-price">'+price+'</td>'
@@ -4821,7 +4924,7 @@ function dRender() {
       }
       return '<tr'+ppData(p)+'>'
         +'<td class="t-code">'+p.c+'</td>'
-        +'<td class="t-name">'+p.n+'</td>'
+        +'<td class="t-name">'+p.n+stockChip(p.c)+'</td>'
         +'<td><span class="t-fmt">'+f1+'</span></td>'
         +'<td><span class="t-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+f2+'</span></td>'
         +'<td class="t-price">'+price+'</td>'
@@ -4890,7 +4993,7 @@ function mGoSub(sub, el) {
       if(p.t&&p.t!==_mt){_mt=p.t;hdrs+='<div style="padding:2px 12px;font-size:.63rem;font-weight:600;color:#9C8E7F;font-style:italic">'+p.t+'</div>';}
       var priceDiff=getPriceDiff(p.c,p.p);var price=p.p+' €'+priceDiff;
       var _mDel2=calcDelivery(mCatKey);
-      return hdrs+'<div class="m-card"'+ppData(p)+(sub.indexOf('DESHIDRATADOS')!==0?' data-trip="1"':'')+'><div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div><div class="m-card-bot"><span class="m-card-code">'+p.c+'</span><span class="m-card-fmt">'+(p.ca||'—')+'</span><span class="m-card-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></div><div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel2+'</div></div>';
+      return hdrs+'<div class="m-card"'+ppData(p)+(sub.indexOf('DESHIDRATADOS')!==0?' data-trip="1"':'')+'><div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div><div class="m-card-bot"><span class="m-card-code">'+p.c+'</span>'+stockChip(p.c)+'<span class="m-card-fmt">'+(p.ca||'—')+'</span><span class="m-card-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></div><div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel2+'</div></div>';
     }).join('');
   } else {
     cardsHTML=items.map(function(p){
@@ -4990,7 +5093,7 @@ function doSearch(q) {
         return '<div class="m-search-card"'+ppData(p)+'>'
           +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+(CLIENT_MODE?'—':p.p+' €')+'</div></div>'
           +'<div class="m-card-bot">'
-          +'<span class="m-card-code">'+p.c+'</span>'
+          +'<span class="m-card-code">'+p.c+'</span>'+stockChip(p.c)
           +'<span style="font-size:.7rem;padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--muted)">'+p.catLabel+'</span>'
           +'</div></div>';
       }).join('');
@@ -5001,7 +5104,7 @@ function doSearch(q) {
       :results.map(function(p){
         return '<div class="search-result"'+ppData(p)+'>'
           +'<span class="sr-code">'+p.c+'</span>'
-          +'<span class="sr-name">'+p.n+'</span>'
+          +'<span class="sr-name">'+p.n+stockChip(p.c)+'</span>'
           +'<span class="sr-tag">'+p.catLabel+'</span>'
           +'<span class="sr-tag">'+p.sub+'</span>'
           +(CLIENT_MODE?'':+'<span class="sr-price">'+p.p+' €</span>')
