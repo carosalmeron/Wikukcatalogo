@@ -287,6 +287,11 @@ tr[data-pp]:hover{background:#faf7f4;}
 .pp-row .lbl{color:var(--muted,#666);font-weight:600;}
 .pp-row.base .lbl{color:var(--text,#222);}
 .pp-row .val{font-weight:700;font-variant-numeric:tabular-nums;color:var(--text,#222);}
+.pp-block .pp-row:not(.base){display:none;}
+.pp-block.pp-open .pp-row:not(.base){display:flex;}
+.pp-hint{font-size:.66rem;font-weight:800;color:var(--accent,#C8612A);margin-left:8px;opacity:.9;white-space:nowrap;}
+.pp-block.pp-open .pp-hint .pp-abre{display:none;}
+.pp-block:not(.pp-open) .pp-hint .pp-cae{display:none;}
 .pp-crm{margin:18px 20px 4px;display:block;width:calc(100% - 40px);padding:15px;border:none;border-radius:12px;background:var(--accent,#C8612A);color:#fff;font-size:.95rem;font-weight:800;cursor:pointer;font-family:Inter,sans-serif;text-align:center;}
 .pp-crm:active{filter:brightness(.94);}
 .pp-extras{margin:14px 20px;}
@@ -4914,6 +4919,24 @@ function dSelectPromoSection(catKey, el) {
   if(items.length > 1) { dSelectSub(subs[0], items[1]); }
 }
 
+// Agrupa las tripas por origen → tipo(CR/CK) → calidad → tira, respetando el orden
+// de primera aparición (no alfabético) y manteniendo el orden original dentro de cada grupo.
+function _tripaOrder(items){
+  if(!items||items.length<2)return items;
+  var rank={o:{},pr:{},q:{},t:{}},ci={o:0,pr:0,q:0,t:0};
+  items.forEach(function(p){
+    ['o','pr','q','t'].forEach(function(f){var v=p[f]||'';if(rank[f][v]===undefined)rank[f][v]=ci[f]++;});
+  });
+  return items.map(function(p,i){return {p:p,i:i};}).sort(function(a,b){
+    var A=a.p,B=b.p;
+    return (rank.o[A.o||'']-rank.o[B.o||''])
+      || (rank.pr[A.pr||'']-rank.pr[B.pr||''])
+      || (rank.q[A.q||'']-rank.q[B.q||''])
+      || (rank.t[A.t||'']-rank.t[B.t||''])
+      || (a.i-b.i);
+  }).map(function(x){return x.p;});
+}
+
 function dRender() {
   const cat=DATA[dCatKey];
   const items=cat.subs[dSub]||[];
@@ -4931,7 +4954,7 @@ function dRender() {
     rows='<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">Sin productos</td></tr>';
   } else if(_isTripas){
     var _to='',_tp='',_tq='',_tt='';
-    rows=items.map(function(p){
+    rows=_tripaOrder(items).map(function(p){
       var hdrs='';
       if(p.o&&p.o!==_to){_to=p.o;_tp=_tq=_tt='';hdrs+='<tr><td colspan="6" style="padding:8px 12px;font-size:.78rem;font-weight:600;color:var(--accent);background:#faf8f6;border-top:2px solid var(--border)">'+p.o+'</td></tr>';}
       if(p.pr&&p.pr!==_tp){_tp=p.pr;_tq=_tt='';hdrs+='<tr><td colspan="6" style="padding:5px 12px 5px 24px;font-size:.72rem;font-weight:600;color:var(--muted);border-top:1px solid #f0ede8">'+p.pr+'</td></tr>';}
@@ -5033,7 +5056,7 @@ function mGoSub(sub, el) {
     cardsHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:.85rem">Sin productos</div>';
   } else if(_mTripas){
     var _mo='',_mp='',_mq='',_mt='';
-    cardsHTML=items.map(function(p){
+    cardsHTML=_tripaOrder(items).map(function(p){
       var hdrs='';
       if(p.o&&p.o!==_mo){_mo=p.o;_mp=_mq=_mt='';hdrs+='<div style="padding:8px 12px;font-size:.78rem;font-weight:600;color:var(--accent);background:#faf8f6;border-radius:8px;margin:8px 0 4px">'+p.o+'</div>';}
       if(p.pr&&p.pr!==_mp){_mp=p.pr;_mq=_mt='';hdrs+='<div style="padding:4px 12px;font-size:.7rem;font-weight:600;color:var(--muted)">'+p.pr+'</div>';}
@@ -6432,8 +6455,9 @@ initApp();
     PP_DESC.forEach(function(d){ rows.push({t:'-'+d+'%', p:base*(1-d/100)}); });
     return rows.map(function(r,idx){
       var sel=(selFirst&&idx===0);
+      var hint=(idx===0&&rows.length>1)?'<span class="pp-hint"><span class="pp-abre">▾ ver descuentos</span><span class="pp-cae">▴ ocultar</span></span>':'';
       return '<div class="pp-row'+(idx===0?' base':'')+(sel?' sel':'')+'" data-val="'+r.p.toFixed(4)+'" data-lbl="'+_ppEscHtml(lbl+' '+r.t)+'">'
-        +'<span class="lbl">'+r.t+'</span><span class="val">'+_ppFmt(r.p)+'</span></div>';
+        +'<span class="lbl">'+r.t+hint+'</span><span class="val">'+_ppFmt(r.p)+'</span></div>';
     }).join('');
   }
 
@@ -6472,9 +6496,10 @@ initApp();
       var cls='pp-row'+(r.sel?' base sel':'');
       var lblTxt=(cli.cat||'Cliente')+' '+r.t;
       var badge=r.aprob?'<span style="font-size:.62rem;font-weight:800;color:#fff;background:#C0392B;border-radius:6px;padding:1px 6px;margin-left:6px">APROBACIÓN</span>':'';
+      var hint=(r.sel&&rows.length>1)?'<span class="pp-hint"><span class="pp-abre">▾ ver descuentos</span><span class="pp-cae">▴ ocultar</span></span>':'';
       return '<div class="'+cls+'" data-val="'+r.p.toFixed(4)+'" data-lbl="'+_ppEscHtml(lblTxt)+'"'
         +' data-extra="'+r.extra+'" data-aprob="'+(r.aprob?'1':'0')+'" data-totaldto="'+(cli.dto+r.extra)+'">'
-        +'<span class="lbl">'+r.t+badge+'</span><span class="val">'+_ppFmt(r.p)+'</span></div>';
+        +'<span class="lbl">'+r.t+badge+hint+'</span><span class="val">'+_ppFmt(r.p)+'</span></div>';
     }).join('');
   }
 
@@ -6508,11 +6533,6 @@ initApp();
       if(isTrip){ inner+=_ppExtrasHtml(); }
       inner+='<div class="pp-extra-total" id="pp-total"></div>';
     }
-    var url='https://crmwikuk.vercel.app/?accion=estrategia'
-      +'&codigo='+encodeURIComponent(code||'')
-      +'&nombre='+encodeURIComponent(name||'')
-      +'&precio='+encodeURIComponent(priceRaw||'');
-    inner+='<button class="pp-crm" onclick="window.open(\''+url.replace(/'/g,"\\'")+'\',\'_blank\')">📋 Solicitar Estrategia en CRM</button>';
     _sh.innerHTML=inner;
     if(!(isNaN(base)||base<=0)) _ppRecalc();
     _ov.classList.add('open'); _sh.classList.add('open');
@@ -6545,7 +6565,9 @@ initApp();
       if(r){
         var rows=_ppSheetEl.querySelectorAll('.pp-row');
         for(var i=0;i<rows.length;i++) rows[i].classList.remove('sel');
-        r.classList.add('sel'); _ppRecalc(); return;
+        r.classList.add('sel'); _ppRecalc();
+        if(r.classList.contains('base')){ var blk=r.closest('.pp-block'); if(blk) blk.classList.toggle('pp-open'); }
+        return;
       }
     });
   }
