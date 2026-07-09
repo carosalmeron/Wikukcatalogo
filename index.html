@@ -3787,6 +3787,13 @@ function calcDelivery(catKey){
 }
 function isSpot(k){return ['spot_wikuk','spot_ceylan','spot_taberner','spot_campana','spot_merkapack','spot_frumen','spot_sierra','spot_cui','spot_el_carmen'].indexOf(k)!==-1;}
 function isPromo(k){return k==='promo_tripas'||k==='promo_especias'||k==='promo_envases';}
+// (fix) El campo precio de algunas promos contiene una cantidad ("3640 uds."), no un precio.
+// Añadimos el € solo si el valor es realmente numérico.
+function fmtPrecio(v){
+  var t=String(v==null?'':v).trim();
+  if(!t) return '—';
+  return /^[0-9]+([.,][0-9]+)?$/.test(t) ? (t+' €') : t;
+}
 
 
 // ═══ PRICE COMPARISON (previous tarifa) ═══
@@ -5155,17 +5162,25 @@ function doSearch(q) {
     else document.getElementById('d-products').innerHTML='<div class="placeholder"><div class="placeholder-icon">📋</div><h3>Selecciona una categoría</h3><p>Navega por el árbol de la izquierda o usa el buscador.</p></div>';
     return;
   }
-  var results=ALL.filter(function(p){return p.n.toLowerCase().includes(q)||p.c.toLowerCase().includes(q);});
+  var results=ALL.filter(function(p){
+    // (fix) Respetar las secciones permitidas al usuario: la búsqueda mostraba
+    // productos de categorías que el vendedor no tiene asignadas.
+    if(ACTIVE_VENDOR_CATS && !ACTIVE_VENDOR_CATS[p.catKey]) return false;
+    return p.n.toLowerCase().includes(q)||p.c.toLowerCase().includes(q);
+  });
+  // (fix) Ordenar: primero los productos normales, luego las promociones,
+  // para que no se mezclen (una promo y una tripa pueden compartir código).
+  results.sort(function(a,b){ return (isPromo(a.catKey)?1:0)-(isPromo(b.catKey)?1:0); });
   if(isMobile){
     document.getElementById('m-s4-title').textContent=results.length+' resultado'+(results.length!==1?'s':'')+' para "'+q+'"';
     document.getElementById('m-s4-results').innerHTML=results.length===0
       ?'<div style="text-align:center;padding:40px;color:var(--muted);font-size:.85rem">Sin resultados</div>'
       :results.map(function(p){
         return '<div class="m-search-card"'+ppData(p)+'>'
-          +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+(CLIENT_MODE?'—':p.p+' €')+'</div></div>'
+          +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+(CLIENT_MODE?'—':fmtPrecio(p.p))+'</div></div>'
           +'<div class="m-card-bot">'
           +'<span class="m-card-code">'+p.c+'</span>'+stockChip(p.c)
-          +'<span style="font-size:.7rem;padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--muted)">'+p.catLabel+'</span>'
+          +'<span style="font-size:.7rem;padding:2px 8px;border-radius:4px;'+(isPromo(p.catKey)?'background:#FDF2E3;color:#C2660C;font-weight:700':'background:var(--bg);color:var(--muted)')+'">'+p.catLabel+'</span>'
           +'</div></div>';
       }).join('');
     mNav(4);
@@ -5176,9 +5191,9 @@ function doSearch(q) {
         return '<div class="search-result"'+ppData(p)+'>'
           +'<span class="sr-code">'+p.c+'</span>'
           +'<span class="sr-name">'+p.n+stockChip(p.c)+'</span>'
-          +'<span class="sr-tag">'+p.catLabel+'</span>'
+          +'<span class="sr-tag"'+(isPromo(p.catKey)?' style="background:#FDF2E3;color:#C2660C;font-weight:700"':'')+'>'+p.catLabel+'</span>'
           +'<span class="sr-tag">'+p.sub+'</span>'
-          +(CLIENT_MODE?'':+'<span class="sr-price">'+p.p+' €</span>')
+          +(CLIENT_MODE?'':'<span class="sr-price">'+fmtPrecio(p.p)+'</span>')
           +'</div>';
       }).join('');
     document.getElementById('d-products').innerHTML=''
