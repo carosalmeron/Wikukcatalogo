@@ -3803,7 +3803,7 @@ var PREV_PRICES = {"53179":59.14,"53239":68.44,"53244":115.84,"53245":79.03,"532
 
 // ─── Panel de precios v2.39: helpers para datos de tarjeta ───
 function _ppEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function ppData(p){return ' data-pp="1" data-code="'+_ppEsc(p.c)+'" data-name="'+_ppEsc(p.n)+'" data-price="'+_ppEsc(p.p)+'" data-ca="'+_ppEsc(p.ca||'')+'" data-me="'+_ppEsc(p.me||'')+'" data-fmt="'+_ppEsc(p.f||'')+'"';}
+function ppData(p){if(CLIENT_MODE)return '';return ' data-pp="1" data-code="'+_ppEsc(p.c)+'" data-name="'+_ppEsc(p.n)+'" data-price="'+_ppEsc(p.p)+'" data-ca="'+_ppEsc(p.ca||'')+'" data-me="'+_ppEsc(p.me||'')+'" data-fmt="'+_ppEsc(p.f||'')+'"';}
 
 function getPriceDiff(code, currentPriceStr) {
   // (v3.45) Prioridad: precio anterior de Firebase; si no, PREV_PRICES local
@@ -4580,6 +4580,8 @@ function checkClientToken() {
   if (backBtn) backBtn.style.display = 'none';
   var shareBtn = document.getElementById('btnShareCliente');
   if (shareBtn) shareBtn.style.display = 'none';
+  var novBtn = document.getElementById('btnNovedades');
+  if (novBtn) novBtn.style.display = 'none';
   var badge = document.getElementById('clientBadge');
   if (badge) badge.style.display = 'none';
 
@@ -4968,7 +4970,7 @@ function dRender() {
       if(p.q&&p.q!==_tq){_tq=p.q;_tt='';hdrs+='<tr><td colspan="6" style="padding:4px 12px 4px 36px;font-size:.68rem;font-weight:700;color:#5C6B4A;background:#f8f7f4">Calidad: '+p.q+'</td></tr>';}
       if(p.t&&p.t!==_tt){_tt=p.t;hdrs+='<tr><td colspan="6" style="padding:3px 12px 3px 48px;font-size:.65rem;font-weight:600;color:#9C8E7F;font-style:italic">'+p.t+'</td></tr>';}
       var priceDiff=getPriceDiff(p.c,p.p);
-      var price=p.p+' €'+priceDiff;
+      var price=CLIENT_MODE?'—':p.p+' €'+priceDiff;
       return hdrs+'<tr'+ppData(p)+(dSub.indexOf('DESHIDRATADOS')!==0?' data-trip="1"':'')+'>'
         +'<td class="t-code">'+p.c+'</td>'
         +'<td class="t-name">'+p.n+stockChip(p.c)+'</td>'
@@ -5069,7 +5071,7 @@ function mGoSub(sub, el) {
       if(p.pr&&p.pr!==_mp){_mp=p.pr;_mq=_mt='';hdrs+='<div style="padding:4px 12px;font-size:.7rem;font-weight:600;color:var(--muted)">'+p.pr+'</div>';}
       if(p.q&&p.q!==_mq){_mq=p.q;_mt='';hdrs+='<div style="padding:3px 12px;font-size:.66rem;font-weight:700;color:#5C6B4A">Calidad: '+p.q+'</div>';}
       if(p.t&&p.t!==_mt){_mt=p.t;hdrs+='<div style="padding:2px 12px;font-size:.63rem;font-weight:600;color:#9C8E7F;font-style:italic">'+p.t+'</div>';}
-      var priceDiff=getPriceDiff(p.c,p.p);var price=p.p+' €'+priceDiff;
+      var priceDiff=getPriceDiff(p.c,p.p);var price=CLIENT_MODE?'—':p.p+' €'+priceDiff;
       var _mDel2=calcDelivery(mCatKey);
       return hdrs+'<div class="m-card"'+ppData(p)+(sub.indexOf('DESHIDRATADOS')!==0?' data-trip="1"':'')+'><div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div><div class="m-card-bot"><span class="m-card-code">'+p.c+'</span>'+stockChip(p.c)+'<span class="m-card-fmt">'+(p.ca||'—')+'</span><span class="m-card-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+(p.me||'—')+'</span></div><div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel2+'</div></div>';
     }).join('');
@@ -6587,6 +6589,7 @@ initApp();
     });
   }
   function _ppOpenFrom(tgt){
+    if(CLIENT_MODE) return;
     if(!tgt||!tgt.closest) return;
     if(tgt.closest('#ppSheet')||tgt.closest('#ppOverlay')) return;
     var el=tgt.closest('[data-pp]');
