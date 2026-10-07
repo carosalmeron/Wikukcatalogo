@@ -1719,8 +1719,10 @@ function stockGrupo(c){
   if(!WK_STOCK._memo)WK_STOCK._memo={};
   if(WK_STOCK._memo[c]!==undefined)return WK_STOCK._memo[c];
   var ex=WK_STOCK.exact||{},envs=[],tot=0,lleg=0,comp=0,pref=c+'.';
+  // (oct 2026) Misma madeja: también los entubados de su letra (FC35.9LF3, FC35.9LR3.C12 → FC35.9L)
+  var _rz=function(x){var m=/^([A-Z]{1,3}\d{1,3}\.\d{1,2}[A-Z]+?)(?:[FR]\d+)?(?:\.[A-Z0-9]+)?$/.exec(x);return m?m[1]:null;}, _rc=(_rz(c)===c)?c:null;
   for(var k in ex){
-    if(k===c||k.indexOf(pref)===0){
+    if(k===c||k.indexOf(pref)===0||(_rc&&_rz(k)===_rc)){
       var v=ex[k]||[],st=v[0]||0,lg=v[1]||0,cm=v[2]||0;
       envs.push([k,st,lg,cm]);tot+=st;lleg+=lg;comp+=cm;
     }
@@ -6538,19 +6540,14 @@ initApp();
       var _liq=_pr.est==='LIQUIDACIÓN', _col=_liq?'#B91C1C':'#B45309';
       inner+='<div style="margin:0 20px 6px;font-size:.78rem;color:'+_col+';font-weight:700">🏷️ '+(_liq?'Liquidación':'Promoción')+' · disponibles '+_pr.uds.toLocaleString('es-ES')+' uds'+(_pr.cal?' · cal. '+_ppEscHtml(_pr.cal):'')+(_pr.met?' · '+_ppEscHtml(_pr.met)+' m':'')+'</div>'
         +'<div class="prc-box"><button type="button" class="prc-btn" onclick="promoVerClientes(\''+_ppEscHtml(String(code)).replace(/'/g,"\\'")+'\')">👥 Clientes que la compraban y la han dejado</button><div id="prcList"></div></div>';
-      if(PP_CLI){
-        var _dp=promoDtoPara(_pr,PP_CLI), _pc=base*(1-_dp/100);
-        inner+='<div style="margin:0 20px 4px;font-size:.72rem;color:#888">Cliente '+_ppEscHtml(PP_CLI.nombre||PP_CLI.cat)+' · '+_ppEscHtml(PP_CLI.cat||'tarifa general')+' (su tarifa −'+PP_CLI.dto+'%)</div>';
-        inner+='<div class="pp-block"><div class="pp-block-h" style="background:'+_col+'">🏷️ Precio '+(_liq?'liquidación':'promoción')+' para '+_ppEscHtml(PP_CLI.cat||'cliente')+'</div>'
-          +'<div class="pp-row base sel" data-val="'+_pc.toFixed(4)+'" data-lbl="'+_ppEscHtml((_liq?'Liquidación':'Promoción')+' −'+_dp+'%')+'" data-extra="0" data-aprob="0" data-totaldto="'+_dp+'"><span class="lbl">⭐ −'+_dp+'% sobre tarifa '+_ppFmt(base)+'</span><span class="val">'+_ppFmt(_pc)+'</span></div></div>';
-      } else {
-        var _dg=Number(_pr.dtoGen)||0, _df=Number(_pr.dtoFab)||0;
-        inner+='<div style="margin:0 20px 4px;font-size:.72rem;color:#888">Sin cliente: precio según el tipo de cliente. Toca el que quieras aplicar:</div>';
-        inner+='<div class="pp-block"><div class="pp-block-h" style="background:#C0392B">🔴 Tarifa general (carniceros) <span style="font-size:.78rem;font-weight:700;opacity:.9">−'+_dg+'%</span></div>'
-          +'<div class="pp-row base sel" data-val="'+(base*(1-_dg/100)).toFixed(4)+'" data-lbl="'+_ppEscHtml('General −'+_dg+'%')+'" data-totaldto="'+_dg+'"><span class="lbl">Precio promo sobre '+_ppFmt(base)+'</span><span class="val">'+_ppFmt(base*(1-_dg/100))+'</span></div></div>'
-          +'<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">🔵 Fabricante / distribuidor <span style="font-size:.78rem;font-weight:700;opacity:.9">−'+_df+'%</span></div>'
-          +'<div class="pp-row base" data-val="'+(base*(1-_df/100)).toFixed(4)+'" data-lbl="'+_ppEscHtml('Fabricante −'+_df+'%')+'" data-totaldto="'+_df+'"><span class="lbl">Precio promo sobre '+_ppFmt(base)+'</span><span class="val">'+_ppFmt(base*(1-_df/100))+'</span></div></div>';
-      }
+      var _T=promoTarifas(_pr,PP_CLI);
+      inner+='<div style="margin:0 20px 4px;font-size:.72rem;color:#888">'+(PP_CLI?('Cliente '+_ppEscHtml(PP_CLI.nombre||PP_CLI.cat)+' · su tarifa −'+PP_CLI.dto+'% y encima el descuento de '+(_liq?'liquidación':'promoción')+':'):'Sin cliente: las dos tarifas con el descuento de '+(_liq?'liquidación':'promoción')+'. Toca la que quieras aplicar:')+'</div>';
+      _T.forEach(function(t,ix){
+        var col=PP_CLI?_col:(ix?'#1E5A8A':'#C0392B'), ico=PP_CLI?'🏷️':(ix?'🔵':'🔴');
+        inner+='<div class="pp-block"><div class="pp-block-h" style="background:'+col+'">'+ico+' '+(PP_CLI?'Precio para '+_ppEscHtml(t.lbl):'PVP '+t.lbl)+' <span style="font-size:.78rem;font-weight:700;opacity:.9">−'+t.dto+'%</span></div>'
+          +'<div class="pp-row base'+(ix===0?' sel':'')+'" data-val="'+t.precio.toFixed(4)+'" data-lbl="'+_ppEscHtml(t.lbl+' '+(_liq?'liquidación':'promoción')+' −'+t.dto+'%')+'" data-extra="0" data-aprob="0" data-totaldto="'+t.total+'">'
+          +'<span class="lbl"><s style="color:#aaa">'+_ppFmt(t.tarifa)+'</s> −'+t.dto+'%</span><span class="val">'+_ppFmt(t.precio)+'</span></div></div>';
+      });
       if(isTrip){ inner+=_ppExtrasHtml(); }
       inner+='<div class="pp-extra-total" id="pp-total"></div>';
     } else if(isNaN(base)||base<=0){
@@ -6647,21 +6644,25 @@ initApp();
 // de su producto en el catálogo, y dentro, en la subcategoría (familia) en el mismo orden que el catálogo.
 window.PROMO_STOCK={};
 var PROMO_FAB=['FABRICANTE','DISTRIBUIDOR','GRAN CUENTA'];
-function promoDtoPara(it,cli){
-  var t=cli&&PROMO_FAB.indexOf(String(cli.cat||'').trim().toUpperCase())>=0?(Number(it.dtoFab)||0):(Number(it.dtoGen)||0);
-  return Math.max(t, cli?(Number(cli.dto)||0):0);   // si su tarifa ya le da más, se queda la suya
+// El descuento de promoción se aplica SOBRE LA TARIFA de cada tipo de cliente:
+//   tarifa general (carniceros) = PVP · tarifa fabricante = PVP −10% (la misma que el panel de precios)
+//   con cliente: su tarifa (PVP − su descuento) y encima el descuento de promoción de su tipo.
+var PROMO_DTO_FAB=10;
+function promoDtoPara(it,cli){ return cli&&PROMO_FAB.indexOf(String(cli.cat||'').trim().toUpperCase())>=0?(Number(it.dtoFab)||0):(Number(it.dtoGen)||0); }
+function promoTarifas(it,cli){   // [{lbl, tarifa, dto, precio, total}]
+  var b=Number(it.tarifa)||0; if(!(b>0)) return [];
+  var f=function(lbl,dtoTar,dto){ var t=b*(1-dtoTar/100), p=t*(1-dto/100); return {lbl:lbl,tarifa:t,dto:dto,precio:p,total:Math.round((1-p/b)*10000)/100}; };
+  if(cli) return [f(cli.cat||'Cliente',Number(cli.dto)||0,promoDtoPara(it,cli))];
+  return [f('Carnicero',0,Number(it.dtoGen)||0), f('Fabricante',PROMO_DTO_FAB,Number(it.dtoFab)||0)];
 }
 function _prFmt(n){return n.toFixed(2).replace('.',',')+' €';}
 function promoPrecioCelda(it){
   var b=Number(it.tarifa)||0; if(!(b>0)) return '—';
-  var cli=(typeof PP_CLI!=='undefined')?PP_CLI:null;
-  if(cli){ var d=promoDtoPara(it,cli);
-    return '<span style="text-decoration:line-through;color:#bbb;font-size:.72rem">'+_prFmt(b)+'</span> <b style="color:#B45309">'+_prFmt(b*(1-d/100))+'</b><span style="margin-left:3px;font-size:.65rem;color:#B45309;font-weight:700">−'+d+'%</span>'; }
-  var g=Number(it.dtoGen)||0, f=Number(it.dtoFab)||0, tach='<span style="text-decoration:line-through;color:#aaa;font-size:.74rem">'+_prFmt(b)+'</span>';
-  if(g===f) return tach+' <b style="color:#B45309">'+_prFmt(b*(1-g/100))+'</b>'+(g?'<span style="margin-left:3px;font-size:.65rem;color:#B45309;font-weight:700">−'+g+'%</span>':'');
-  return '<span style="display:inline-block;text-align:right;line-height:1.3">'+tach
-    +'<br><span style="font-size:.64rem;color:#888">Gral. −'+g+'%</span> <b style="color:#B45309">'+_prFmt(b*(1-g/100))+'</b>'
-    +'<br><span style="font-size:.64rem;color:#888">Fab. −'+f+'%</span> <b style="color:#B45309">'+_prFmt(b*(1-f/100))+'</b></span>';
+  var cli=(typeof PP_CLI!=='undefined')?PP_CLI:null, T=promoTarifas(it,cli);
+  return '<span style="display:inline-block;text-align:right;line-height:1.35;white-space:nowrap">'+T.map(function(t,i){
+    return (i?'<br>':'')+'<span style="font-size:.62rem;color:#888">'+(cli?'':(t.lbl==='Carnicero'?'Carn.':'Fab.')+' ')+'</span>'
+      +'<span style="text-decoration:line-through;color:#aaa;font-size:.72rem">'+_prFmt(t.tarifa)+'</span> <b style="color:#B45309">'+_prFmt(t.precio)+'</b>'
+      +'<span style="margin-left:3px;font-size:.62rem;color:#B45309;font-weight:700">−'+t.dto+'%</span>'; }).join('')+'</span>';
 }
 // ── Clientes que compraban el artículo y lo han dejado (o compran menos), para ofrecérselo ──
 var PRC_API='https://crmwikuk.vercel.app/api/pbi-sync?clientesArticulo=';
@@ -6704,9 +6705,8 @@ function promoEnviarOferta(code,i){
   var box=document.getElementById('prcList'), c=box&&box._lista&&box._lista[i]; if(!c) return;
   var it=(window.PROMO_STOCK||{})[code]||{}, base=Number(it.tarifa)||0, liq=it.est==='LIQUIDACIÓN';
   var cli=(typeof PP_CLI!=='undefined'&&PP_CLI)?PP_CLI:null;
-  var dto=cli?promoDtoPara(it,cli):(Number(it.dtoGen)||0);
-  var precio=base>0?(base*(1-dto/100)).toFixed(2):'';
-  var nota=(liq?'Liquidación':'Promoción')+' desde el catálogo · −'+(Number(it.dtoGen)||0)+'% tarifa general / −'+(Number(it.dtoFab)||0)+'% fabricante · '+(Number(it.uds)||0).toLocaleString('es-ES')+' uds disponibles';
+  var T=promoTarifas(it,cli), precio=T.length?T[0].precio.toFixed(2):'';
+  var nota=(liq?'Liquidación':'Promoción')+' desde el catálogo · −'+(Number(it.dtoGen)||0)+'% sobre tarifa carnicero / −'+(Number(it.dtoFab)||0)+'% sobre tarifa fabricante · '+(Number(it.uds)||0).toLocaleString('es-ES')+' uds disponibles';
   var q={nuevo:'oferta',desde:'catalogo',cli:c.cliente,nom:c.nombre||c.cliente,art:code,desc:it.nom||'',cal:it.cal||'',met:it.met||'',pb:base>0?base.toFixed(2):'',pr:precio,nota:nota};
   var url=PRC_CRM+'?'+Object.keys(q).map(function(k){return k+'='+encodeURIComponent(q[k]);}).join('&');
   try{ if(window.self!==window.top){ window.open(url,'_blank'); return; } }catch(e){ window.open(url,'_blank'); return; }
