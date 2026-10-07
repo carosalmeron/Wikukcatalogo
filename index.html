@@ -6668,7 +6668,7 @@ function promoPrecioCelda(it){
 var PRC_API='https://crmwikuk.vercel.app/api/pbi-sync?clientesArticulo=';
 var PRC_CRM='https://crmwikuk.vercel.app/crm.html';
 var PRC_Q=(function(){ try{ var q=new URLSearchParams(location.search); return {ag:(q.get('ag')||'').trim().toUpperCase(), jefe:q.get('jefe')==='1'}; }catch(e){ return {ag:'',jefe:false}; } })();
-var PRC_CACHE={}, PRC_VER={};
+var PRC_CACHE={}, PRC_VER={}, PRC_TIPO={};
 function _prcE(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function _prcEur(n){return Math.round(Number(n)||0).toLocaleString('es-ES')+' €';}
 async function promoVerClientes(code){
@@ -6676,7 +6676,7 @@ async function promoVerClientes(code){
   code=String(code||'').toUpperCase();
   box.innerHTML='<div class="prc-msg">Buscando clientes…</div>';
   try{
-    if(!PRC_CACHE[code]){ var r=await fetch(PRC_API+encodeURIComponent(code)+'&top=60'); var j=await r.json(); if(j.ok===false) throw new Error(j.error||'sin respuesta'); PRC_CACHE[code]=j; }
+    if(!PRC_CACHE[code]){ var r=await fetch(PRC_API+encodeURIComponent(code)+'&top=300'); var j=await r.json(); if(j.ok===false) throw new Error(j.error||'sin respuesta'); PRC_CACHE[code]=j; }
     if(PRC_VER[code]==null) PRC_VER[code]=(PRC_Q.ag&&!PRC_Q.jefe)?'mios':'todos';
     pintarClientesPromo(code);
   }catch(e){ box.innerHTML='<div class="prc-msg">No se ha podido consultar: '+_prcE(e.message)+'</div>'; }
@@ -6684,18 +6684,25 @@ async function promoVerClientes(code){
 function pintarClientesPromo(code){
   var box=document.getElementById('prcList'), j=PRC_CACHE[code]; if(!box||!j) return;
   var it=(window.PROMO_STOCK||{})[code]||{};
-  var caen=(j.clientes||[]).filter(function(c){ return Number(c.ventasAnt)>0&&Number(c.diferencia)<0; });
-  var mios=PRC_Q.ag?caen.filter(function(c){ return String(c.agente||'').trim().toUpperCase()===PRC_Q.ag; }):[];
-  var ver=PRC_VER[code], L=ver==='mios'?mios:caen;
+  // Dos listas: los que la han dejado o compran menos, y los que siguen comprando igual o más
+  var esMio=function(c){ return String(c.agente||'').trim().toUpperCase()===PRC_Q.ag; };
+  var todos=(j.clientes||[]);
+  var tipo=PRC_TIPO[code]||'caen', ver=PRC_VER[code];
+  var base=ver==='mios'?todos.filter(esMio):todos;
+  var caen=base.filter(function(c){ return Number(c.ventasAnt)>0&&Number(c.diferencia)<0; });
+  var siguen=base.filter(function(c){ return Number(c.ventasAct)>0&&Number(c.diferencia)>=0; }).sort(function(a,b){ return Number(b.ventasAct)-Number(a.ventasAct); });
+  var L=tipo==='siguen'?siguen:caen;
+  var bt=function(on,js,txt){ return '<button type="button" class="'+(on?'on':'')+'" onclick="'+js+';pintarClientesPromo(\''+code+'\')">'+txt+'</button>'; };
   var h='';
-  if(PRC_Q.ag) h+='<div class="prc-tabs"><button type="button" class="'+(ver==='mios'?'on':'')+'" onclick="PRC_VER[\''+code+'\']=\'mios\';pintarClientesPromo(\''+code+'\')">Mis clientes · '+mios.length+'</button><button type="button" class="'+(ver==='todos'?'on':'')+'" onclick="PRC_VER[\''+code+'\']=\'todos\';pintarClientesPromo(\''+code+'\')">Todos · '+caen.length+'</button></div>';
-  h+='<div class="prc-sub">Este año frente al mismo periodo del año pasado. Primero los que más han dejado de comprar.</div>';
+  if(PRC_Q.ag) h+='<div class="prc-tabs">'+bt(ver==='mios',"PRC_VER['"+code+"']='mios'",'Mis clientes · '+todos.filter(esMio).length)+bt(ver==='todos',"PRC_VER['"+code+"']='todos'",'Todos · '+todos.length)+'</div>';
+  h+='<div class="prc-tabs">'+bt(tipo==='caen',"PRC_TIPO['"+code+"']='caen'",'La dejan o bajan · '+caen.length)+bt(tipo==='siguen',"PRC_TIPO['"+code+"']='siguen'",'Siguen comprando · '+siguen.length)+'</div>';
+  h+='<div class="prc-sub">Este año frente al mismo periodo del año pasado. '+(tipo==='siguen'?'Primero los que más compran.':'Primero los que más han dejado de comprar.')+'</div>';
   var inc=(j.codigosIncluidos||[]); if(inc.length) h+='<div class="prc-sub">Cuenta '+inc.length+' código'+(inc.length>1?'s':'')+' (envases, hijos y códigos antiguos): '+inc.slice(0,25).map(_prcE).join(', ')+(inc.length>25?' y '+(inc.length-25)+' más':'')+'</div>';
-  if(!L.length) h+='<div class="prc-msg">'+(ver==='mios'?'Ninguno de tus clientes ha dejado esta referencia.':'Nadie ha dejado de comprar esta referencia.')+'</div>';
-  L.slice(0,40).forEach(function(c,i){
-    var dejo=Number(c.ventasAct)<=0;
+  if(!L.length) h+='<div class="prc-msg">'+(tipo==='siguen'?'Nadie la está comprando este año'+(ver==='mios'?' entre tus clientes.':'.'):(ver==='mios'?'Ninguno de tus clientes ha dejado esta referencia.':'Nadie ha dejado de comprar esta referencia.'))+'</div>';
+  L.slice(0,80).forEach(function(c,i){
+    var dejo=Number(c.ventasAct)<=0, sube=Number(c.diferencia)>=0;
     h+='<div class="prc-row"><div class="prc-n"><b>'+_prcE(c.nombre||c.cliente)+'</b><small>'+_prcE(c.cliente)+(c.poblacion?' · '+_prcE(c.poblacion):'')+(ver==='todos'&&c.agente?' · '+_prcE(c.agente):'')+'</small>'
-      +'<span class="prc-tag '+(dejo?'off':'baja')+'">'+(dejo?'La ha dejado':'Compra menos '+(c.variacionPct!=null?Math.round(c.variacionPct)+'%':''))+'</span>'
+      +'<span class="prc-tag '+(sube?'sube':dejo?'off':'baja')+'">'+(sube?(Number(c.ventasAnt)>0?'Compra igual o más'+(c.variacionPct?' +'+Math.round(c.variacionPct)+'%':''):'Nuevo este año'):dejo?'La ha dejado':'Compra menos '+(c.variacionPct!=null?Math.round(c.variacionPct)+'%':''))+'</span>'
       +'<small>Año pasado '+_prcEur(c.ventasAnt)+' → este año '+_prcEur(c.ventasAct)+'</small></div>'
       +'<button type="button" class="prc-of" onclick="promoEnviarOferta(\''+code+'\','+i+')">✉️ Enviar oferta</button></div>';
   });
@@ -6718,7 +6725,7 @@ function promoEnviarOferta(code,i){
   +'.prc-sub{font-size:.68rem;color:#888;margin:6px 0}.prc-msg{font-size:.8rem;color:#888;padding:10px 0;text-align:center}'
   +'.prc-row{display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid #eee;padding:9px 0}'
   +'.prc-n{display:flex;flex-direction:column;gap:2px;min-width:0}.prc-n b{font-size:.84rem}.prc-n small{font-size:.68rem;color:#888}'
-  +'.prc-tag{align-self:flex-start;font-size:.64rem;font-weight:800;border-radius:4px;padding:1px 6px}.prc-tag.off{background:#FEE2E2;color:#991B1B}.prc-tag.baja{background:#FEF3C7;color:#92400E}'
+  +'.prc-tag{align-self:flex-start;font-size:.64rem;font-weight:800;border-radius:4px;padding:1px 6px}.prc-tag.off{background:#FEE2E2;color:#991B1B}.prc-tag.baja{background:#FEF3C7;color:#92400E}.prc-tag.sube{background:#DCFCE7;color:#166534}'
   +'.prc-of{flex:none;padding:9px 11px;border-radius:9px;border:none;background:#C8612A;color:#fff;font:700 .76rem Inter,sans-serif;cursor:pointer}';
   document.head.appendChild(st); })();
 function promoUdsHtml(it){ return '<span style="display:inline-block;margin-left:6px;font-size:.66rem;font-weight:700;color:#475569;background:#F1F5F9;border-radius:4px;padding:1px 6px">'+Number(it.uds).toLocaleString('es-ES')+' uds disp.</span>'; }
