@@ -6594,17 +6594,19 @@ function pintarClientesPromo(code){
     h+='<div class="prc-row"><div class="prc-n"><b>'+_prcE(c.nombre||c.cliente)+'</b><small>'+_prcE(c.cliente)+(c.poblacion?' · '+_prcE(c.poblacion):'')+(ver==='todos'&&c.agente?' · '+_prcE(c.agente):'')+'</small>'
       +'<span class="prc-tag '+(sube?'sube':dejo?'off':'baja')+'">'+(sube?(Number(c.ventasAnt)>0?'Compra igual o más'+(c.variacionPct?' +'+Math.round(c.variacionPct)+'%':''):'Nuevo este año'):dejo?'La ha dejado':'Compra menos '+(c.variacionPct!=null?Math.round(c.variacionPct)+'%':''))+'</span>'
       +'<small>Año pasado '+_prcEur(c.ventasAnt)+' → este año '+_prcEur(c.ventasAct)+'</small></div>'
-      +'<button type="button" class="prc-of" onclick="promoEnviarOferta(\''+code+'\','+i+')">✉️ Enviar oferta</button></div>';
+      +'<div class="prc-bts"><button type="button" class="prc-of" onclick="promoEnviarOferta(\''+code+'\','+i+')">✉️ Oferta</button>'
+      +'<button type="button" class="prc-of est" onclick="promoEnviarOferta(\''+code+'\','+i+',\'estrategia\')">🎯 Estrategia</button></div></div>';
   });
   box.innerHTML=h; box._lista=L;
 }
-function promoEnviarOferta(code,i){
+function promoEnviarOferta(code,i,tipo){
   var box=document.getElementById('prcList'), c=box&&box._lista&&box._lista[i]; if(!c) return;
   var it=(window.PROMO_STOCK||{})[code]||{}, base=Number(it.tarifa)||0, liq=it.est==='LIQUIDACIÓN';
   var cli=(typeof PP_CLI!=='undefined'&&PP_CLI)?PP_CLI:null;
-  var T=promoTarifas(it,cli), precio=T.length?T[0].precio.toFixed(2):'';
+  var T=promoTarifas(it,cli), precio=T.length?T[0].precio.toFixed(2):'', dtoT=T.length?T[0].total:'';
   var nota=(liq?'Liquidación':'Promoción')+' desde el catálogo · −'+(Number(it.dtoGen)||0)+'% sobre tarifa carnicero / −'+(Number(it.dtoFab)||0)+'% sobre tarifa fabricante · '+(Number(it.uds)||0).toLocaleString('es-ES')+' uds disponibles';
-  var q={nuevo:'oferta',desde:'catalogo',cli:c.cliente,nom:c.nombre||c.cliente,art:code,desc:it.nom||'',cal:it.cal||'',met:it.met||'',pb:base>0?base.toFixed(2):'',pr:precio,nota:nota};
+  // Oferta directa, o estrategia (el comercial la pide; el jefe la crea asignada al comercial del cliente)
+  var q={nuevo:tipo==='estrategia'?'estrategia':'oferta',desde:'catalogo',cli:c.cliente,nom:c.nombre||c.cliente,art:code,desc:it.nom||'',cal:it.cal||'',met:it.met||'',pb:base>0?base.toFixed(2):'',pr:precio,dto:dtoT,ag:c.agente||'',nota:nota};
   var url=PRC_CRM+'?'+Object.keys(q).map(function(k){return k+'='+encodeURIComponent(q[k]);}).join('&');
   try{ if(window.self!==window.top){ window.open(url,'_blank'); return; } }catch(e){ window.open(url,'_blank'); return; }
   location.href=url;
@@ -6616,7 +6618,7 @@ function promoEnviarOferta(code,i){
   +'.prc-row{display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid #eee;padding:9px 0}'
   +'.prc-n{display:flex;flex-direction:column;gap:2px;min-width:0}.prc-n b{font-size:.84rem}.prc-n small{font-size:.68rem;color:#888}'
   +'.prc-tag{align-self:flex-start;font-size:.64rem;font-weight:800;border-radius:4px;padding:1px 6px}.prc-tag.off{background:#FEE2E2;color:#991B1B}.prc-tag.baja{background:#FEF3C7;color:#92400E}.prc-tag.sube{background:#DCFCE7;color:#166534}'
-  +'.prc-of{flex:none;padding:9px 11px;border-radius:9px;border:none;background:#C8612A;color:#fff;font:700 .76rem Inter,sans-serif;cursor:pointer}';
+  +'.prc-of{flex:none;padding:9px 11px;border-radius:9px;border:none;background:#C8612A;color:#fff;font:700 .76rem Inter,sans-serif;cursor:pointer}.prc-of.est{background:#1E5A8A}.prc-bts{display:flex;flex-direction:column;gap:6px;flex:none}';
   document.head.appendChild(st); })();
 function promoUdsHtml(it){ return '<span style="display:inline-block;margin-left:6px;font-size:.66rem;font-weight:700;color:#475569;background:#F1F5F9;border-radius:4px;padding:1px 6px">'+Number(it.uds).toLocaleString('es-ES')+' uds disp.</span>'; }
 (function(){
