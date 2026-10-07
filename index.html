@@ -6635,26 +6635,34 @@ function promoUdsHtml(it){ return '<span style="display:inline-block;margin-left
     var t=''; for(var i=0;i<(Number(m.partes)||1);i++){ var d=await get('items_'+m.version+'_'+i); t+=(d&&d.texto)||''; }
     var items=[]; try{ items=JSON.parse(t||'[]'); }catch(e){ return; }
     // Dónde está cada código en el catálogo (sin contar las promociones)
+    // Mismo orden que el catálogo: categoría, subcategoría y posición del producto dentro (en tripas, como las ordena el catálogo)
     var keys=Object.keys(DATA), donde={};
     keys.forEach(function(k,ki){ if(isPromo(k)) return; var subs=(DATA[k]&&DATA[k].subs)||{};
-      Object.keys(subs).forEach(function(sk,si){ (subs[sk]||[]).forEach(function(p){ var c=String(p.c||'').toUpperCase(); if(c&&!donde[c]) donde[c]={k:k,ki:ki,s:sk,si:si,p:p}; }); }); });
+      Object.keys(subs).forEach(function(sk,si){ var arr=subs[sk]||[]; if(k==='tripas_naturales'&&typeof _tripaOrder==='function') arr=_tripaOrder(arr.slice());
+        arr.forEach(function(p,ii){ var c=String(p.c||'').toUpperCase(); if(c&&!donde[c]) donde[c]={k:k,ki:ki,s:sk,si:si,ii:ii,p:p}; }); }); });
+    // Sin producto en el catálogo: a la subcategoría de su especie (por el nombre), o a «Otros» al final
+    function subPorNombre(sec,it){ var src=sec==='promo_tripas'?'tripas_naturales':null; if(!src||!DATA[src]) return null;
+      var tx=((it.nom||'')+' '+(it.fam||'')).toUpperCase(), esp=/CORDERO/.test(tx)?'CORDERO':/CERDO/.test(tx)?'CERDO':/VACUNO|BUEY/.test(tx)?'VACUNO':null; if(!esp) return null;
+      var ks=Object.keys(DATA[src].subs||{}), si=ks.findIndex(function(x){ return x.toUpperCase().indexOf(esp)>=0; }); if(si<0) return null;
+      return {k:src,ki:keys.indexOf(src),s:ks[si],si:si,ii:99999}; }
     var porSec={promo_tripas:[],promo_especias:[],promo_envases:[]}, mapa={};
     items.forEach(function(it){
       var cods=[it.cod].concat(it.codigos||[]), w=null;
       for(var j=0;j<cods.length&&!w;j++) w=donde[String(cods[j]||'').toUpperCase()]||null;
-      var sec=seccion(w&&w.k,it.div), sub=w?w.s:(it.fam&&it.fam!=='Sin familia en el catálogo'?it.fam:'Otros');
+      var sec=seccion(w&&w.k,it.div), pos=w||subPorNombre(sec,it);
+      var sub=pos?pos.s:'Otros';
       // Tarifa: la del producto en el catálogo (precio numérico); si no, la que manda Stock
       var _pp=w?String(w.p.p||'').trim():'', _pn=/^\d+([.,]\d+)?$/.test(_pp)?parseFloat(_pp.replace(',','.')):0;
       var tar=_pn||Number(it.tarifa)||0; it.tarifa=tar;
       var p={c:it.cod,n:it.nom||(w&&w.p.n)||it.cod,ca:it.cal||(w&&w.p.ca)||'',me:it.met||(w&&w.p.me)||'',f:(w&&w.p.f)||'',
         p:tar>0?tar.toFixed(2):'',cat:it.est==='LIQUIDACIÓN'?'Liquidación':'Promoción',_pr:it};
       if(w&&w.p.o){ p.o=w.p.o; p.pr=w.p.pr; p.q=w.p.q; p.t=w.p.t; }
-      porSec[sec].push({ki:w?w.ki:999,si:w?w.si:999,sub:sub,p:p});
+      porSec[sec].push({ki:pos?pos.ki:9999,si:pos?pos.si:9999,ii:pos?pos.ii:99999,sub:sub,p:p});
       mapa[String(it.cod).toUpperCase()]=it;
     });
     Object.keys(porSec).forEach(function(sec){
       if(!DATA[sec]) return;
-      var L=porSec[sec].sort(function(a,b){ return a.ki-b.ki||a.si-b.si||String(a.sub).localeCompare(b.sub)||String(a.p.n).localeCompare(b.p.n); });
+      var L=porSec[sec].sort(function(a,b){ return a.ki-b.ki||a.si-b.si||a.ii-b.ii||String(a.p.n).localeCompare(b.p.n); });
       var subs={}; L.forEach(function(x){ (subs[x.sub]=subs[x.sub]||[]).push(x.p); });
       DATA[sec].subs=subs;
     });
