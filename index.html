@@ -4993,7 +4993,7 @@ function dRender() {
           +'<span style="margin-left:3px;font-size:.65rem;color:var(--accent);font-weight:600">-'+discResult.pct+'%</span>'
           +priceDiff;
       } else {
-        price=CLIENT_MODE?'—':p.p+(p.cat?'':' €')+priceDiff;
+        price=CLIENT_MODE?'—':(p._pr?promoPrecioCelda(p._pr):p.p+(p.cat?'':' €')+priceDiff);
       }
       let lastCell;
       if(p.cat){
@@ -5004,7 +5004,7 @@ function dRender() {
       }
       return '<tr'+ppData(p)+'>'
         +'<td class="t-code">'+p.c+'</td>'
-        +'<td class="t-name">'+p.n+stockChip(p.c)+'</td>'
+        +'<td class="t-name">'+p.n+stockChip(p.c)+(p._pr?promoUdsHtml(p._pr):'')+'</td>'
         +'<td><span class="t-fmt">'+f1+'</span></td>'
         +'<td><span class="t-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+f2+'</span></td>'
         +'<td class="t-price">'+price+'</td>'
@@ -5088,7 +5088,7 @@ function mGoSub(sub, el) {
           +'<span style="margin-left:3px;font-size:.65rem;color:var(--accent);font-weight:600">-'+discResult.pct+'%</span>'
           +priceDiff;
       } else {
-        price=CLIENT_MODE?'—':p.p+(p.cat?'':' €')+priceDiff;
+        price=CLIENT_MODE?'—':(p._pr?promoPrecioCelda(p._pr):p.p+(p.cat?'':' €')+priceDiff);
       }
       let lastLine='';
       if(p.cat){
@@ -5098,7 +5098,7 @@ function mGoSub(sub, el) {
         lastLine='<div style="margin-top:5px;font-size:.68rem;color:#1A6B3A;font-weight:600">'+_mDel+'</div>';
       }
       return '<div class="m-card"'+ppData(p)+'>'
-        +'<div class="m-card-top"><div class="m-card-name">'+p.n+'</div><div class="m-card-price">'+price+'</div></div>'
+        +'<div class="m-card-top"><div class="m-card-name">'+p.n+(p._pr?promoUdsHtml(p._pr):'')+'</div><div class="m-card-price">'+price+'</div></div>'
         +'<div class="m-card-bot"><span class="m-card-code">'+p.c+'</span>'
         +'<span class="m-card-fmt">'+f1+'</span>'
         +'<span class="m-card-fmt" style="background:#EBF2F8;color:#1E5A8A;border-color:#C8DFF0">'+f2+'</span></div>'
@@ -6532,7 +6532,28 @@ initApp();
       +'<div class="pp-name">'+_ppEscHtml(name||'Producto')+'</div>'
       +'<div class="pp-code">'+(code?('Código: '+_ppEscHtml(code)):'')+'</div></div>';
     inner+=_ppStockHtml(code);
-    if(isNaN(base)||base<=0){
+    var _pr=window.PROMO_STOCK&&window.PROMO_STOCK[String(code||'').toUpperCase()];
+    if(_pr&&!(isNaN(base)||base<=0)){
+      // (oct 2026) Artículo en PROMOCIÓN / LIQUIDACIÓN (desde Stock): descuento permitido por tipo de cliente
+      var _liq=_pr.est==='LIQUIDACIÓN', _col=_liq?'#B91C1C':'#B45309';
+      inner+='<div style="margin:0 20px 6px;font-size:.78rem;color:'+_col+';font-weight:700">🏷️ '+(_liq?'Liquidación':'Promoción')+' · disponibles '+_pr.uds.toLocaleString('es-ES')+' uds'+(_pr.cal?' · cal. '+_ppEscHtml(_pr.cal):'')+(_pr.met?' · '+_ppEscHtml(_pr.met)+' m':'')+'</div>'
+        +'<div class="prc-box"><button type="button" class="prc-btn" onclick="promoVerClientes(\''+_ppEscHtml(String(code)).replace(/'/g,"\\'")+'\')">👥 Clientes que la compraban y la han dejado</button><div id="prcList"></div></div>';
+      if(PP_CLI){
+        var _dp=promoDtoPara(_pr,PP_CLI), _pc=base*(1-_dp/100);
+        inner+='<div style="margin:0 20px 4px;font-size:.72rem;color:#888">Cliente '+_ppEscHtml(PP_CLI.nombre||PP_CLI.cat)+' · '+_ppEscHtml(PP_CLI.cat||'tarifa general')+' (su tarifa −'+PP_CLI.dto+'%)</div>';
+        inner+='<div class="pp-block"><div class="pp-block-h" style="background:'+_col+'">🏷️ Precio '+(_liq?'liquidación':'promoción')+' para '+_ppEscHtml(PP_CLI.cat||'cliente')+'</div>'
+          +'<div class="pp-row base sel" data-val="'+_pc.toFixed(4)+'" data-lbl="'+_ppEscHtml((_liq?'Liquidación':'Promoción')+' −'+_dp+'%')+'" data-extra="0" data-aprob="0" data-totaldto="'+_dp+'"><span class="lbl">⭐ −'+_dp+'% sobre tarifa '+_ppFmt(base)+'</span><span class="val">'+_ppFmt(_pc)+'</span></div></div>';
+      } else {
+        var _dg=Number(_pr.dtoGen)||0, _df=Number(_pr.dtoFab)||0;
+        inner+='<div style="margin:0 20px 4px;font-size:.72rem;color:#888">Sin cliente: precio según el tipo de cliente. Toca el que quieras aplicar:</div>';
+        inner+='<div class="pp-block"><div class="pp-block-h" style="background:#C0392B">🔴 Tarifa general (carniceros) <span style="font-size:.78rem;font-weight:700;opacity:.9">−'+_dg+'%</span></div>'
+          +'<div class="pp-row base sel" data-val="'+(base*(1-_dg/100)).toFixed(4)+'" data-lbl="'+_ppEscHtml('General −'+_dg+'%')+'" data-totaldto="'+_dg+'"><span class="lbl">Precio promo sobre '+_ppFmt(base)+'</span><span class="val">'+_ppFmt(base*(1-_dg/100))+'</span></div></div>'
+          +'<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">🔵 Fabricante / distribuidor <span style="font-size:.78rem;font-weight:700;opacity:.9">−'+_df+'%</span></div>'
+          +'<div class="pp-row base" data-val="'+(base*(1-_df/100)).toFixed(4)+'" data-lbl="'+_ppEscHtml('Fabricante −'+_df+'%')+'" data-totaldto="'+_df+'"><span class="lbl">Precio promo sobre '+_ppFmt(base)+'</span><span class="val">'+_ppFmt(base*(1-_df/100))+'</span></div></div>';
+      }
+      if(isTrip){ inner+=_ppExtrasHtml(); }
+      inner+='<div class="pp-extra-total" id="pp-total"></div>';
+    } else if(isNaN(base)||base<=0){
       inner+='<div style="padding:22px 20px;color:#888;font-size:.88rem">Este producto no tiene un precio numérico para calcular descuentos.</div>';
     } else if(PP_CLI){
       // (v3.41) MODO CLIENTE: precio de su tarifa + descuentos según su margen
@@ -6617,6 +6638,128 @@ initApp();
   });
   // Cerrar con Escape
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closePricePanel();});
+})();
+</script>
+<script>
+// ══ (oct 2026) PROMOCIÓN Y LIQUIDACIÓN desde «Stock Promoción y Liquidación» del CRM ══
+// Los artículos con cantidad propuesta se publican en Firestore (catalogo_promo). Sustituyen a la
+// lista fija de promociones: cada uno va a Tripas / Especias y Preparados / Envases según la categoría
+// de su producto en el catálogo, y dentro, en la subcategoría (familia) en el mismo orden que el catálogo.
+window.PROMO_STOCK={};
+var PROMO_FAB=['FABRICANTE','DISTRIBUIDOR','GRAN CUENTA'];
+function promoDtoPara(it,cli){
+  var t=cli&&PROMO_FAB.indexOf(String(cli.cat||'').trim().toUpperCase())>=0?(Number(it.dtoFab)||0):(Number(it.dtoGen)||0);
+  return Math.max(t, cli?(Number(cli.dto)||0):0);   // si su tarifa ya le da más, se queda la suya
+}
+function _prFmt(n){return n.toFixed(2).replace('.',',')+' €';}
+function promoPrecioCelda(it){
+  var b=Number(it.tarifa)||0; if(!(b>0)) return '—';
+  var cli=(typeof PP_CLI!=='undefined')?PP_CLI:null;
+  if(cli){ var d=promoDtoPara(it,cli);
+    return '<span style="text-decoration:line-through;color:#bbb;font-size:.72rem">'+_prFmt(b)+'</span> <b style="color:#B45309">'+_prFmt(b*(1-d/100))+'</b><span style="margin-left:3px;font-size:.65rem;color:#B45309;font-weight:700">−'+d+'%</span>'; }
+  var g=Number(it.dtoGen)||0, f=Number(it.dtoFab)||0;
+  return '<span style="display:inline-block;text-align:right;line-height:1.25"><span style="font-size:.66rem;color:#888">Gral. −'+g+'%</span> <b>'+_prFmt(b*(1-g/100))+'</b><br><span style="font-size:.66rem;color:#888">Fab. −'+f+'%</span> <b>'+_prFmt(b*(1-f/100))+'</b></span>';
+}
+// ── Clientes que compraban el artículo y lo han dejado (o compran menos), para ofrecérselo ──
+var PRC_API='https://crmwikuk.vercel.app/api/pbi-sync?clientesArticulo=';
+var PRC_CRM='https://crmwikuk.vercel.app/crm.html';
+var PRC_Q=(function(){ try{ var q=new URLSearchParams(location.search); return {ag:(q.get('ag')||'').trim().toUpperCase(), jefe:q.get('jefe')==='1'}; }catch(e){ return {ag:'',jefe:false}; } })();
+var PRC_CACHE={}, PRC_VER={};
+function _prcE(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function _prcEur(n){return Math.round(Number(n)||0).toLocaleString('es-ES')+' €';}
+async function promoVerClientes(code){
+  var box=document.getElementById('prcList'); if(!box) return;
+  code=String(code||'').toUpperCase();
+  box.innerHTML='<div class="prc-msg">Buscando clientes…</div>';
+  try{
+    if(!PRC_CACHE[code]){ var r=await fetch(PRC_API+encodeURIComponent(code)+'&top=60'); var j=await r.json(); if(j.ok===false) throw new Error(j.error||'sin respuesta'); PRC_CACHE[code]=j; }
+    if(PRC_VER[code]==null) PRC_VER[code]=(PRC_Q.ag&&!PRC_Q.jefe)?'mios':'todos';
+    pintarClientesPromo(code);
+  }catch(e){ box.innerHTML='<div class="prc-msg">No se ha podido consultar: '+_prcE(e.message)+'</div>'; }
+}
+function pintarClientesPromo(code){
+  var box=document.getElementById('prcList'), j=PRC_CACHE[code]; if(!box||!j) return;
+  var it=(window.PROMO_STOCK||{})[code]||{};
+  var caen=(j.clientes||[]).filter(function(c){ return Number(c.ventasAnt)>0&&Number(c.diferencia)<0; });
+  var mios=PRC_Q.ag?caen.filter(function(c){ return String(c.agente||'').trim().toUpperCase()===PRC_Q.ag; }):[];
+  var ver=PRC_VER[code], L=ver==='mios'?mios:caen;
+  var h='';
+  if(PRC_Q.ag) h+='<div class="prc-tabs"><button type="button" class="'+(ver==='mios'?'on':'')+'" onclick="PRC_VER[\''+code+'\']=\'mios\';pintarClientesPromo(\''+code+'\')">Mis clientes · '+mios.length+'</button><button type="button" class="'+(ver==='todos'?'on':'')+'" onclick="PRC_VER[\''+code+'\']=\'todos\';pintarClientesPromo(\''+code+'\')">Todos · '+caen.length+'</button></div>';
+  h+='<div class="prc-sub">Este año frente al mismo periodo del año pasado. Primero los que más han dejado de comprar.</div>';
+  if(!L.length) h+='<div class="prc-msg">'+(ver==='mios'?'Ninguno de tus clientes ha dejado esta referencia.':'Nadie ha dejado de comprar esta referencia.')+'</div>';
+  L.slice(0,40).forEach(function(c,i){
+    var dejo=Number(c.ventasAct)<=0;
+    h+='<div class="prc-row"><div class="prc-n"><b>'+_prcE(c.nombre||c.cliente)+'</b><small>'+_prcE(c.cliente)+(c.poblacion?' · '+_prcE(c.poblacion):'')+(ver==='todos'&&c.agente?' · '+_prcE(c.agente):'')+'</small>'
+      +'<span class="prc-tag '+(dejo?'off':'baja')+'">'+(dejo?'La ha dejado':'Compra menos '+(c.variacionPct!=null?Math.round(c.variacionPct)+'%':''))+'</span>'
+      +'<small>Año pasado '+_prcEur(c.ventasAnt)+' → este año '+_prcEur(c.ventasAct)+'</small></div>'
+      +'<button type="button" class="prc-of" onclick="promoEnviarOferta(\''+code+'\','+i+')">✉️ Enviar oferta</button></div>';
+  });
+  box.innerHTML=h; box._lista=L;
+}
+function promoEnviarOferta(code,i){
+  var box=document.getElementById('prcList'), c=box&&box._lista&&box._lista[i]; if(!c) return;
+  var it=(window.PROMO_STOCK||{})[code]||{}, base=Number(it.tarifa)||0, liq=it.est==='LIQUIDACIÓN';
+  var cli=(typeof PP_CLI!=='undefined'&&PP_CLI)?PP_CLI:null;
+  var dto=cli?promoDtoPara(it,cli):(Number(it.dtoGen)||0);
+  var precio=base>0?(base*(1-dto/100)).toFixed(2):'';
+  var nota=(liq?'Liquidación':'Promoción')+' desde el catálogo · −'+(Number(it.dtoGen)||0)+'% tarifa general / −'+(Number(it.dtoFab)||0)+'% fabricante · '+(Number(it.uds)||0).toLocaleString('es-ES')+' uds disponibles';
+  var q={nuevo:'oferta',desde:'catalogo',cli:c.cliente,nom:c.nombre||c.cliente,art:code,desc:it.nom||'',cal:it.cal||'',met:it.met||'',pb:base>0?base.toFixed(2):'',pr:precio,nota:nota};
+  var url=PRC_CRM+'?'+Object.keys(q).map(function(k){return k+'='+encodeURIComponent(q[k]);}).join('&');
+  try{ if(window.self!==window.top){ window.open(url,'_blank'); return; } }catch(e){ window.open(url,'_blank'); return; }
+  location.href=url;
+}
+(function(){ var st=document.createElement('style'); st.textContent=
+  '.prc-box{margin:4px 20px 10px}.prc-btn{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid #1E5A8A;background:#EBF2F8;color:#1E5A8A;font:700 .86rem Inter,sans-serif;cursor:pointer}'
+  +'.prc-tabs{display:flex;gap:6px;margin:10px 0 4px}.prc-tabs button{flex:1;padding:7px;border-radius:99px;border:1px solid #ddd;background:#fff;font:600 .76rem Inter,sans-serif;cursor:pointer}.prc-tabs button.on{background:#1E5A8A;color:#fff;border-color:#1E5A8A}'
+  +'.prc-sub{font-size:.68rem;color:#888;margin:6px 0}.prc-msg{font-size:.8rem;color:#888;padding:10px 0;text-align:center}'
+  +'.prc-row{display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid #eee;padding:9px 0}'
+  +'.prc-n{display:flex;flex-direction:column;gap:2px;min-width:0}.prc-n b{font-size:.84rem}.prc-n small{font-size:.68rem;color:#888}'
+  +'.prc-tag{align-self:flex-start;font-size:.64rem;font-weight:800;border-radius:4px;padding:1px 6px}.prc-tag.off{background:#FEE2E2;color:#991B1B}.prc-tag.baja{background:#FEF3C7;color:#92400E}'
+  +'.prc-of{flex:none;padding:9px 11px;border-radius:9px;border:none;background:#C8612A;color:#fff;font:700 .76rem Inter,sans-serif;cursor:pointer}';
+  document.head.appendChild(st); })();
+function promoUdsHtml(it){ return '<span style="display:inline-block;margin-left:6px;font-size:.66rem;font-weight:700;color:#475569;background:#F1F5F9;border-radius:4px;padding:1px 6px">'+Number(it.uds).toLocaleString('es-ES')+' uds disp.</span>'; }
+(function(){
+  var FBP="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents/catalogo_promo/";
+  function val(v){ if(!v) return null; if('stringValue' in v) return v.stringValue; if('integerValue' in v) return Number(v.integerValue); if('doubleValue' in v) return Number(v.doubleValue); return null; }
+  async function get(id){ var r=await fetch(FBP+encodeURIComponent(id),{cache:'no-store'}); if(!r.ok) return null; var j=await r.json(), o={}; Object.keys(j.fields||{}).forEach(function(k){o[k]=val(j.fields[k]);}); return o; }
+  var SEC_ENV=['envases','accesorios','spot_merkapack','spot_el_carmen','spot_sierra','spot_cui'];
+  function seccion(catKey,div){
+    if(catKey==='tripas_naturales') return 'promo_tripas';
+    if(catKey&&SEC_ENV.indexOf(catKey)>=0) return 'promo_envases';
+    if(catKey) return 'promo_especias';
+    return div==='Envases'?'promo_envases':div==='Especias'?'promo_especias':'promo_tripas';
+  }
+  async function cargar(){
+    var m=await get('actual'); if(!m||!m.version) return;           // nunca publicado: se queda la lista fija
+    var t=''; for(var i=0;i<(Number(m.partes)||1);i++){ var d=await get('items_'+m.version+'_'+i); t+=(d&&d.texto)||''; }
+    var items=[]; try{ items=JSON.parse(t||'[]'); }catch(e){ return; }
+    // Dónde está cada código en el catálogo (sin contar las promociones)
+    var keys=Object.keys(DATA), donde={};
+    keys.forEach(function(k,ki){ if(isPromo(k)) return; var subs=(DATA[k]&&DATA[k].subs)||{};
+      Object.keys(subs).forEach(function(sk,si){ (subs[sk]||[]).forEach(function(p){ var c=String(p.c||'').toUpperCase(); if(c&&!donde[c]) donde[c]={k:k,ki:ki,s:sk,si:si,p:p}; }); }); });
+    var porSec={promo_tripas:[],promo_especias:[],promo_envases:[]}, mapa={};
+    items.forEach(function(it){
+      var cods=[it.cod].concat(it.codigos||[]), w=null;
+      for(var j=0;j<cods.length&&!w;j++) w=donde[String(cods[j]||'').toUpperCase()]||null;
+      var sec=seccion(w&&w.k,it.div), sub=w?w.s:(it.fam&&it.fam!=='Sin familia en el catálogo'?it.fam:'Otros');
+      var tar=Number(it.tarifa)||(w?parseFloat(String(w.p.p||'').replace(',','.'))||0:0); it.tarifa=tar;
+      var p={c:it.cod,n:it.nom||(w&&w.p.n)||it.cod,ca:it.cal||(w&&w.p.ca)||'',me:it.met||(w&&w.p.me)||'',f:(w&&w.p.f)||'',
+        p:tar>0?tar.toFixed(2):'',cat:it.est==='LIQUIDACIÓN'?'Liquidación':'Promoción',_pr:it};
+      if(w&&w.p.o){ p.o=w.p.o; p.pr=w.p.pr; p.q=w.p.q; p.t=w.p.t; }
+      porSec[sec].push({ki:w?w.ki:999,si:w?w.si:999,sub:sub,p:p});
+      mapa[String(it.cod).toUpperCase()]=it;
+    });
+    Object.keys(porSec).forEach(function(sec){
+      if(!DATA[sec]) return;
+      var L=porSec[sec].sort(function(a,b){ return a.ki-b.ki||a.si-b.si||String(a.sub).localeCompare(b.sub)||String(a.p.n).localeCompare(b.p.n); });
+      var subs={}; L.forEach(function(x){ (subs[x.sub]=subs[x.sub]||[]).push(x.p); });
+      DATA[sec].subs=subs;
+    });
+    window.PROMO_STOCK=mapa;
+    try{ if(typeof dCatKey!=='undefined'&&dCatKey&&isPromo(dCatKey)){ var s=Object.keys(DATA[dCatKey].subs); if(s.indexOf(dSub)<0) dSub=s[0]||null; } reRenderIfOpen(); }catch(e){}
+    console.log('🏷️ Promoción y liquidación desde Stock: '+items.length+' artículos');
+  }
+  var n=0; (function esperar(){ if((typeof _fbProductsLoaded!=='undefined'&&_fbProductsLoaded)||n++>60) cargar().catch(function(e){console.warn('promo stock',e);}); else setTimeout(esperar,250); })();
 })();
 </script>
 <script>
@@ -6798,13 +6941,13 @@ initApp();
   }
 })();
 </script>
-<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.56.0</div>
+<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.57.0</div>
 <script>
 // Mostrar si llegó cliente, para diagnóstico
 (function(){
   function pinta(){
     var b=document.getElementById('catVerBadge'); if(!b) return;
-    try{ b.textContent='cat v3.55.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
+    try{ b.textContent='cat v3.57.0'+(PP_CLI?(' · '+(PP_CLI.cat||'?')+' -'+PP_CLI.dto+'%'):' · sin cliente'); }catch(e){}
   }
   setInterval(pinta, 800);
 })();
