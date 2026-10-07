@@ -4872,7 +4872,8 @@ function dRender() {
     }).join('');
   } else {
     rows=items.map(function(p){
-      const fmts=p.f?p.f.split(' / '):[p.f1||'—',p.f2||'—'];
+      // (oct 2026) En promoción y liquidación: calibre y metros en lugar de los formatos
+      const fmts=p._pr?[p.ca||'—',p.me?(/m$/i.test(String(p.me).trim())?p.me:p.me+' m'):'—']:p.f?p.f.split(' / '):[p.f1||'—',p.f2||'—'];
       const f1=fmts[0]||'—'; const f2=fmts[1]||fmts[0]||'—';
       const priceDiff=getPriceDiff(p.c,p.p);
       var discResult=ACTIVE_CLIENT&&ACTIVE_CLIENT.global&&!p.cat?applyDiscount(p.p,p.c,dCatKey):null;
@@ -4911,7 +4912,7 @@ function dRender() {
     +'<table class="prod-table">'
     +'<thead><tr>'
     +'<th style="width:88px">Código</th><th>Producto</th>'
-    +(_isTripas?'<th style="width:100px">Calibre</th><th style="width:110px">Medida</th>':'<th style="width:100px">Fmt. mínimo</th><th style="width:110px">Fmt. agrupado</th>')
+    +((_isTripas||_isPromo)?'<th style="width:100px">Calibre</th><th style="width:110px">Medida</th>':'<th style="width:100px">Fmt. mínimo</th><th style="width:110px">Fmt. agrupado</th>')
     +'<th class="r" style="width:75px">PVP / Stock</th>'
     +'<th style="width:145px">Entrega</th>'
     +'</tr></thead>'
@@ -4967,7 +4968,8 @@ function mGoSub(sub, el) {
     }).join('');
   } else {
     cardsHTML=items.map(function(p){
-      const fmts=p.f?p.f.split(' / '):[p.f1||'—',p.f2||'—'];
+      // (oct 2026) En promoción y liquidación: calibre y metros en lugar de los formatos
+      const fmts=p._pr?[p.ca||'—',p.me?(/m$/i.test(String(p.me).trim())?p.me:p.me+' m'):'—']:p.f?p.f.split(' / '):[p.f1||'—',p.f2||'—'];
       const f1=fmts[0]||'—'; const f2=fmts[1]||fmts[0]||'—';
       const priceDiff=getPriceDiff(p.c,p.p);
       var discResult=ACTIVE_CLIENT&&ACTIVE_CLIENT.global&&!p.cat?applyDiscount(p.p,p.c,dCatKey):null;
@@ -6549,8 +6551,8 @@ function promoPrecioCelda(it){
   var cli=(typeof PP_CLI!=='undefined')?PP_CLI:null, T=promoTarifas(it,cli);
   return '<span style="display:inline-block;text-align:right;line-height:1.35;white-space:nowrap">'+T.map(function(t,i){
     return (i?'<br>':'')+'<span style="font-size:.62rem;color:#888">'+(cli?'':(t.lbl==='Carnicero'?'Carn.':'Fab.')+' ')+'</span>'
-      +'<span style="text-decoration:line-through;color:#aaa;font-size:.72rem">'+_prFmt(t.tarifa)+'</span> <b style="color:#B45309">'+_prFmt(t.precio)+'</b>'
-      +'<span style="margin-left:3px;font-size:.62rem;color:#B45309;font-weight:700">−'+t.dto+'%</span>'; }).join('')+'</span>';
+      +(t.dto?'<span style="text-decoration:line-through;color:#aaa;font-size:.72rem">'+_prFmt(t.tarifa)+'</span> <b style="color:#B45309">'+_prFmt(t.precio)+'</b>'
+      +'<span style="margin-left:3px;font-size:.62rem;color:#B45309;font-weight:700">−'+t.dto+'%</span>':'<b>'+_prFmt(t.precio)+'</b>'); }).join('')+'</span>';
 }
 // ── Clientes que compraban el artículo y lo han dejado (o compran menos), para ofrecérselo ──
 var PRC_API='https://crmwikuk.vercel.app/api/pbi-sync?clientesArticulo=';
