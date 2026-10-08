@@ -1719,10 +1719,8 @@ function stockGrupo(c){
   if(!WK_STOCK._memo)WK_STOCK._memo={};
   if(WK_STOCK._memo[c]!==undefined)return WK_STOCK._memo[c];
   var ex=WK_STOCK.exact||{},envs=[],tot=0,lleg=0,comp=0,pref=c+'.';
-  // (oct 2026) Misma madeja: también los entubados de su letra (FC35.9LF3, FC35.9LR3.C12 → FC35.9L)
-  var _rz=function(x){var m=/^([A-Z]{1,3}\d{1,3}\.\d{1,2}[A-Z]+?)(?:[FR]\d+)?(?:\.[A-Z0-9]+)?$/.exec(x);return m?m[1]:null;}, _rc=(_rz(c)===c)?c:null;
   for(var k in ex){
-    if(k===c||k.indexOf(pref)===0||(_rc&&_rz(k)===_rc)){
+    if(k===c||k.indexOf(pref)===0){
       var v=ex[k]||[],st=v[0]||0,lg=v[1]||0,cm=v[2]||0;
       envs.push([k,st,lg,cm]);tot+=st;lleg+=lg;comp+=cm;
     }
@@ -6566,7 +6564,8 @@ async function promoVerClientes(code){
   code=String(code||'').toUpperCase();
   box.innerHTML='<div class="prc-msg">Buscando clientes…</div>';
   try{
-    if(!PRC_CACHE[code]){ var r=await fetch(PRC_API+encodeURIComponent(code)+'&top=300'); var j=await r.json(); if(j.ok===false) throw new Error(j.error||'sin respuesta'); PRC_CACHE[code]=j; }
+    var _it=(window.PROMO_STOCK||{})[code]||{}, _mas=(_it.eq||[]).length?'&mas='+encodeURIComponent(_it.eq.join(',')):'';
+    if(!PRC_CACHE[code]){ var r=await fetch(PRC_API+encodeURIComponent(code)+'&top=300'+_mas); var j=await r.json(); if(j.ok===false) throw new Error(j.error||'sin respuesta'); PRC_CACHE[code]=j; }
     if(PRC_VER[code]==null) PRC_VER[code]=(PRC_Q.ag&&!PRC_Q.jefe)?'mios':'todos';
     pintarClientesPromo(code);
   }catch(e){ box.innerHTML='<div class="prc-msg">No se ha podido consultar: '+_prcE(e.message)+'</div>'; }
@@ -6675,7 +6674,7 @@ function promoUdsHtml(it){ return '<span style="display:inline-block;margin-left
       var subs={}; L.forEach(function(x){ (subs[x.sub]=subs[x.sub]||[]).push(x.p); });
       DATA[sec].subs=subs;
     });
-    window.PROMO_STOCK=mapa;
+    window.PROMO_STOCK=mapa; try{ if(typeof WK_STOCK!=='undefined'&&WK_STOCK) WK_STOCK._memo={}; }catch(e){}
     try{ if(typeof dCatKey!=='undefined'&&dCatKey&&isPromo(dCatKey)){ var s=Object.keys(DATA[dCatKey].subs); if(s.indexOf(dSub)<0) dSub=s[0]||null; } reRenderIfOpen(); }catch(e){}
     console.log('🏷️ Promoción y liquidación desde Stock: '+items.length+' artículos');
   }
