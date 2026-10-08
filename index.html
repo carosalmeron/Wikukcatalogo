@@ -6607,9 +6607,16 @@ function promoEnviarOferta(code,i,tipo){
   var nota=(liq?'Liquidación':'Promoción')+' desde el catálogo · −'+(Number(it.dtoGen)||0)+'% sobre tarifa carnicero / −'+(Number(it.dtoFab)||0)+'% sobre tarifa fabricante · '+(Number(it.uds)||0).toLocaleString('es-ES')+' uds disponibles';
   // Oferta directa, o estrategia (el comercial la pide; el jefe la crea asignada al comercial del cliente)
   var q={nuevo:tipo==='estrategia'?'estrategia':'oferta',desde:'catalogo',cli:c.cliente,nom:c.nombre||c.cliente,art:code,desc:it.nom||'',cal:it.cal||'',met:it.met||'',pb:base>0?base.toFixed(2):'',pr:precio,dto:dtoT,ag:c.agente||'',nota:nota};
-  var url=PRC_CRM+'?'+Object.keys(q).map(function(k){return k+'='+encodeURIComponent(q[k]);}).join('&');
-  try{ if(window.self!==window.top){ window.open(url,'_blank'); return; } }catch(e){ window.open(url,'_blank'); return; }
-  location.href=url;
+  var qstr=Object.keys(q).map(function(k){return k+'='+encodeURIComponent(q[k]);}).join('&'), url=PRC_CRM+'?'+qstr;
+  var enMarco=false; try{ enMarco=window.self!==window.top; }catch(e){ enMarco=true; }
+  if(!enMarco){ location.href=url; return; }
+  // Dentro del portal: se le pide al portal que abra el CRM con la oferta/estrategia (sin abrir otra ventana).
+  // Si en un momento no contesta (p. ej. dentro de un formulario del CRM suelto), se abre en otra pestaña.
+  var hecho=false;
+  var ok=function(ev){ if(ev&&ev.data&&ev.data.type==='WK_ABRIR_CRM_OK'){ hecho=true; window.removeEventListener('message',ok); } };
+  window.addEventListener('message',ok);
+  try{ window.top.postMessage({type:'WK_ABRIR_CRM',query:qstr},'*'); }catch(e){}
+  setTimeout(function(){ window.removeEventListener('message',ok); if(!hecho){ var w=window.open(url,'_blank'); if(!w) location.href=url; } },700);
 }
 (function(){ var st=document.createElement('style'); st.textContent=
   '.prc-box{margin:4px 20px 10px}.prc-btn{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid #1E5A8A;background:#EBF2F8;color:#1E5A8A;font:700 .86rem Inter,sans-serif;cursor:pointer}'
