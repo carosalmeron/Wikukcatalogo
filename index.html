@@ -6438,6 +6438,14 @@ initApp();
       });
       if(isTrip){ inner+=_ppExtrasHtml(); }
       inner+='<div class="pp-extra-total" id="pp-total"></div>';
+    } else if(_pr){
+      // (oct 2026) En promoción/liquidación pero sin precio en el catálogo: el descuento permitido
+      var _liq2=_pr.est==='LIQUIDACIÓN', _col2=_liq2?'#B91C1C':'#B45309';
+      inner+='<div style="margin:0 20px 6px;font-size:.78rem;color:'+_col2+';font-weight:700">🏷️ '+(_liq2?'Liquidación':'Promoción')+' · disponibles '+_pr.uds.toLocaleString('es-ES')+' uds'+(_pr.cal?' · cal. '+_ppEscHtml(_pr.cal):'')+(_pr.met?' · '+_ppEscHtml(_pr.met)+' m':'')+'</div>'
+        +'<div class="prc-box"><button type="button" class="prc-btn" onclick="promoVerClientes(\''+_ppEscHtml(String(code)).replace(/'/g,"\\'")+'\')">👥 Clientes que la compraban y la han dejado</button><div id="prcList"></div></div>'
+        +'<div style="margin:6px 20px 14px;font-size:.88rem;line-height:1.6">Sin precio en el catálogo. Descuento permitido sobre la tarifa:<br>'
+        +(PP_CLI?'<b style="color:'+_col2+'">−'+promoDtoPara(_pr,PP_CLI)+'%</b> para '+_ppEscHtml(PP_CLI.nombre||PP_CLI.cat)
+          :'🔴 Carnicero <b style="color:'+_col2+'">−'+(Number(_pr.dtoGen)||0)+'%</b> · 🔵 Fabricante <b style="color:'+_col2+'">−'+(Number(_pr.dtoFab)||0)+'%</b>')+'</div>';
     } else if(isNaN(base)||base<=0){
       inner+='<div style="padding:22px 20px;color:#888;font-size:.88rem">Este producto no tiene un precio numérico para calcular descuentos.</div>';
     } else if(PP_CLI){
@@ -6544,9 +6552,18 @@ function promoTarifas(it,cli){   // [{lbl, tarifa, dto, precio, total}]
   return [f('Carnicero',0,Number(it.dtoGen)||0), f('Fabricante',PROMO_DTO_FAB,Number(it.dtoFab)||0)];
 }
 function _prFmt(n){return n.toFixed(2).replace('.',',')+' €';}
+// (oct 2026) Sin precio en el catálogo: se enseña el descuento permitido
+function promoDtoSinPrecio(it,cli){
+  var c='<span style="margin-left:3px;font-size:.62rem;color:#888">sobre tarifa</span>';
+  var l=function(lbl,d){ return '<span style="font-size:.62rem;color:#888">'+lbl+' </span><b style="color:#B45309">−'+(Number(d)||0)+'%</b>'; };
+  return '<span style="display:inline-block;text-align:right;line-height:1.35;white-space:nowrap">'
+    +(cli?l('Dto.',promoDtoPara(it,cli))+c:l('Carn.',it.dtoGen)+c+'<br>'+l('Fab.',it.dtoFab)+c)+'</span>';
+}
 function promoPrecioCelda(it){
-  var b=Number(it.tarifa)||0; if(!(b>0)) return '—';
-  var cli=(typeof PP_CLI!=='undefined')?PP_CLI:null, T=promoTarifas(it,cli);
+  var b=Number(it.tarifa)||0;
+  var cli=(typeof PP_CLI!=='undefined')?PP_CLI:null;
+  if(!(b>0)) return promoDtoSinPrecio(it,cli);
+  var T=promoTarifas(it,cli);
   return '<span style="display:inline-block;text-align:right;line-height:1.35;white-space:nowrap">'+T.map(function(t,i){
     return (i?'<br>':'')+'<span style="font-size:.62rem;color:#888">'+(cli?'':(t.lbl==='Carnicero'?'Carn.':'Fab.')+' ')+'</span>'
       +(t.dto?'<span style="text-decoration:line-through;color:#aaa;font-size:.72rem">'+_prFmt(t.tarifa)+'</span> <b style="color:#B45309">'+_prFmt(t.precio)+'</b>'
