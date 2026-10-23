@@ -387,7 +387,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.58</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.59</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -3818,6 +3818,7 @@ async function loadAccesos() {
 }
 
 async function saveAccesos() {
+  if (!Array.isArray(APP_USERS) || APP_USERS.length === 0) return;  // nunca escribir usuarios vacíos
   try {
     if (ACCESOS_LOG.length > 100) ACCESOS_LOG = ACCESOS_LOG.slice(-100);
     // Usar APP_USERS actual para no sobrescribir cambios del admin
@@ -4009,6 +4010,12 @@ async function loadUsers(forceRemote) {
 
 // ── Save users to JSONBin ──
 async function saveUsers() {
+  // SALVAGUARDA: si la lista está vacía es que la lectura falló (cuota, red...).
+  // Guardar ahora escribiría "cero usuarios" encima y los borraría a todos.
+  if (!Array.isArray(APP_USERS) || APP_USERS.length === 0) {
+    alert('⚠️ No se ha podido guardar.\n\nLa lista de usuarios está vacía — seguramente no se pudo leer la base de datos. Se cancela el guardado para no borrar los usuarios.\n\nRecarga la página e inténtalo de nuevo.');
+    return false;
+  }
   // Limitar accesos a los últimos 100 para no superar límite JSONBin (100KB)
   var accesosToSave = ACCESOS_LOG.length > 100 ? ACCESOS_LOG.slice(-100) : ACCESOS_LOG;
   var payload = {usuarios: APP_USERS, accesos: accesosToSave};
@@ -4024,6 +4031,12 @@ async function saveUsers() {
       });
       if (!r.ok) {
         var rt = await r.text();
+        // 403/429 = cuota agotada o clave sin permiso. Reintentar solo gasta
+        // más peticiones y no va a funcionar: cortar aquí.
+        if (r.status === 403 || r.status === 429) {
+          alert('⚠️ La base de datos no acepta más peticiones ahora mismo (HTTP ' + r.status + ').\n\nEl cupo del servicio está agotado. No se ha guardado nada. Avisa a quien lleve el catálogo.');
+          return false;
+        }
         throw new Error('HTTP ' + r.status + ': ' + rt.substring(0, 100));
       }
       // Solo actualizar caché DESPUÉS de confirmar save exitoso
@@ -4320,41 +4333,90 @@ function copyEnlaceCliente(idx) {
 var CLIENT_MODE = false;
 var CLIENT_CATS = null;
 
-// ── SHARE MODAL FUNCTIONS (v3.58 — varios enlaces por comercial) ──
+// ── ENLACES DE CLIENTE (v3.59 — en Firestore, sin depender de JSONBin) ──
+// Colección propia: enlaces_catalogo/<token>
+//   n = nombre del cliente · cats = familias ("todas" o "k1,k2") · ag = comercial
+//   a = activo · f = fecha ISO
+var ENL_COL = FB_STOCK + '/enlaces_catalogo';
+var ENLACES = [];           // enlaces cargados (los que puede ver quien mira)
+var _enlCargados = false;
+
 function _shEsc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function _shBase(){ return window.location.href.split('?')[0]; }
 function _shUrl(tok){ return _shBase()+'?cliente='+tok; }
-function _shMyUser(){
-  if(!ACTIVE_USER) return null;
-  var u = APP_USERS.find(function(x){ return x.usuario===ACTIVE_USER.usuario; });
-  if (u) return u;
-  // Dentro del portal (Hub) no hay usuario con clave: se usa una ficha propia
-  // para guardar ahí los enlaces. Nunca puede iniciar sesión (activo:false).
-  if (ACTIVE_USER.usuario === 'PORTAL') {
-    u = { nombre:'Portal (enlaces)', usuario:'PORTAL', clave:'', activo:false,
-          categorias: ACTIVE_USER.categorias || 'todas', enlaces: [] };
-    APP_USERS.push(u);
-    return u;
-  }
-  return null;
+
+// Quién está mirando: el CRM lo manda en ?ag=. Sin ag (CEO/Dirección) => bolsa común.
+function _shQuien(){
+  var ag = (window.PRC_Q && PRC_Q.ag) ? String(PRC_Q.ag).trim().toUpperCase() : '';
+  return ag || 'DIRECCION';
 }
-// Familias que el comercial tiene permitidas — nunca puede compartir más que eso
+function _shEsJefe(){ return !!(window.PRC_Q && PRC_Q.jefe); }
+
+// Familias que tiene permitidas quien mira — nunca puede compartir más que eso
 function _shMisCats(){
-  var c = ACTIVE_USER ? ACTIVE_USER.categorias : 'todas';
-  if(!c || c==='todas') return ALL_CATS.slice();
+  var c = ACTIVE_USER ? ACTIVE_USER.categorias : null;
+  if (!c && ACTIVE_VENDOR_CATS) c = ACTIVE_VENDOR_CATS;
+  if (!c || c==='todas') return ALL_CATS.slice();
   return ALL_CATS.filter(function(k){ return c[k.key]; });
 }
-function _shEnlaces(){ var u=_shMyUser(); return (u && Array.isArray(u.enlaces)) ? u.enlaces : []; }
 
-function openShareModal(){
+// ── Firestore: leer / escribir ──
+function _fsDoc2Enl(doc){
+  var f = doc.fields||{};
+  var id = String(doc.name||'').split('/').pop();
+  var cats = (f.cats&&f.cats.stringValue)||'todas';
+  return { t:id,
+    n:(f.n&&f.n.stringValue)||'(sin nombre)',
+    cats: cats==='todas' ? 'todas' : (function(){ var m={}; cats.split(',').forEach(function(k){k=k.trim(); if(k)m[k]=true;}); return m; })(),
+    ag:(f.ag&&f.ag.stringValue)||'',
+    a: f.a ? (f.a.booleanValue!==false) : false,
+    f:(f.f&&f.f.stringValue)||'' };
+}
+function _enl2FsFields(e){
+  var cats = (e.cats==='todas') ? 'todas' : Object.keys(e.cats||{}).join(',');
+  return { fields: { n:{stringValue:String(e.n||'')}, cats:{stringValue:cats},
+                     ag:{stringValue:String(e.ag||'')}, a:{booleanValue:!!e.a},
+                     f:{stringValue:String(e.f||'')} } };
+}
+
+async function cargarEnlaces(){
+  try{
+    var r = await fetch(ENL_COL+'?pageSize=300',{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    var d = await r.json();
+    ENLACES = (d.documents||[]).map(_fsDoc2Enl);
+    _enlCargados = true;
+    return true;
+  }catch(e){ console.error('cargarEnlaces:',e.message); ENLACES=[]; _enlCargados=false; return false; }
+}
+
+async function _guardarEnlaceFS(e){
+  var r = await fetch(ENL_COL+'/'+encodeURIComponent(e.t),{
+    method:'PATCH', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(_enl2FsFields(e)) });
+  if(!r.ok){ var t=await r.text(); throw new Error('HTTP '+r.status+' '+t.substring(0,140)); }
+  return true;
+}
+
+// Los que puede ver quien mira: los suyos; un jefe ve todos
+function _shMisEnlaces(){
+  var yo=_shQuien(), jefe=_shEsJefe();
+  return ENLACES.filter(function(e){ return e.a && (jefe || e.ag===yo); });
+}
+
+// ── UI ──
+async function openShareModal(){
   var m=document.getElementById('share-modal'); if(!m) return;
   var n=document.getElementById('share-nombre'); if(n) n.value='';
-  _renderShareCats(); _renderShareList();
+  _renderShareCats();
+  var box=document.getElementById('share-list');
+  if(box) box.innerHTML='<div style="text-align:center;padding:16px;color:#9CA3AF;font-size:.8rem">Cargando enlaces…</div>';
   m.style.display='flex';
+  var ok=await cargarEnlaces();
+  if(!ok && box){ box.innerHTML='<div style="padding:13px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;color:#991B1B;font-size:.8rem;line-height:1.5">No se han podido leer los enlaces.<br>Comprueba la conexión y vuelve a abrir esta ventana.</div>'; return; }
+  _renderShareList();
 }
-function closeShareModal(){
-  var m=document.getElementById('share-modal'); if(m) m.style.display='none';
-}
+function closeShareModal(){ var m=document.getElementById('share-modal'); if(m) m.style.display='none'; }
 
 function _renderShareCats(){
   var box=document.getElementById('share-cats'); if(!box) return;
@@ -4374,19 +4436,20 @@ function _shareToggleAll(){
 
 function _renderShareList(){
   var box=document.getElementById('share-list'); if(!box) return;
-  var act=_shEnlaces().filter(function(e){ return e && e.a; });
+  var act=_shMisEnlaces();
   if(!act.length){
     box.innerHTML='<div style="text-align:center;padding:18px 12px;color:#9CA3AF;font-size:.8rem;background:#FAFAF8;border:1px dashed #E5E7EB;border-radius:10px;line-height:1.5;">Todavía no has creado ningún enlace.<br>Rellena el nombre arriba y pulsa Generar.</div>';
     return;
   }
+  var total=_shMisCats().length, jefe=_shEsJefe(), yo=_shQuien();
   box.innerHTML=act.map(function(e){
-    var total=_shMisCats().length;
-    var nc=(!e.cats||e.cats==='todas') ? 'Todas las familias' : (Object.keys(e.cats).length+' de '+total+' familias');
-    var f=''; try{ f=new Date(e.f).toLocaleDateString('es-ES',{day:'numeric',month:'short'}); }catch(x){}
+    var nc=(e.cats==='todas') ? 'Todas las familias' : (Object.keys(e.cats).length+(total?' de '+total:'')+' familias');
+    var f=''; try{ if(e.f) f=new Date(e.f).toLocaleDateString('es-ES',{day:'numeric',month:'short'}); }catch(x){}
+    var duenyo=(jefe && e.ag && e.ag!==yo) ? ' · <span style="color:#B45309;font-weight:700">'+_shEsc(e.ag)+'</span>' : '';
     var bt='style="border:1px solid #E5E7EB;background:white;border-radius:7px;padding:5px 9px;font-size:.74rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;color:#374151;"';
     return '<div style="border:1px solid #E8E3DC;border-radius:11px;padding:11px 13px;margin-bottom:8px;background:white;">'
-      +'<div style="font-size:.87rem;font-weight:700;color:#1A1816;margin-bottom:2px;">'+_shEsc(e.n||'Sin nombre')+'</div>'
-      +'<div style="font-size:.72rem;color:#8A8078;margin-bottom:9px;">'+nc+(f?' · '+f:'')+'</div>'
+      +'<div style="font-size:.87rem;font-weight:700;color:#1A1816;margin-bottom:2px;">'+_shEsc(e.n)+'</div>'
+      +'<div style="font-size:.72rem;color:#8A8078;margin-bottom:9px;">'+nc+(f?' · '+f:'')+duenyo+'</div>'
       +'<div style="display:flex;gap:6px;flex-wrap:wrap;">'
       +'<button onclick="copiarEnlace(\''+e.t+'\')" '+bt+'>📋 Copiar</button>'
       +'<button onclick="waEnlace(\''+e.t+'\')" style="border:1px solid #86EFAC;background:#F0FDF4;color:#166534;border-radius:7px;padding:5px 9px;font-size:.74rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">WhatsApp</button>'
@@ -4397,40 +4460,34 @@ function _renderShareList(){
 }
 
 async function crearEnlaceCliente(){
-  var u=_shMyUser();
-  if(!u){ alert('No se encuentra tu usuario. Vuelve a entrar e inténtalo otra vez.'); return; }
   var nombre=(document.getElementById('share-nombre').value||'').trim();
   if(!nombre){ alert('Pon el nombre del cliente, así sabrás luego cuál es cada enlace.'); return; }
   var cats={}, n=0;
   document.querySelectorAll('#share-cats .shc-i').forEach(function(i){ if(i.checked){ cats[i.value]=true; n++; } });
   if(!n){ alert('Marca al menos una familia.'); return; }
-  var btn=document.getElementById('share-gen-btn'), txt=btn?btn.textContent:'';
+  var btn=document.getElementById('share-gen-btn'), txt=btn?btn.textContent:'Generar enlace';
   if(btn){ btn.textContent='Guardando...'; btn.disabled=true; }
-  if(!Array.isArray(u.enlaces)) u.enlaces=[];
-  var tok=_genToken();
-  u.enlaces.unshift({t:tok, n:nombre, cats:cats, f:new Date().toISOString(), a:true});
-  var ok=await saveUsers();
-  if(btn){ btn.textContent=txt||'Generar enlace'; btn.disabled=false; }
-  if(ok===false){
-    u.enlaces=u.enlaces.filter(function(e){ return e.t!==tok; });  // revertir si no se guardó
-    showToast('❌ No se pudo guardar el enlace');
-    return;
+  var e={ t:_genToken(), n:nombre, cats:cats, ag:_shQuien(), a:true, f:new Date().toISOString() };
+  try{
+    await _guardarEnlaceFS(e);
+    ENLACES.unshift(e);
+    document.getElementById('share-nombre').value='';
+    _renderShareCats();
+    _renderShareList();
+    _shCopy(_shUrl(e.t), '✅ Enlace creado y copiado');
+  }catch(err){
+    alert('No se ha podido guardar el enlace.\n\n'+err.message+'\n\nSi pone PERMISSION_DENIED, faltan los permisos de escritura en Firestore.');
+  }finally{
+    if(btn){ btn.textContent=txt; btn.disabled=false; }
   }
-  document.getElementById('share-nombre').value='';
-  _renderShareCats();   // deja las familias listas (todas) para el siguiente enlace
-  _renderShareList();
-  _shCopy(_shUrl(tok), '✅ Enlace creado y copiado');
 }
 
 async function desactivarEnlace(tok){
-  var u=_shMyUser(); if(!u||!Array.isArray(u.enlaces)) return;
-  var e=u.enlaces.find(function(x){ return x.t===tok; }); if(!e) return;
+  var e=ENLACES.find(function(x){ return x.t===tok; }); if(!e) return;
   if(!confirm('¿Desactivar el enlace de '+(e.n||'este cliente')+'?\n\nEse cliente dejará de poder abrir el catálogo. Los demás enlaces no se tocan.')) return;
   e.a=false;
-  var ok=await saveUsers();
-  if(ok===false){ e.a=true; showToast('❌ No se pudo guardar'); return; }
-  _renderShareList();
-  showToast('Enlace desactivado');
+  try{ await _guardarEnlaceFS(e); _renderShareList(); showToast('Enlace desactivado'); }
+  catch(err){ e.a=true; alert('No se ha podido desactivar.\n\n'+err.message); }
 }
 
 function _shCopy(url,msg){
@@ -4441,7 +4498,7 @@ function _shCopy(url,msg){
 }
 function copiarEnlace(tok){ _shCopy(_shUrl(tok)); }
 function waEnlace(tok){
-  var e=_shEnlaces().find(function(x){return x.t===tok;});
+  var e=ENLACES.find(function(x){return x.t===tok;});
   var txt='Hola'+(e&&e.n?' '+e.n:'')+', te comparto el catálogo de productos Wikuk: '+_shUrl(tok);
   window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
@@ -4450,7 +4507,7 @@ function mailEnlace(tok){
   window.location.href='mailto:?subject='+encodeURIComponent('Catálogo de productos Wikuk')+'&body='+encodeURIComponent(body);
 }
 
-// El botón es estándar: lo ve cualquier comercial que haya entrado.
+// El botón es estándar: lo ve cualquiera que haya entrado (comercial o portal).
 function _updateShareBtn(){
   var btn=document.getElementById('btnShareCliente'); if(!btn) return;
   if(!ACTIVE_USER || ACTIVE_USER.esCliente || ACTIVE_USER.esAdmin){ btn.style.display='none'; return; }
@@ -4458,10 +4515,27 @@ function _updateShareBtn(){
   btn.style.background='#D97706';
 }
 
-function checkClientToken() {
+// Busca el token en Firestore (enlaces nuevos). Devuelve el enlace o null.
+async function _buscarEnlaceFS(token) {
+  try {
+    var r = await fetch(ENL_COL + '/' + encodeURIComponent(token), {cache:'no-store'});
+    if (!r.ok) return null;                 // 404 = no existe
+    var e = _fsDoc2Enl(await r.json());
+    return e.a ? e : null;                  // desactivado = como si no existiera
+  } catch(err) { console.error('_buscarEnlaceFS:', err.message); return null; }
+}
+
+async function checkClientToken() {
   var params = new URLSearchParams(window.location.search);
   var token = params.get('cliente');
   if (!token) return false;
+
+  // 1) Enlaces nuevos: un solo documento de Firestore. No toca JSONBin.
+  var _fs = await _buscarEnlaceFS(token);
+  if (_fs) return _activarModoCliente(_fs.cats);
+
+  // 2) Respaldo para los enlaces antiguos, que viven en JSONBin
+  if (!APP_USERS || !APP_USERS.length) { try { await loadUsers(); } catch(e) {} }
   var u=null, _enl=null;
   for (var _i=0; _i<APP_USERS.length && !u; _i++) {
     var _c=APP_USERS[_i];
@@ -4488,8 +4562,12 @@ function checkClientToken() {
     if (es) { es.style.setProperty('display','flex','important'); es.style.zIndex = '2147483647'; }
     return true;
   }
+  return _activarModoCliente(_enl ? _enl.cats : u.categoriasCliente);
+}
+
+// Enciende el modo cliente con las familias que toquen
+function _activarModoCliente(catsCliente) {
   CLIENT_MODE = true;
-  var catsCliente = _enl ? _enl.cats : u.categoriasCliente;
   CLIENT_CATS = (!catsCliente || catsCliente === 'todas') ? null : catsCliente;
   ACTIVE_USER = { nombre: 'Cliente', usuario: 'cliente', categorias: catsCliente || 'todas', esCliente: true };
   ACTIVE_VENDOR_CATS = CLIENT_CATS;
@@ -5975,21 +6053,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.appendChild(loader);
     // Limpiar caché para que el cliente siempre vea datos actualizados
     try { localStorage.removeItem('wk_data_cache'); } catch(e) {}
-    var clientLoadTimeout = setTimeout(function() {
+    // Los enlaces nuevos se validan contra Firestore: ya no hace falta cargar
+    // la lista de usuarios de JSONBin (era una petición por cada cliente).
+    var _quitarLoader = function() {
       var l = document.getElementById('client-loader');
       if (l) l.remove();
-      checkClientToken();
-    }, 8000); // fallback por si JSONBin no responde en 8s
-    loadUsers().then(function() {
-      clearTimeout(clientLoadTimeout);
-      var l = document.getElementById('client-loader');
-      if (l) l.remove();
-      checkClientToken();
-    }).catch(function() {
-      clearTimeout(clientLoadTimeout);
-      var l = document.getElementById('client-loader');
-      if (l) l.remove();
-      checkClientToken();
+    };
+    var _fallback = setTimeout(_quitarLoader, 12000);
+    checkClientToken().then(function() {
+      clearTimeout(_fallback); _quitarLoader();
+    }).catch(function(err) {
+      clearTimeout(_fallback); _quitarLoader();
+      console.error('checkClientToken:', err && err.message);
     });
   } else {
     loadUsers(); // precarga en background para login rápido
@@ -6915,7 +6990,7 @@ function promoUdsHtml(it){ return '<span style="display:inline-block;margin-left
   }
 })();
 </script>
-<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.58.0</div>
+<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.59.0</div>
 <script>
 // Mostrar si llegó cliente, para diagnóstico
 (function(){
