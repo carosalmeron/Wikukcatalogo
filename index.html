@@ -320,9 +320,7 @@ tr[data-pp]:hover{background:#faf7f4;}
       if (es) es.style.display = 'none';
     });
     // También via inline style en el elemento directamente
-    // (lleva id: si el token resulta no ser válido hay que poder retirarlo,
-    //  o el candado quedaría escrito dentro de una pantalla invisible)
-    document.write('<style id="clientHideStyle">#entryScreen{display:none!important}</style>');
+    document.write('<style>#entryScreen{display:none!important}</style>');
   }
 })();
 </script>
@@ -366,8 +364,6 @@ tr[data-pp]:hover{background:#faf7f4;}
       var bs = document.getElementById('portalBridgeStyle'); if (bs) bs.remove();
 
       try { applyVendorCatFilter(); } catch (e) {}
-      // El botón de enlaces también dentro del portal (Hub)
-      setTimeout(function(){ try { _updateShareBtn(); } catch (e) {} }, 300);
     } catch (e) {}
   }
 
@@ -387,7 +383,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.59</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.56</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -588,32 +584,46 @@ async function doUserLoginUnified() {
 </div>
 
 <!-- ══ MODAL SHARE CLIENTE ══ -->
-<div id="share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:white;border-radius:16px;padding:22px;max-width:470px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:Inter,sans-serif;">
-    <div style="font-size:1rem;font-weight:700;margin-bottom:3px;">🔗 Enlaces para clientes</div>
-    <div style="font-size:.78rem;color:#6B7280;margin-bottom:16px;">El cliente ve el catálogo sin precios.</div>
+<div id="share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:24px;max-width:400px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:Inter,sans-serif;">
+    <div style="font-size:1rem;font-weight:700;margin-bottom:4px;">🔗 Enlace para cliente</div>
+    <div style="font-size:.8rem;color:#6B7280;margin-bottom:18px;">El cliente ve el catálogo sin precios.</div>
 
-    <!-- ── NUEVO ENLACE ── -->
-    <div style="background:#FAFAF8;border:1px solid #E8E3DC;border-radius:12px;padding:14px;margin-bottom:16px;">
-      <div style="font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8A8078;margin-bottom:9px;">Nuevo enlace</div>
-      <input id="share-nombre" type="text" placeholder="Nombre del cliente — ej. Carnicería Pérez" maxlength="60"
-        style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:9px;font-family:Inter,sans-serif;font-size:.86rem;outline:none;box-sizing:border-box;margin-bottom:11px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
-        <span style="font-size:.76rem;font-weight:600;color:#374151;">Familias que verá</span>
-        <button onclick="_shareToggleAll()" style="background:none;border:none;color:#C4501A;font-size:.74rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;padding:2px 4px;">Marcar / desmarcar todas</button>
+    <!-- URL box activo -->
+    <div id="share-url-section">
+      <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:10px 13px;font-size:.74rem;color:#166534;word-break:break-all;margin-bottom:14px;line-height:1.5;" id="share-url-box"></div>
+
+      <!-- Botones envío -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+        <button onclick="shareWhatsApp()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#25D366;color:white;border:none;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Enviar por WhatsApp
+        </button>
+        <button onclick="shareEmail()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#4F46E5;color:white;border:none;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg>
+          Enviar por Email
+        </button>
+        <button onclick="copyShareUrl()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#F3F4F6;color:#374151;border:1px solid #E5E7EB;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
+          📋 Copiar enlace
+        </button>
       </div>
-      <div id="share-cats" style="display:grid;grid-template-columns:1fr 1fr;gap:3px 10px;max-height:190px;overflow-y:auto;padding:9px 10px;background:white;border:1px solid #E5E7EB;border-radius:9px;margin-bottom:12px;"></div>
-      <button onclick="crearEnlaceCliente()" id="share-gen-btn"
-        style="width:100%;padding:11px;background:#C4501A;color:white;border:none;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">
-        Generar enlace
-      </button>
+
+      <!-- Acciones peligrosas -->
+      <div style="border-top:1px solid #F3F4F6;padding-top:12px;display:flex;gap:8px;">
+        <button onclick="newShareUrl()" style="flex:1;padding:9px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">🔄 Nuevo enlace</button>
+        <button onclick="deactivateMyEnlace()" style="flex:1;padding:9px;background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">⛔ Desactivar</button>
+      </div>
     </div>
 
-    <!-- ── LISTA ── -->
-    <div style="font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8A8078;margin-bottom:9px;">Enlaces activos</div>
-    <div id="share-list"></div>
+    <!-- Sección desactivado -->
+    <div id="share-inactive-section" style="display:none;text-align:center;padding:16px 0;">
+      <div style="font-size:2rem;margin-bottom:8px;">⛔</div>
+      <div style="font-size:.88rem;font-weight:700;color:#991B1B;margin-bottom:4px;">Enlace desactivado</div>
+      <div style="font-size:.78rem;color:#6B7280;margin-bottom:16px;">El cliente no puede acceder al catálogo.</div>
+      <button onclick="activateMyEnlace()" style="width:100%;padding:11px;background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;border-radius:10px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">✅ Generar nuevo enlace y activar</button>
+    </div>
 
-    <button onclick="closeShareModal()" style="width:100%;padding:10px;background:#F3F4F6;border:none;border-radius:9px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;margin-top:14px;">Cerrar</button>
+    <button onclick="closeShareModal()" style="width:100%;padding:10px;background:#F3F4F6;border:none;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;margin-top:12px;">Cerrar</button>
   </div>
 </div>
 
@@ -1690,7 +1700,9 @@ function tSub(sub) {
 // ═══════════════════════════════════════════════════════════
 // Stock leído desde Firebase (proyecto grupo-consolidado-crm). Sin datos incrustados.
 const FB_STOCK="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
-var WK_STOCK={fecha:"",exact:{},base:{},cargado:false};
+var WK_STOCK={fecha:"",exact:{},base:{},lleg:{},cargado:false};
+// (28/10) Fechas de llegada de un envase: "75 el 05/11, 150 el 20/11"
+function llegTxt(cod){var L=((WK_STOCK.lleg||{})[String(cod||"").toUpperCase()]||[]).slice().sort(function(a,b){return String(a[0]).localeCompare(String(b[0]));});if(!L.length)return "";return L.slice(0,3).map(function(l){return (Math.round((l[1]||0)*100)/100).toLocaleString("es-ES")+" el "+String(l[0]).slice(8,10)+"/"+String(l[0]).slice(5,7);}).join(", ")+(L.length>3?"…":"");}
 var SHOW_STOCK=false;
 (function(){
   try{
@@ -1749,7 +1761,7 @@ function showStockDetalle(el){
       var stCol=st>0?'#166534':'#9CA3AF';
       var dpCol=dp>0?'#166534':(dp<0?'#B91C1C':'#9CA3AF');
       return '<div style="'+GRID+';font-size:.8rem;padding:6px 0;border-bottom:1px solid #F0EDE8">'
-        +'<span style="color:#4A443E;word-break:break-all">'+etq+'</span>'
+        +'<span style="color:#4A443E;word-break:break-all">'+etq+(lg>0&&llegTxt(cod)?'<div style="font-size:.68rem;color:#2563EB">🚚 '+llegTxt(cod)+'</div>':'')+'</span>'
         +'<span style="text-align:right;font-weight:700;color:'+stCol+'">'+nf(st)+'</span>'
         +'<span style="text-align:right;color:'+(lg>0?'#2563EB':'#C7C1B8')+'">'+(lg>0?nf(lg):'·')+'</span>'
         +'<span style="text-align:right;color:'+(cm>0?'#D97706':'#C7C1B8')+'">'+(cm>0?nf(cm):'·')+'</span>'
@@ -1767,7 +1779,7 @@ function showStockDetalle(el){
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><strong style="font-size:1.05rem;color:#2A2420">📦 Stock por envase</strong><button onclick="closeStockDetalle()" style="border:none;background:#F0EDE8;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:1.2rem;color:#6B645C">×</button></div>'
       +'<div style="font-size:.85rem;color:#8A8078;margin-bottom:10px">'+c+' · SAP a '+WK_STOCK.fecha+'</div>'
       +head+rows+totRow
-      +'<div style="font-size:.68rem;color:#A39A8F;margin-top:10px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas</div>'
+      +'<div style="font-size:.68rem;color:#A39A8F;margin-top:10px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas (🚚 fecha según el pedido de compra en SAP)</div>'
       +'</div></div>';
     var d=document.createElement('div');d.id='stk-modal-wrap';d.innerHTML=html;document.body.appendChild(d);
   }catch(e){}
@@ -1786,7 +1798,7 @@ function _ppStockHtml(code){
     var etq=cod===code?(cod+' · base'):cod;
     var stCol=st>0?'#166534':'#9CA3AF',dpCol=dp>0?'#166534':(dp<0?'#B91C1C':'#9CA3AF');
     return '<div style="'+GRID+';font-size:.8rem;padding:6px 0;border-bottom:1px solid #F3F0EB">'
-      +'<span style="color:#4A443E;word-break:break-all">'+etq+'</span>'
+      +'<span style="color:#4A443E;word-break:break-all">'+etq+(lg>0&&llegTxt(cod)?'<div style="font-size:.68rem;color:#2563EB">🚚 '+llegTxt(cod)+'</div>':'')+'</span>'
       +'<span style="text-align:right;font-weight:700;color:'+stCol+'">'+nf(st)+'</span>'
       +'<span style="text-align:right;color:'+(lg>0?'#2563EB':'#C7C1B8')+'">'+(lg>0?nf(lg):'·')+'</span>'
       +'<span style="text-align:right;color:'+(cm>0?'#D97706':'#C7C1B8')+'">'+(cm>0?nf(cm):'·')+'</span>'
@@ -1802,7 +1814,7 @@ function _ppStockHtml(code){
   return '<div style="margin:12px 16px 4px;border:1px solid #E6E0D8;border-radius:12px;overflow:hidden">'
     +'<div style="background:#2E6B42;color:#fff;font-weight:800;font-size:.85rem;padding:9px 13px">📦 Stock por envase · SAP a '+WK_STOCK.fecha+'</div>'
     +'<div style="padding:6px 13px 11px">'+head+rows+totRow
-    +'<div style="font-size:.66rem;color:#A39A8F;margin-top:8px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas</div>'
+    +'<div style="font-size:.66rem;color:#A39A8F;margin-top:8px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas (🚚 fecha según el pedido de compra en SAP)</div>'
     +'</div></div>';
 }
 // Carga el resumen de stock desde Firebase (solo si el modo stock está activo)
@@ -1815,6 +1827,7 @@ async function loadStockCatalogo(){
     WK_STOCK.fecha=(f.fecha&&f.fecha.stringValue)||"";
     try{WK_STOCK.exact=JSON.parse((f.exact&&f.exact.stringValue)||"{}");}catch(e){WK_STOCK.exact={};}
     try{WK_STOCK.base=JSON.parse((f.base&&f.base.stringValue)||"{}");}catch(e){WK_STOCK.base={};}
+    try{WK_STOCK.lleg=JSON.parse((f.llegadas&&f.llegadas.stringValue)||"{}");}catch(e){WK_STOCK.lleg={};}   // (28/10) {cod:[[fecha,uds],…]} de los pedidos de compra de SAP
     WK_STOCK._memo={};
     WK_STOCK.cargado=true;
     // Re-render de la vista actual para que aparezcan los chips
@@ -3818,7 +3831,6 @@ async function loadAccesos() {
 }
 
 async function saveAccesos() {
-  if (!Array.isArray(APP_USERS) || APP_USERS.length === 0) return;  // nunca escribir usuarios vacíos
   try {
     if (ACCESOS_LOG.length > 100) ACCESOS_LOG = ACCESOS_LOG.slice(-100);
     // Usar APP_USERS actual para no sobrescribir cambios del admin
@@ -4010,12 +4022,6 @@ async function loadUsers(forceRemote) {
 
 // ── Save users to JSONBin ──
 async function saveUsers() {
-  // SALVAGUARDA: si la lista está vacía es que la lectura falló (cuota, red...).
-  // Guardar ahora escribiría "cero usuarios" encima y los borraría a todos.
-  if (!Array.isArray(APP_USERS) || APP_USERS.length === 0) {
-    alert('⚠️ No se ha podido guardar.\n\nLa lista de usuarios está vacía — seguramente no se pudo leer la base de datos. Se cancela el guardado para no borrar los usuarios.\n\nRecarga la página e inténtalo de nuevo.');
-    return false;
-  }
   // Limitar accesos a los últimos 100 para no superar límite JSONBin (100KB)
   var accesosToSave = ACCESOS_LOG.length > 100 ? ACCESOS_LOG.slice(-100) : ACCESOS_LOG;
   var payload = {usuarios: APP_USERS, accesos: accesosToSave};
@@ -4031,12 +4037,6 @@ async function saveUsers() {
       });
       if (!r.ok) {
         var rt = await r.text();
-        // 403/429 = cuota agotada o clave sin permiso. Reintentar solo gasta
-        // más peticiones y no va a funcionar: cortar aquí.
-        if (r.status === 403 || r.status === 429) {
-          alert('⚠️ La base de datos no acepta más peticiones ahora mismo (HTTP ' + r.status + ').\n\nEl cupo del servicio está agotado. No se ha guardado nada. Avisa a quien lleve el catálogo.');
-          return false;
-        }
         throw new Error('HTTP ' + r.status + ': ' + rt.substring(0, 100));
       }
       // Solo actualizar caché DESPUÉS de confirmar save exitoso
@@ -4333,220 +4333,116 @@ function copyEnlaceCliente(idx) {
 var CLIENT_MODE = false;
 var CLIENT_CATS = null;
 
-// ── ENLACES DE CLIENTE (v3.59 — en Firestore, sin depender de JSONBin) ──
-// Colección propia: enlaces_catalogo/<token>
-//   n = nombre del cliente · cats = familias ("todas" o "k1,k2") · ag = comercial
-//   a = activo · f = fecha ISO
-var ENL_COL = FB_STOCK + '/enlaces_catalogo';
-var ENLACES = [];           // enlaces cargados (los que puede ver quien mira)
-var _enlCargados = false;
-
-function _shEsc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function _shBase(){ return window.location.href.split('?')[0]; }
-function _shUrl(tok){ return _shBase()+'?cliente='+tok; }
-
-// Quién está mirando: el CRM lo manda en ?ag=. Sin ag (CEO/Dirección) => bolsa común.
-function _shQuien(){
-  var ag = (window.PRC_Q && PRC_Q.ag) ? String(PRC_Q.ag).trim().toUpperCase() : '';
-  return ag || 'DIRECCION';
-}
-function _shEsJefe(){ return !!(window.PRC_Q && PRC_Q.jefe); }
-
-// Familias que tiene permitidas quien mira — nunca puede compartir más que eso
-function _shMisCats(){
-  var c = ACTIVE_USER ? ACTIVE_USER.categorias : null;
-  if (!c && ACTIVE_VENDOR_CATS) c = ACTIVE_VENDOR_CATS;
-  if (!c || c==='todas') return ALL_CATS.slice();
-  return ALL_CATS.filter(function(k){ return c[k.key]; });
+// ── SHARE MODAL FUNCTIONS ──
+function _getMyEnlaceUrl() {
+  if (!ACTIVE_USER || !ACTIVE_USER.tokenCliente) return null;
+  var base = window.location.href.split('?')[0];
+  return base + '?cliente=' + ACTIVE_USER.tokenCliente;
 }
 
-// ── Firestore: leer / escribir ──
-function _fsDoc2Enl(doc){
-  var f = doc.fields||{};
-  var id = String(doc.name||'').split('/').pop();
-  var cats = (f.cats&&f.cats.stringValue)||'todas';
-  return { t:id,
-    n:(f.n&&f.n.stringValue)||'(sin nombre)',
-    cats: cats==='todas' ? 'todas' : (function(){ var m={}; cats.split(',').forEach(function(k){k=k.trim(); if(k)m[k]=true;}); return m; })(),
-    ag:(f.ag&&f.ag.stringValue)||'',
-    a: f.a ? (f.a.booleanValue!==false) : false,
-    f:(f.f&&f.f.stringValue)||'' };
-}
-function _enl2FsFields(e){
-  var cats = (e.cats==='todas') ? 'todas' : Object.keys(e.cats||{}).join(',');
-  return { fields: { n:{stringValue:String(e.n||'')}, cats:{stringValue:cats},
-                     ag:{stringValue:String(e.ag||'')}, a:{booleanValue:!!e.a},
-                     f:{stringValue:String(e.f||'')} } };
+function openShareModal() {
+  var modal = document.getElementById('share-modal');
+  if (!modal) return;
+  // Sync ACTIVE_USER from APP_USERS (in case admin changed it)
+  var u = APP_USERS.find(function(x){ return x.usuario === ACTIVE_USER.usuario; });
+  if (u) { ACTIVE_USER.activoCliente = u.activoCliente; ACTIVE_USER.tokenCliente = u.tokenCliente; }
+  _refreshShareModal();
+  modal.style.display = 'flex';
 }
 
-async function cargarEnlaces(){
-  try{
-    var r = await fetch(ENL_COL+'?pageSize=300',{cache:'no-store'});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    var d = await r.json();
-    ENLACES = (d.documents||[]).map(_fsDoc2Enl);
-    _enlCargados = true;
-    return true;
-  }catch(e){ console.error('cargarEnlaces:',e.message); ENLACES=[]; _enlCargados=false; return false; }
+function closeShareModal() {
+  document.getElementById('share-modal').style.display = 'none';
 }
 
-async function _guardarEnlaceFS(e){
-  var r = await fetch(ENL_COL+'/'+encodeURIComponent(e.t),{
-    method:'PATCH', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(_enl2FsFields(e)) });
-  if(!r.ok){ var t=await r.text(); throw new Error('HTTP '+r.status+' '+t.substring(0,140)); }
-  return true;
+function _refreshShareModal() {
+  var activo = ACTIVE_USER && ACTIVE_USER.activoCliente && ACTIVE_USER.tokenCliente;
+  var url = _getMyEnlaceUrl();
+  document.getElementById('share-url-section').style.display = activo ? 'block' : 'none';
+  document.getElementById('share-inactive-section').style.display = activo ? 'none' : 'block';
+  if (activo && url) document.getElementById('share-url-box').textContent = url;
 }
 
-// Los que puede ver quien mira: los suyos; un jefe ve todos
-function _shMisEnlaces(){
-  var yo=_shQuien(), jefe=_shEsJefe();
-  return ENLACES.filter(function(e){ return e.a && (jefe || e.ag===yo); });
+async function deactivateMyEnlace() {
+  if (!confirm('¿Desactivar el enlace? El cliente no podrá acceder al catálogo.')) return;
+  var u = APP_USERS.find(function(x){ return x.usuario === ACTIVE_USER.usuario; });
+  if (!u) return;
+  var idx = APP_USERS.indexOf(u);
+  APP_USERS[idx].activoCliente = false;
+  ACTIVE_USER.activoCliente = false;
+  await saveUsers();
+  _refreshShareModal();
+  _updateShareBtn();
 }
 
-// ── UI ──
-async function openShareModal(){
-  var m=document.getElementById('share-modal'); if(!m) return;
-  var n=document.getElementById('share-nombre'); if(n) n.value='';
-  _renderShareCats();
-  var box=document.getElementById('share-list');
-  if(box) box.innerHTML='<div style="text-align:center;padding:16px;color:#9CA3AF;font-size:.8rem">Cargando enlaces…</div>';
-  m.style.display='flex';
-  var ok=await cargarEnlaces();
-  if(!ok && box){ box.innerHTML='<div style="padding:13px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;color:#991B1B;font-size:.8rem;line-height:1.5">No se han podido leer los enlaces.<br>Comprueba la conexión y vuelve a abrir esta ventana.</div>'; return; }
-  _renderShareList();
-}
-function closeShareModal(){ var m=document.getElementById('share-modal'); if(m) m.style.display='none'; }
-
-function _renderShareCats(){
-  var box=document.getElementById('share-cats'); if(!box) return;
-  var cats=_shMisCats();
-  if(!cats.length){ box.innerHTML='<div style="grid-column:1/-1;font-size:.78rem;color:#9CA3AF;padding:4px">No tienes familias asignadas.</div>'; return; }
-  box.innerHTML=cats.map(function(c){
-    return '<label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#374151;cursor:pointer;padding:3px 0;line-height:1.25;">'
-      +'<input type="checkbox" class="shc-i" value="'+_shEsc(c.key)+'" checked style="flex-shrink:0;width:15px;height:15px;accent-color:#C4501A;cursor:pointer;">'
-      +'<span>'+_shEsc(c.label)+'</span></label>';
-  }).join('');
-}
-function _shareToggleAll(){
-  var ins=document.querySelectorAll('#share-cats .shc-i');
-  var allOn=true; ins.forEach(function(i){ if(!i.checked) allOn=false; });
-  ins.forEach(function(i){ i.checked=!allOn; });
+async function activateMyEnlace() {
+  var u = APP_USERS.find(function(x){ return x.usuario === ACTIVE_USER.usuario; });
+  if (!u) return;
+  var idx = APP_USERS.indexOf(u);
+  // Siempre token nuevo al activar
+  var token = _genToken();
+  APP_USERS[idx].tokenCliente = token;
+  APP_USERS[idx].activoCliente = true;
+  ACTIVE_USER.tokenCliente = token;
+  ACTIVE_USER.activoCliente = true;
+  if (!APP_USERS[idx].categoriasCliente) APP_USERS[idx].categoriasCliente = u.categorias;
+  await saveUsers();
+  _refreshShareModal();
+  _updateShareBtn();
 }
 
-function _renderShareList(){
-  var box=document.getElementById('share-list'); if(!box) return;
-  var act=_shMisEnlaces();
-  if(!act.length){
-    box.innerHTML='<div style="text-align:center;padding:18px 12px;color:#9CA3AF;font-size:.8rem;background:#FAFAF8;border:1px dashed #E5E7EB;border-radius:10px;line-height:1.5;">Todavía no has creado ningún enlace.<br>Rellena el nombre arriba y pulsa Generar.</div>';
-    return;
+async function newShareUrl() {
+  if (!confirm('¿Generar un nuevo enlace? El enlace anterior dejará de funcionar inmediatamente.')) return;
+  await activateMyEnlace();
+  showToast('✅ Nuevo enlace generado');
+}
+
+function shareWhatsApp() {
+  var url = _getMyEnlaceUrl();
+  if (!url) return;
+  var text = 'Hola, te comparto el catálogo de productos Wikuk: ' + url;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function shareEmail() {
+  var url = _getMyEnlaceUrl();
+  if (!url) return;
+  var subject = 'Catálogo de productos Wikuk';
+  var body = 'Hola,\n\nTe comparto el catálogo de productos Wikuk para que puedas consultarlo:\n\n' + url + '\n\nSaludos.';
+  window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+
+function copyShareUrl() {
+  var url = _getMyEnlaceUrl();
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('✅ Enlace copiado');
+  }).catch(function() {
+    prompt('Copia este enlace:', url);
+  });
+}
+
+function _updateShareBtn() {
+  var btn = document.getElementById('btnShareCliente');
+  if (!btn) return;
+  // Show button only for logged-in users (not admin, not client mode)
+  if (!ACTIVE_USER || ACTIVE_USER.esCliente || ACTIVE_USER.esAdmin) {
+    btn.style.display = 'none'; return;
   }
-  var total=_shMisCats().length, jefe=_shEsJefe(), yo=_shQuien();
-  box.innerHTML=act.map(function(e){
-    var nc=(e.cats==='todas') ? 'Todas las familias' : (Object.keys(e.cats).length+(total?' de '+total:'')+' familias');
-    var f=''; try{ if(e.f) f=new Date(e.f).toLocaleDateString('es-ES',{day:'numeric',month:'short'}); }catch(x){}
-    var duenyo=(jefe && e.ag && e.ag!==yo) ? ' · <span style="color:#B45309;font-weight:700">'+_shEsc(e.ag)+'</span>' : '';
-    var bt='style="border:1px solid #E5E7EB;background:white;border-radius:7px;padding:5px 9px;font-size:.74rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;color:#374151;"';
-    return '<div style="border:1px solid #E8E3DC;border-radius:11px;padding:11px 13px;margin-bottom:8px;background:white;">'
-      +'<div style="font-size:.87rem;font-weight:700;color:#1A1816;margin-bottom:2px;">'+_shEsc(e.n)+'</div>'
-      +'<div style="font-size:.72rem;color:#8A8078;margin-bottom:9px;">'+nc+(f?' · '+f:'')+duenyo+'</div>'
-      +'<div style="display:flex;gap:6px;flex-wrap:wrap;">'
-      +'<button onclick="copiarEnlace(\''+e.t+'\')" '+bt+'>📋 Copiar</button>'
-      +'<button onclick="waEnlace(\''+e.t+'\')" style="border:1px solid #86EFAC;background:#F0FDF4;color:#166534;border-radius:7px;padding:5px 9px;font-size:.74rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">WhatsApp</button>'
-      +'<button onclick="mailEnlace(\''+e.t+'\')" style="border:1px solid #C7D2FE;background:#EEF2FF;color:#3730A3;border-radius:7px;padding:5px 9px;font-size:.74rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Email</button>'
-      +'<button onclick="desactivarEnlace(\''+e.t+'\')" style="margin-left:auto;border:1px solid #FCA5A5;background:#FEE2E2;color:#991B1B;border-radius:7px;padding:5px 9px;font-size:.74rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">⛔ Desactivar</button>'
-      +'</div></div>';
-  }).join('');
-}
-
-async function crearEnlaceCliente(){
-  var nombre=(document.getElementById('share-nombre').value||'').trim();
-  if(!nombre){ alert('Pon el nombre del cliente, así sabrás luego cuál es cada enlace.'); return; }
-  var cats={}, n=0;
-  document.querySelectorAll('#share-cats .shc-i').forEach(function(i){ if(i.checked){ cats[i.value]=true; n++; } });
-  if(!n){ alert('Marca al menos una familia.'); return; }
-  var btn=document.getElementById('share-gen-btn'), txt=btn?btn.textContent:'Generar enlace';
-  if(btn){ btn.textContent='Guardando...'; btn.disabled=true; }
-  var e={ t:_genToken(), n:nombre, cats:cats, ag:_shQuien(), a:true, f:new Date().toISOString() };
-  try{
-    await _guardarEnlaceFS(e);
-    ENLACES.unshift(e);
-    document.getElementById('share-nombre').value='';
-    _renderShareCats();
-    _renderShareList();
-    _shCopy(_shUrl(e.t), '✅ Enlace creado y copiado');
-  }catch(err){
-    alert('No se ha podido guardar el enlace.\n\n'+err.message+'\n\nSi pone PERMISSION_DENIED, faltan los permisos de escritura en Firestore.');
-  }finally{
-    if(btn){ btn.textContent=txt; btn.disabled=false; }
+  var u = APP_USERS.find(function(x){ return x.usuario === ACTIVE_USER.usuario; });
+  // Show if user has a tokenCliente configured (even if inactive, so they can activate)
+  if (u && u.tokenCliente) {
+    btn.style.display = 'flex';
+    btn.style.background = u.activoCliente ? '#D97706' : '#6B7280';
+  } else {
+    btn.style.display = 'none';
   }
 }
 
-async function desactivarEnlace(tok){
-  var e=ENLACES.find(function(x){ return x.t===tok; }); if(!e) return;
-  if(!confirm('¿Desactivar el enlace de '+(e.n||'este cliente')+'?\n\nEse cliente dejará de poder abrir el catálogo. Los demás enlaces no se tocan.')) return;
-  e.a=false;
-  try{ await _guardarEnlaceFS(e); _renderShareList(); showToast('Enlace desactivado'); }
-  catch(err){ e.a=true; alert('No se ha podido desactivar.\n\n'+err.message); }
-}
-
-function _shCopy(url,msg){
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(function(){ showToast(msg||'✅ Enlace copiado'); })
-      .catch(function(){ prompt('Copia este enlace:',url); });
-  } else { prompt('Copia este enlace:',url); }
-}
-function copiarEnlace(tok){ _shCopy(_shUrl(tok)); }
-function waEnlace(tok){
-  var e=ENLACES.find(function(x){return x.t===tok;});
-  var txt='Hola'+(e&&e.n?' '+e.n:'')+', te comparto el catálogo de productos Wikuk: '+_shUrl(tok);
-  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
-}
-function mailEnlace(tok){
-  var body='Hola,\n\nTe comparto el catálogo de productos Wikuk para que puedas consultarlo:\n\n'+_shUrl(tok)+'\n\nSaludos.';
-  window.location.href='mailto:?subject='+encodeURIComponent('Catálogo de productos Wikuk')+'&body='+encodeURIComponent(body);
-}
-
-// El botón es estándar: lo ve cualquiera que haya entrado (comercial o portal).
-function _updateShareBtn(){
-  var btn=document.getElementById('btnShareCliente'); if(!btn) return;
-  if(!ACTIVE_USER || ACTIVE_USER.esCliente || ACTIVE_USER.esAdmin){ btn.style.display='none'; return; }
-  btn.style.display='flex';
-  btn.style.background='#D97706';
-}
-
-// Busca el token en Firestore (enlaces nuevos). Devuelve el enlace o null.
-async function _buscarEnlaceFS(token) {
-  try {
-    var r = await fetch(ENL_COL + '/' + encodeURIComponent(token), {cache:'no-store'});
-    if (!r.ok) return null;                 // 404 = no existe
-    var e = _fsDoc2Enl(await r.json());
-    return e.a ? e : null;                  // desactivado = como si no existiera
-  } catch(err) { console.error('_buscarEnlaceFS:', err.message); return null; }
-}
-
-async function checkClientToken() {
+function checkClientToken() {
   var params = new URLSearchParams(window.location.search);
   var token = params.get('cliente');
   if (!token) return false;
-
-  // 1) Enlaces nuevos: un solo documento de Firestore. No toca JSONBin.
-  var _fs = await _buscarEnlaceFS(token);
-  if (_fs) return _activarModoCliente(_fs.cats);
-
-  // 2) Respaldo para los enlaces antiguos, que viven en JSONBin
-  if (!APP_USERS || !APP_USERS.length) { try { await loadUsers(); } catch(e) {} }
-  var u=null, _enl=null;
-  for (var _i=0; _i<APP_USERS.length && !u; _i++) {
-    var _c=APP_USERS[_i];
-    if (Array.isArray(_c.enlaces)) {
-      for (var _j=0; _j<_c.enlaces.length; _j++) {
-        if (_c.enlaces[_j] && _c.enlaces[_j].t===token && _c.enlaces[_j].a) { u=_c; _enl=_c.enlaces[_j]; break; }
-      }
-    }
-  }
-  // Compatibilidad: enlaces antiguos (un solo token por usuario) siguen funcionando
-  if (!u) u = APP_USERS.find(function(x) { return x.tokenCliente === token && x.activoCliente; });
+  var u = APP_USERS.find(function(u) { return u.tokenCliente === token && u.activoCliente; });
   if (!u) {
     // Token inválido o desactivado
     var es = document.getElementById('entryScreen');
@@ -4555,19 +4451,10 @@ async function checkClientToken() {
       + '<div style="font-size:1.1rem;font-weight:700">Enlace no disponible</div>'
       + '<div style="font-size:.9rem;color:#6B7280">Este enlace ha sido desactivado o ha caducado.</div>'
       + '</div>';
-    // El token no vale: hay que retirar el ocultador anti-parpadeo y enseñar
-    // el candado. Si no, el visitante se queda en el catálogo CON precios.
-    var _hs = document.getElementById('clientHideStyle');
-    if (_hs) _hs.remove();
-    if (es) { es.style.setProperty('display','flex','important'); es.style.zIndex = '2147483647'; }
     return true;
   }
-  return _activarModoCliente(_enl ? _enl.cats : u.categoriasCliente);
-}
-
-// Enciende el modo cliente con las familias que toquen
-function _activarModoCliente(catsCliente) {
   CLIENT_MODE = true;
+  var catsCliente = u.categoriasCliente;
   CLIENT_CATS = (!catsCliente || catsCliente === 'todas') ? null : catsCliente;
   ACTIVE_USER = { nombre: 'Cliente', usuario: 'cliente', categorias: catsCliente || 'todas', esCliente: true };
   ACTIVE_VENDOR_CATS = CLIENT_CATS;
@@ -6053,18 +5940,21 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.appendChild(loader);
     // Limpiar caché para que el cliente siempre vea datos actualizados
     try { localStorage.removeItem('wk_data_cache'); } catch(e) {}
-    // Los enlaces nuevos se validan contra Firestore: ya no hace falta cargar
-    // la lista de usuarios de JSONBin (era una petición por cada cliente).
-    var _quitarLoader = function() {
+    var clientLoadTimeout = setTimeout(function() {
       var l = document.getElementById('client-loader');
       if (l) l.remove();
-    };
-    var _fallback = setTimeout(_quitarLoader, 12000);
-    checkClientToken().then(function() {
-      clearTimeout(_fallback); _quitarLoader();
-    }).catch(function(err) {
-      clearTimeout(_fallback); _quitarLoader();
-      console.error('checkClientToken:', err && err.message);
+      checkClientToken();
+    }, 8000); // fallback por si JSONBin no responde en 8s
+    loadUsers().then(function() {
+      clearTimeout(clientLoadTimeout);
+      var l = document.getElementById('client-loader');
+      if (l) l.remove();
+      checkClientToken();
+    }).catch(function() {
+      clearTimeout(clientLoadTimeout);
+      var l = document.getElementById('client-loader');
+      if (l) l.remove();
+      checkClientToken();
     });
   } else {
     loadUsers(); // precarga en background para login rápido
@@ -6990,7 +6880,7 @@ function promoUdsHtml(it){ return '<span style="display:inline-block;margin-left
   }
 })();
 </script>
-<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.59.0</div>
+<div id="catVerBadge" style="position:fixed;bottom:4px;right:6px;font-size:9px;color:#94A3B8;z-index:99999;font-family:sans-serif;pointer-events:none;">cat v3.57.0</div>
 <script>
 // Mostrar si llegó cliente, para diagnóstico
 (function(){
