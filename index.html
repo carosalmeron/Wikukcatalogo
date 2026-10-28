@@ -1702,6 +1702,28 @@ function tSub(sub) {
 const FB_STOCK="https://firestore.googleapis.com/v1/projects/grupo-consolidado-crm/databases/(default)/documents";
 var WK_STOCK={fecha:"",exact:{},base:{},lleg:{},cargado:false};
 // (28/10) Fechas de llegada de un envase: "75 el 05/11, 150 el 20/11"
+// (28/10) Ventana con el detalle de las entradas previstas de un envase: fecha, unidades, almacén y nº de pedido (sin proveedor)
+function showEntradas(cod){
+  try{
+    var L=((WK_STOCK.lleg||{})[String(cod||"").toUpperCase()]||[]).slice().sort(function(a,b){return String(a[0]).localeCompare(String(b[0]));});
+    if(!L.length)return;
+    function nf(n){return (Math.round((n||0)*100)/100).toLocaleString('es-ES');}
+    function fd(f){return String(f).slice(8,10)+'/'+String(f).slice(5,7)+'/'+String(f).slice(0,4);}
+    var tot=L.reduce(function(t,l){return t+(Number(l[1])||0);},0);
+    var GRID='display:grid;grid-template-columns:1fr .8fr .8fr 1fr;gap:6px;align-items:center';
+    var head='<div style="'+GRID+';font-size:.63rem;color:#8A8078;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:6px 0;border-bottom:2px solid #EDE8E1"><span>Fecha prevista</span><span style="text-align:right">Unidades</span><span>Almacén</span><span>Pedido compra</span></div>';
+    var rows=L.map(function(l){return '<div style="'+GRID+';font-size:.85rem;padding:7px 0;border-bottom:1px solid #F0EDE8"><span style="font-weight:700;color:#2A2420">'+fd(l[0])+'</span><span style="text-align:right;font-weight:700;color:#2563EB">'+nf(l[1])+'</span><span style="color:#4A443E">'+(l[2]||'—')+'</span><span style="color:#8A8078">'+(l[3]||'—')+'</span></div>';}).join('');
+    var html='<div id="entr-modal-bg" onclick="closeEntradas()" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px">'
+      +'<div onclick="event.stopPropagation()" style="background:#fff;border-radius:16px;max-width:460px;width:100%;max-height:82vh;overflow:auto;padding:18px 20px;font-family:inherit;box-shadow:0 16px 48px rgba(0,0,0,.28)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><strong style="font-size:1.05rem;color:#2A2420">🚚 Entradas previstas</strong><button onclick="closeEntradas()" style="border:none;background:#F0EDE8;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:1.2rem;color:#2A2420">×</button></div>'
+      +'<div style="font-size:.85rem;color:#8A8078;margin-bottom:10px">'+cod+' · '+L.length+(L.length===1?' entrada':' entradas')+' · '+nf(tot)+' uds · SAP a '+WK_STOCK.fecha+'</div>'
+      +head+rows
+      +'<div style="font-size:.68rem;color:#A39A8F;margin-top:10px;line-height:1.5">Fechas según los pedidos de compra abiertos en SAP. Pueden variar.</div>'
+      +'</div></div>';
+    var d=document.createElement('div');d.id='entr-modal-wrap';d.innerHTML=html;document.body.appendChild(d);
+  }catch(e){}
+}
+function closeEntradas(){var w=document.getElementById('entr-modal-wrap');if(w)w.remove();}
 function llegTxt(cod){var L=((WK_STOCK.lleg||{})[String(cod||"").toUpperCase()]||[]).slice().sort(function(a,b){return String(a[0]).localeCompare(String(b[0]));});if(!L.length)return "";return L.slice(0,3).map(function(l){return (Math.round((l[1]||0)*100)/100).toLocaleString("es-ES")+" el "+String(l[0]).slice(8,10)+"/"+String(l[0]).slice(5,7);}).join(", ")+(L.length>3?"…":"");}
 var SHOW_STOCK=false;
 (function(){
@@ -1761,7 +1783,7 @@ function showStockDetalle(el){
       var stCol=st>0?'#166534':'#9CA3AF';
       var dpCol=dp>0?'#166534':(dp<0?'#B91C1C':'#9CA3AF');
       return '<div style="'+GRID+';font-size:.8rem;padding:6px 0;border-bottom:1px solid #F0EDE8">'
-        +'<span style="color:#4A443E;word-break:break-all">'+etq+(lg>0&&llegTxt(cod)?'<div style="font-size:.68rem;color:#2563EB">🚚 '+llegTxt(cod)+'</div>':'')+'</span>'
+        +'<span style="color:#4A443E;word-break:break-all">'+etq+(lg>0&&llegTxt(cod)?'<div style="font-size:.7rem"><a href="#" onclick="event.preventDefault();event.stopPropagation();showEntradas(\''+cod.replace(/'/g,"\\'")+'\')" style="color:#2563EB;font-weight:700;text-decoration:underline">🚚 Ver entradas</a></div>':'')+'</span>'
         +'<span style="text-align:right;font-weight:700;color:'+stCol+'">'+nf(st)+'</span>'
         +'<span style="text-align:right;color:'+(lg>0?'#2563EB':'#C7C1B8')+'">'+(lg>0?nf(lg):'·')+'</span>'
         +'<span style="text-align:right;color:'+(cm>0?'#D97706':'#C7C1B8')+'">'+(cm>0?nf(cm):'·')+'</span>'
@@ -1798,7 +1820,7 @@ function _ppStockHtml(code){
     var etq=cod===code?(cod+' · base'):cod;
     var stCol=st>0?'#166534':'#9CA3AF',dpCol=dp>0?'#166534':(dp<0?'#B91C1C':'#9CA3AF');
     return '<div style="'+GRID+';font-size:.8rem;padding:6px 0;border-bottom:1px solid #F3F0EB">'
-      +'<span style="color:#4A443E;word-break:break-all">'+etq+(lg>0&&llegTxt(cod)?'<div style="font-size:.68rem;color:#2563EB">🚚 '+llegTxt(cod)+'</div>':'')+'</span>'
+      +'<span style="color:#4A443E;word-break:break-all">'+etq+(lg>0&&llegTxt(cod)?'<div style="font-size:.7rem"><a href="#" onclick="event.preventDefault();event.stopPropagation();showEntradas(\''+cod.replace(/'/g,"\\'")+'\')" style="color:#2563EB;font-weight:700;text-decoration:underline">🚚 Ver entradas</a></div>':'')+'</span>'
       +'<span style="text-align:right;font-weight:700;color:'+stCol+'">'+nf(st)+'</span>'
       +'<span style="text-align:right;color:'+(lg>0?'#2563EB':'#C7C1B8')+'">'+(lg>0?nf(lg):'·')+'</span>'
       +'<span style="text-align:right;color:'+(cm>0?'#D97706':'#C7C1B8')+'">'+(cm>0?nf(cm):'·')+'</span>'
