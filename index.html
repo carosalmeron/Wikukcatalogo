@@ -383,7 +383,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.56</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.57</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -1807,6 +1807,34 @@ function showStockDetalle(el){
   }catch(e){}
 }
 function closeStockDetalle(){var w=document.getElementById('stk-modal-wrap');if(w)w.remove();}
+// (24/11/2026, CEO) Pedido en la visita: en el catálogo de selección, al tocar un envase sale su precio (el de SAP para el cliente, que manda el pedido)
+// y cuántos envases pedir; «Añadir al pedido» lo mete directamente en el pedido sin cerrar el catálogo.
+// Solo si la página que abre el catálogo contesta (WK_ENVASES): el CRM antiguo sigue igual.
+var WK_ENVP={}, WK_ENVQ={}, WK_ENVOK={};
+function WK_SELECCION_OK(){ try{ return new URLSearchParams(location.search).get('seleccion')==='1'&&window.parent&&window.parent!==window; }catch(e){ return false; } }
+function wkPideEnvases(code){ var c=String(code||'').toUpperCase(); if(!c||WK_ENVP[c]) return; WK_ENVP[c]={_pidiendo:true}; try{ window.parent.postMessage({type:'WK_PIDE_ENVASES',codigo:c},'*'); }catch(e){} }
+function wkStkRe(){ var b=document.getElementById('ppStkBox'); if(!b) return; var h=_ppStockHtml(b.getAttribute('data-code')); var t=document.createElement('div'); t.innerHTML=h; if(t.firstChild) b.parentNode.replaceChild(t.firstChild,b); }
+function wkEnvSel(cod,code){ window.WK_ENVSEL=window.WK_ENVSEL===cod?null:cod; wkStkRe(); }
+function wkEnvQ(cod,d){ WK_ENVQ[cod]=Math.max(1,(WK_ENVQ[cod]||1)+d); wkStkRe(); }
+function wkEnvSetQ(cod,v){ WK_ENVQ[cod]=Math.max(1,Math.round(+v||1)); wkStkRe(); }
+function wkEnvAdd(cod,code){ var q=WK_ENVQ[cod]||1; WK_ENVOK[cod]='Añadiendo…'; wkStkRe(); try{ window.parent.postMessage({type:'WK_PRODUCTO',producto:{codigo:cod,cantidad:q,envase:true,base:code}},'*'); }catch(e){} }
+function wkEnvSelHtml(cod,code){ var D=WK_ENVP[String(code).toUpperCase()]||{}, P=D[cod]||null, q=WK_ENVQ[cod]||1;
+  var f=function(n){ return (Math.round(n*100)/100).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }, e=function(t){ return String(t==null?'':t).replace(/[<>&"]/g,function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); };
+  var ud=(P&&P.ud)||'uds', B=P&&P.bulto>1?P.bulto:0, uds=B?q*B:q, js=cod.replace(/'/g,"\\'"), jb=String(code).replace(/'/g,"\\'");
+  var h='<div onclick="event.stopPropagation()" style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:10px;padding:10px 11px;margin:6px 0 8px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:.86rem;color:#2A2420">'+e((P&&P.prep)||cod)+'</b><span style="font-size:.95rem;font-weight:800;color:#166534;white-space:nowrap">'+(P?(P.precio!=null?f(P.precio)+'<span style="font-size:.7rem;font-weight:600;color:#6B645C"> / '+e(ud.replace(/s$/,''))+'</span>':'sin precio en SAP'):'<span style="font-size:.75rem;color:#8A8078">leyendo precio…</span>')+'</span></div>';
+  if(B) h+='<div style="font-size:.74rem;color:#6B645C;margin-top:2px">'+e(P.envase||'Bulto')+' de '+B+' '+e(ud)+'</div>';
+  if(WK_ENVOK[cod]&&WK_ENVOK[cod]!=='Añadiendo…') h+='<div style="margin-top:8px;font-size:.82rem;font-weight:800;color:'+(/^✓/.test(WK_ENVOK[cod])?'#166534':'#B91C1C')+'">'+e(WK_ENVOK[cod])+'</div>';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-top:8px"><div style="display:flex;align-items:center;border:1.5px solid #D6D0C8;border-radius:9px;overflow:hidden;background:#fff">'
+   +'<button onclick="wkEnvQ(\''+js+'\',-1)" style="width:36px;height:36px;border:none;background:#fff;font-size:1.2rem;font-weight:800;color:#C0392B;cursor:pointer">−</button>'
+   +'<input type="number" inputmode="numeric" value="'+q+'" onchange="wkEnvSetQ(\''+js+'\',this.value)" style="width:46px;height:36px;border:none;text-align:center;font-weight:800;font-size:1rem">'
+   +'<button onclick="wkEnvQ(\''+js+'\',1)" style="width:36px;height:36px;border:none;background:#fff;font-size:1.2rem;font-weight:800;color:#C0392B;cursor:pointer">+</button></div>'
+   +'<div style="flex:1;min-width:0;font-size:.74rem;color:#4A443E">'+(B?e(P.envase||'bultos')+' = '+uds+' '+e(ud):e(ud))+(P&&P.precio!=null?'<br><b style="font-size:.85rem;color:#2A2420">'+f(P.precio*uds)+'</b>':'')+'</div></div>'
+   +'<button onclick="wkEnvAdd(\''+js+'\',\''+jb+'\')" '+(P&&P.precio==null?'disabled ':'')+'style="width:100%;margin-top:8px;border:none;border-radius:10px;background:'+(P&&P.precio==null?'#D6D0C8':'#C0392B')+';color:#fff;font-weight:800;font-size:.9rem;padding:11px;cursor:pointer">'+(WK_ENVOK[cod]==='Añadiendo…'?'Añadiendo…':'➕ Añadir al pedido')+'</button>';
+  return h+'</div>'; }
+window.addEventListener('message',function(ev){ var d=ev&&ev.data; if(!d) return;
+  if(d.type==='WK_ENVASES'&&d.codigo){ WK_ENVP[String(d.codigo).toUpperCase()]=d.datos||{}; window.WK_PADRE_ENV=true; wkStkRe(); }
+  if(d.type==='WK_AÑADIDO'&&d.codigo){ WK_ENVOK[d.codigo]=(d.ok?'✓ ':'⚠️ ')+(d.texto||''); wkStkRe(); } });
 // Bloque de stock por envase para incrustar dentro de la ficha del producto (openPricePanel)
 function _ppStockHtml(code){
   if(!SHOW_STOCK)return'';
@@ -1819,12 +1847,14 @@ function _ppStockHtml(code){
     var cod=e[0],st=e[1]||0,lg=e[2]||0,cm=e[3]||0,dp=Math.round((st-cm)*100)/100;
     var etq=cod===code?(cod+' · base'):cod;
     var stCol=st>0?'#166534':'#9CA3AF',dpCol=dp>0?'#166534':(dp<0?'#B91C1C':'#9CA3AF');
-    return '<div style="'+GRID+';font-size:.8rem;padding:6px 0;border-bottom:1px solid #F3F0EB">'
-      +'<span style="color:#4A443E;word-break:break-all">'+etq+(lg>0&&llegTxt(cod)?'<div style="font-size:.7rem"><a href="#" onclick="event.preventDefault();event.stopPropagation();showEntradas(\''+cod.replace(/'/g,"\\'")+'\')" style="color:#2563EB;font-weight:700;text-decoration:underline">🚚 Ver entradas</a></div>':'')+'</span>'
+    var _sel=window.WK_PADRE_ENV&&WK_SELECCION_OK();
+    return '<div'+(_sel?' onclick="wkEnvSel(\''+cod.replace(/'/g,"\\'")+'\',\''+String(code).replace(/'/g,"\\'")+'\')"':'')+' style="'+GRID+';font-size:.8rem;padding:6px 0;border-bottom:1px solid #F3F0EB'+(_sel?';cursor:pointer':'')+(window.WK_ENVSEL===cod?';background:#F0FDF4':'')+'">'
+      +'<span style="color:#4A443E;word-break:break-all">'+(_sel?'<b style="color:#2E6B42">'+(window.WK_ENVSEL===cod?'▾ ':'▸ ')+'</b>':'')+etq+(lg>0&&llegTxt(cod)?'<div style="font-size:.7rem"><a href="#" onclick="event.preventDefault();event.stopPropagation();showEntradas(\''+cod.replace(/'/g,"\\'")+'\')" style="color:#2563EB;font-weight:700;text-decoration:underline">🚚 Ver entradas</a></div>':'')+'</span>'
       +'<span style="text-align:right;font-weight:700;color:'+stCol+'">'+nf(st)+'</span>'
       +'<span style="text-align:right;color:'+(lg>0?'#2563EB':'#C7C1B8')+'">'+(lg>0?nf(lg):'·')+'</span>'
       +'<span style="text-align:right;color:'+(cm>0?'#D97706':'#C7C1B8')+'">'+(cm>0?nf(cm):'·')+'</span>'
-      +'<span style="text-align:right;font-weight:700;color:'+dpCol+'">'+nf(dp)+'</span></div>';
+      +'<span style="text-align:right;font-weight:700;color:'+dpCol+'">'+nf(dp)+'</span></div>'
+      +(_sel&&window.WK_ENVSEL===cod?wkEnvSelHtml(cod,code):'');
   }).join('');
   var dispTot=Math.round((g.total-(g.comp||0))*100)/100;
   var totRow='<div style="'+GRID+';font-size:.82rem;padding:8px 0 2px;border-top:2px solid #EDE8E1;font-weight:800">'
@@ -1833,8 +1863,9 @@ function _ppStockHtml(code){
     +'<span style="text-align:right;color:'+((g.lleg||0)>0?'#2563EB':'#C7C1B8')+'">'+((g.lleg||0)>0?nf(g.lleg):'·')+'</span>'
     +'<span style="text-align:right;color:'+((g.comp||0)>0?'#D97706':'#C7C1B8')+'">'+((g.comp||0)>0?nf(g.comp):'·')+'</span>'
     +'<span style="text-align:right;color:'+(dispTot>0?'#166534':(dispTot<0?'#B91C1C':'#9CA3AF'))+'">'+nf(dispTot)+'</span></div>';
-  return '<div style="margin:12px 16px 4px;border:1px solid #E6E0D8;border-radius:12px;overflow:hidden">'
-    +'<div style="background:#2E6B42;color:#fff;font-weight:800;font-size:.85rem;padding:9px 13px">📦 Stock por envase · SAP a '+WK_STOCK.fecha+'</div>'
+  if(WK_SELECCION_OK()) wkPideEnvases(code);
+  return '<div id="ppStkBox" data-code="'+String(code).replace(/"/g,'&quot;')+'" style="margin:12px 16px 4px;border:1px solid #E6E0D8;border-radius:12px;overflow:hidden">'
+    +'<div style="background:#2E6B42;color:#fff;font-weight:800;font-size:.85rem;padding:9px 13px">📦 Stock por envase · SAP a '+WK_STOCK.fecha+(window.WK_PADRE_ENV&&WK_SELECCION_OK()?'<div style="font-weight:600;font-size:.74rem;opacity:.9;margin-top:2px">Toca un envase para ver su precio y pedirlo</div>':'')+'</div>'
     +'<div style="padding:6px 13px 11px">'+head+rows+totRow
     +'<div style="font-size:.66rem;color:#A39A8F;margin-top:8px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas (🚚 fecha según el pedido de compra en SAP)</div>'
     +'</div></div>';
@@ -6476,7 +6507,7 @@ initApp();
     } else if(PP_CLI){
       // (v3.41) MODO CLIENTE: precio de su tarifa + descuentos según su margen
       inner+='<div style="margin:0 20px 4px;font-size:.72rem;color:#888">Cliente '+_ppEscHtml(PP_CLI.nombre||PP_CLI.cat)
-        +' · margen del vendedor: <b>'+PP_CLI.margen+'%</b> · <span style="color:#bbb">v3.56</span>. Toca el precio a aplicar:</div>';
+        +' · margen del vendedor: <b>'+PP_CLI.margen+'%</b> · <span style="color:#bbb">v3.57</span>. Toca el precio a aplicar:</div>';
       inner+='<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">💼 Precio para '+_ppEscHtml(PP_CLI.cat||'cliente')+'</div>'
         +_ppRowsCliente(base,PP_CLI)+'</div>';
       if(isTrip){ inner+=_ppExtrasHtml(); }
