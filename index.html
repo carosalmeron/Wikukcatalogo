@@ -383,7 +383,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.57</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.58</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -1814,6 +1814,18 @@ var WK_ENVP={}, WK_ENVQ={}, WK_ENVOK={};
 function WK_SELECCION_OK(){ try{ return new URLSearchParams(location.search).get('seleccion')==='1'&&window.parent&&window.parent!==window; }catch(e){ return false; } }
 function wkPideEnvases(code){ var c=String(code||'').toUpperCase(); if(!c||WK_ENVP[c]) return; WK_ENVP[c]={_pidiendo:true}; try{ window.parent.postMessage({type:'WK_PIDE_ENVASES',codigo:c},'*'); }catch(e){} }
 function wkStkRe(){ var b=document.getElementById('ppStkBox'); if(!b) return; var h=_ppStockHtml(b.getAttribute('data-code')); var t=document.createElement('div'); t.innerHTML=h; if(t.firstChild) b.parentNode.replaceChild(t.firstChild,b); }
+function wkEnvSoloHtml(code){ var c=String(code||'').toUpperCase(), D=WK_ENVP[c], q=String(code).replace(/"/g,'&quot;');
+  if(!D||D._pidiendo||!window.WK_PADRE_ENV) return '<div id="ppStkBox" data-code="'+q+'">'+(D&&D._pidiendo?'<div style="margin:12px 16px 4px;font-size:.8rem;color:#8A8078">📦 Buscando sus envases en SAP…</div>':'')+'</div>';
+  var ks=Object.keys(D).filter(function(k){ return k.charAt(0)!=='_'; }).sort(function(a,b){ return a===c?-1:b===c?1:(D[b].stock||0)-(D[a].stock||0); });
+  var e=function(t){ return String(t==null?'':t).replace(/[<>&"]/g,function(x){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[x]; }); };
+  var rows=ks.length?ks.map(function(k){ var P=D[k], on=window.WK_ENVSEL===k, js=k.replace(/'/g,"\\'"), jb=String(code).replace(/'/g,"\\'");
+    return '<div onclick="wkEnvSel(\''+js+'\',\''+jb+'\')" style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:.8rem;padding:7px 0;border-bottom:1px solid #F3F0EB;cursor:pointer'+(on?';background:#F0FDF4':'')+'">'
+      +'<span style="color:#4A443E;min-width:0"><b style="color:#2E6B42">'+(on?'▾ ':'▸ ')+'</b>'+e(k)+(k===c?' · base':'')+(P.prep?'<div style="font-size:.7rem;color:#8A8078">'+e(P.prep)+'</div>':'')+'</span>'
+      +'<span style="text-align:right;white-space:nowrap;font-weight:700;color:'+((P.stock||0)>0?'#166534':'#9CA3AF')+'">'+((P.stock||0)>0?'Hay '+(Math.round(P.stock*100)/100).toLocaleString('es-ES'):'Sin stock')+'</span></div>'
+      +(on?wkEnvSelHtml(k,code):''); }).join(''):'<div style="font-size:.8rem;color:#8A8078;padding:6px 0">No se han encontrado envases en SAP.</div>';
+  return '<div id="ppStkBox" data-code="'+q+'" style="margin:12px 16px 4px;border:1px solid #E6E0D8;border-radius:12px;overflow:hidden">'
+    +'<div style="background:#2E6B42;color:#fff;font-weight:800;font-size:.85rem;padding:9px 13px">📦 Envases · precio de SAP<div style="font-weight:600;font-size:.74rem;opacity:.9;margin-top:2px">Toca un envase para ver su precio y pedirlo</div></div>'
+    +'<div style="padding:4px 13px 10px">'+rows+'</div></div>'; }
 function wkEnvSel(cod,code){ window.WK_ENVSEL=window.WK_ENVSEL===cod?null:cod; wkStkRe(); }
 function wkEnvQ(cod,d){ WK_ENVQ[cod]=Math.max(1,(WK_ENVQ[cod]||1)+d); wkStkRe(); }
 function wkEnvSetQ(cod,v){ WK_ENVQ[cod]=Math.max(1,Math.round(+v||1)); wkStkRe(); }
@@ -1837,8 +1849,10 @@ window.addEventListener('message',function(ev){ var d=ev&&ev.data; if(!d) return
   if(d.type==='WK_AÑADIDO'&&d.codigo){ WK_ENVOK[d.codigo]=(d.ok?'✓ ':'⚠️ ')+(d.texto||''); wkStkRe(); } });
 // Bloque de stock por envase para incrustar dentro de la ficha del producto (openPricePanel)
 function _ppStockHtml(code){
-  if(!SHOW_STOCK)return'';
-  var g=stockGrupo(code);if(!g)return'';
+  if(!SHOW_STOCK&&!WK_SELECCION_OK())return'';
+  var g=SHOW_STOCK?stockGrupo(code):null;
+  // (24/11/2026, CEO) Sin stock en el resumen (o sin envases con stock): en el pedido salen igual sus envases de SAP, con precio y cantidad
+  if(!g){ if(!WK_SELECCION_OK()) return ''; wkPideEnvases(code); return wkEnvSoloHtml(code); }
   function nf(n){return (Math.round((n||0)*100)/100).toLocaleString('es-ES');}
   var GRID='display:grid;grid-template-columns:1.3fr .72fr .72fr .72fr .82fr;gap:6px;align-items:center';
   var head='<div style="'+GRID+';font-size:.6rem;color:#8A8078;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:5px 0;border-bottom:2px solid #EDE8E1">'
@@ -6507,7 +6521,7 @@ initApp();
     } else if(PP_CLI){
       // (v3.41) MODO CLIENTE: precio de su tarifa + descuentos según su margen
       inner+='<div style="margin:0 20px 4px;font-size:.72rem;color:#888">Cliente '+_ppEscHtml(PP_CLI.nombre||PP_CLI.cat)
-        +' · margen del vendedor: <b>'+PP_CLI.margen+'%</b> · <span style="color:#bbb">v3.57</span>. Toca el precio a aplicar:</div>';
+        +' · margen del vendedor: <b>'+PP_CLI.margen+'%</b> · <span style="color:#bbb">v3.58</span>. Toca el precio a aplicar:</div>';
       inner+='<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">💼 Precio para '+_ppEscHtml(PP_CLI.cat||'cliente')+'</div>'
         +_ppRowsCliente(base,PP_CLI)+'</div>';
       if(isTrip){ inner+=_ppExtrasHtml(); }
