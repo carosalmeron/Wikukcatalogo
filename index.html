@@ -384,7 +384,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.60</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.61</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -1714,7 +1714,7 @@ function showEntradas(cod){
     var GRID='display:grid;grid-template-columns:1fr .8fr .8fr 1fr;gap:6px;align-items:center';
     var head='<div style="'+GRID+';font-size:.63rem;color:#8A8078;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:6px 0;border-bottom:2px solid #EDE8E1"><span>Fecha prevista</span><span style="text-align:right">Unidades</span><span>Almacén</span><span>Pedido compra</span></div>';
     var rows=L.map(function(l){return '<div style="'+GRID+';font-size:.85rem;padding:7px 0;border-bottom:1px solid #F0EDE8"><span style="font-weight:700;color:#2A2420">'+fd(l[0])+'</span><span style="text-align:right;font-weight:700;color:#2563EB">'+nf(l[1])+'</span><span style="color:#4A443E">'+(l[2]||'—')+'</span><span style="color:#8A8078">'+(l[3]||'—')+'</span></div>';}).join('');
-    var html='<div id="entr-modal-bg" onclick="closeEntradas()" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px">'
+    var html='<div id="entr-modal-bg" onclick="closeEntradas()" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000010;display:flex;align-items:center;justify-content:center;padding:16px">'
       +'<div onclick="event.stopPropagation()" style="background:#fff;border-radius:16px;max-width:460px;width:100%;max-height:82vh;overflow:auto;padding:18px 20px;font-family:inherit;box-shadow:0 16px 48px rgba(0,0,0,.28)">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><strong style="font-size:1.05rem;color:#2A2420">🚚 Entradas previstas</strong><button onclick="closeEntradas()" style="border:none;background:#F0EDE8;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:1.2rem;color:#2A2420">×</button></div>'
       +'<div style="font-size:.85rem;color:#8A8078;margin-bottom:10px">'+cod+' · '+L.length+(L.length===1?' entrada':' entradas')+' · '+nf(tot)+' uds · SAP a '+WK_STOCK.fecha+'</div>'
@@ -1797,7 +1797,7 @@ function showStockDetalle(el){
       +'<span style="text-align:right;color:'+((g.lleg||0)>0?'#2563EB':'#C7C1B8')+'">'+((g.lleg||0)>0?nf(g.lleg):'·')+'</span>'
       +'<span style="text-align:right;color:'+((g.comp||0)>0?'#D97706':'#C7C1B8')+'">'+((g.comp||0)>0?nf(g.comp):'·')+'</span>'
       +'<span style="text-align:right;color:'+(dispTot>0?'#166534':(dispTot<0?'#B91C1C':'#9CA3AF'))+'">'+nf(dispTot)+'</span></div>';
-    var html='<div id="stk-modal-bg" onclick="closeStockDetalle()" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px">'
+    var html='<div id="stk-modal-bg" onclick="closeStockDetalle()" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000010;display:flex;align-items:center;justify-content:center;padding:16px">'
       +'<div onclick="event.stopPropagation()" style="background:#fff;border-radius:16px;max-width:480px;width:100%;max-height:82vh;overflow:auto;padding:18px 20px;font-family:inherit;box-shadow:0 16px 48px rgba(0,0,0,.28)">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><strong style="font-size:1.05rem;color:#2A2420">📦 Stock por envase</strong><button onclick="closeStockDetalle()" style="border:none;background:#F0EDE8;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:1.2rem;color:#6B645C">×</button></div>'
       +'<div style="font-size:.85rem;color:#8A8078;margin-bottom:10px">'+c+' · SAP a '+WK_STOCK.fecha+'</div>'
@@ -1822,7 +1822,7 @@ function wkEnvSoloHtml(code){ var c=String(code||'').toUpperCase(), D=WK_ENVP[c]
   var rows=ks.length?ks.map(function(k){ var P=D[k], on=window.WK_ENVSEL===k, js=k.replace(/'/g,"\\'"), jb=String(code).replace(/'/g,"\\'");
     return '<div onclick="wkEnvSel(\''+js+'\',\''+jb+'\')" style="display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:.8rem;padding:7px 0;border-bottom:1px solid #F3F0EB;cursor:pointer'+(on?';background:#F0FDF4':'')+'">'
       +'<span style="color:#4A443E;min-width:0"><b style="color:#2E6B42">'+(on?'▾ ':'▸ ')+'</b>'+e(k)+(k===c?' · base':'')+(P.prep?'<div style="font-size:.7rem;color:#8A8078">'+e(P.prep)+'</div>':'')+'</span>'
-      +'<span style="text-align:right;white-space:nowrap;font-weight:700;color:'+((P.stock||0)>0?'#166534':'#9CA3AF')+'">'+((P.stock||0)>0?'Hay '+(Math.round(P.stock*100)/100).toLocaleString('es-ES'):'Sin stock')+'</span></div>'
+      +'<span style="text-align:right;white-space:nowrap;font-weight:700;color:'+((P.stock||0)>0?'#166534':'#9CA3AF')+'">'+((P.stock||0)>0?'Hay '+(Math.round(P.stock*100)/100).toLocaleString('es-ES'):'Sin stock')+(P.lleg&&P.lleg.length?'<div style="font-size:.7rem;font-weight:600;color:#1D4ED8">🚚 llega '+e(P.lleg[0].f)+'</div>':'')+'</span></div>'
       +(on?wkEnvSelHtml(k,code):''); }).join(''):'<div style="font-size:.8rem;color:#8A8078;padding:6px 0">No se han encontrado envases en SAP.</div>';
   return '<div id="ppStkBox" data-code="'+q+'" style="margin:12px 16px 4px;border:1px solid #E6E0D8;border-radius:12px;overflow:hidden">'
     +'<div style="background:#2E6B42;color:#fff;font-weight:800;font-size:.85rem;padding:9px 13px">📦 Envases · precio de SAP<div style="font-weight:600;font-size:.74rem;opacity:.9;margin-top:2px">Toca un envase para ver su precio y pedirlo</div></div>'
@@ -1851,6 +1851,10 @@ function wkEnvSelHtml(cod,code){ var D=WK_ENVP[String(code).toUpperCase()]||{}, 
   if(P&&P.precio!=null){ var prv=WK_ENVPR[cod]!=null?WK_ENVPR[cod]:P.precio.toFixed(2);
     h+='<div style="display:flex;align-items:center;gap:8px;margin-top:8px"><span style="font-size:.76rem;font-weight:700;color:#4A443E">Tu precio € / '+e(ud.replace(/s$/,''))+'</span><input type="text" inputmode="decimal" value="'+e(prv)+'" oninput="wkEnvSetPr(\''+js+'\',\''+jb+'\',this.value)" style="width:90px;height:34px;border:2px solid #22C55E;border-radius:9px;text-align:center;font-weight:800;font-size:.95rem"></div>'
      +'<div id="wkpi_'+e(cod)+'" style="font-size:.74rem;margin-top:4px">'+wkEnvInfo(cod,code)+'</div>'; }
+  // (25/11/2026, CEO) Las entradas previstas del envase (de SAP, las manda el pedido), con fecha y cantidad
+  if(P&&P.lleg&&P.lleg.length) h+='<div style="margin-top:8px;background:#fff;border:1px solid #BFDBFE;border-radius:9px;padding:6px 9px"><div style="font-size:.72rem;font-weight:800;color:#1D4ED8;margin-bottom:2px">🚚 Entradas previstas</div>'
+    +P.lleg.map(function(x){ return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:.78rem;padding:2px 0"><b>'+e(x.f)+'</b><span>'+(Math.round((x.u||0)*100)/100).toLocaleString('es-ES')+' '+e(ud)+'</span><span style="color:#8A8078">'+e(x.t||'')+'</span></div>'; }).join('')+'</div>';
+  else if(P) h+='<div style="margin-top:6px;font-size:.74rem;color:#8A8078">🚚 Sin entradas previstas</div>';
   if(WK_ENVOK[cod]&&WK_ENVOK[cod]!=='Añadiendo…') h+='<div style="margin-top:8px;font-size:.82rem;font-weight:800;color:'+(/^✓/.test(WK_ENVOK[cod])?'#166534':'#B91C1C')+'">'+e(WK_ENVOK[cod])+'</div>';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-top:8px"><div style="display:flex;align-items:center;border:1.5px solid #D6D0C8;border-radius:9px;overflow:hidden;background:#fff">'
    +'<button onclick="wkEnvQ(\''+js+'\',-1)" style="width:36px;height:36px;border:none;background:#fff;font-size:1.2rem;font-weight:800;color:#C0392B;cursor:pointer">−</button>'
@@ -6540,7 +6544,7 @@ initApp();
     } else if(PP_CLI){
       // (v3.41) MODO CLIENTE: precio de su tarifa + descuentos según su margen
       inner+='<div style="margin:0 20px 4px;font-size:.72rem;color:#888">Cliente '+_ppEscHtml(PP_CLI.nombre||PP_CLI.cat)
-        +' · margen del vendedor: <b>'+PP_CLI.margen+'%</b> · <span style="color:#bbb">v3.60</span>. Toca el precio a aplicar:</div>';
+        +' · margen del vendedor: <b>'+PP_CLI.margen+'%</b> · <span style="color:#bbb">v3.61</span>. Toca el precio a aplicar:</div>';
       inner+='<div class="pp-block"><div class="pp-block-h" style="background:#1E5A8A">💼 Precio para '+_ppEscHtml(PP_CLI.cat||'cliente')+'</div>'
         +_ppRowsCliente(base,PP_CLI)+'</div>';
       if(isTrip){ inner+=_ppExtrasHtml(); }
