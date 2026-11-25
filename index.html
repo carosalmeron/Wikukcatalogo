@@ -393,7 +393,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.65</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.66</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -1750,6 +1750,44 @@ function stockGrupo(c){
   var r={total:Math.round(tot*100)/100,lleg:Math.round(lleg*100)/100,comp:Math.round(comp*100)/100,envases:envs};
   WK_STOCK._memo[c]=r;return r;
 }
+// (25/11/2026, CEO: «cuando pulso en las líneas de tripas no me salen los envases y preparaciones»)
+// En tripas, las preparaciones son el mismo código con letras detrás (PX255.35 → PX255.35RB, PX255.35BB…) y cada una tiene sus envases (.BL, .C140…).
+// Al tocar una tripa salen sus envases y, debajo, las otras preparaciones con su stock. Si no hay stock de nada, se dice (antes no salía nada).
+var _WK_TRIPAS=null;
+function esTripa(code){ try{ { _WK_TRIPAS={};   // se rehace cada vez: los productos de Firebase y las tarifas cambian DATA después de cargar
+  var T=(DATA.tripas_naturales||{}).subs||{}; Object.keys(T).forEach(function(k){ (T[k]||[]).forEach(function(p){ if(p&&p.c) _WK_TRIPAS[String(p.c).trim().toUpperCase()]=p.n||''; }); }); }
+  return Object.prototype.hasOwnProperty.call(_WK_TRIPAS,String(code||'').trim().toUpperCase()); }catch(e){ return false; } }
+function stockPreps(code){
+  var c=String(code||'').trim().toUpperCase(); if(!c) return [];
+  var root=c.replace(/[A-Z]+$/,''); if(!root||!/[0-9]$/.test(root)) return [];
+  if(!WK_STOCK._prep) WK_STOCK._prep={};
+  if(WK_STOCK._prep[c]) return WK_STOCK._prep[c];
+  var ex=WK_STOCK.exact||{}, P={}, re=/^([A-Z]*)(\.|$)/;
+  for(var k in ex){ if(k.indexOf(root)!==0) continue; var m=re.exec(k.slice(root.length)); if(!m) continue; var pr=root+m[1]; if(pr!==c) P[pr]=1; }
+  var out=Object.keys(P).map(function(pr){ return {p:pr,g:stockGrupo(pr)}; }).filter(function(x){ return x.g; })
+    .sort(function(a,b){ return (b.g.total-a.g.total)||String(a.p).localeCompare(String(b.p)); }).slice(0,10);
+  WK_STOCK._prep[c]=out; return out;
+}
+function _ppPrepsHtml(code){
+  var L=esTripa(code)?stockPreps(code):[]; if(!L.length) return '';
+  function nf(n){return (Math.round((n||0)*100)/100).toLocaleString('es-ES');}
+  function e(t){ return String(t==null?'':t).replace(/[<>&"]/g,function(x){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[x]; }); }
+  var root=String(code).trim().toUpperCase().replace(/[A-Z]+$/,'');
+  return '<div style="margin-top:12px;border-top:2px solid #EDE8E1;padding-top:8px">'
+    +'<div style="font-size:.78rem;font-weight:800;color:#2A2420;margin-bottom:4px">🧪 Otras preparaciones de '+e(root)+'</div>'
+    +L.map(function(x){ var g=x.g, dp=Math.round((g.total-(g.comp||0))*100)/100, suf=x.p.slice(root.length)||'natural', nom=(_WK_TRIPAS&&_WK_TRIPAS[x.p])||'';
+      return '<div style="border:1px solid #EFEAE3;border-radius:9px;padding:6px 9px;margin-top:6px">'
+        +'<div style="display:flex;justify-content:space-between;gap:8px;font-size:.8rem;font-weight:800"><span style="color:#4A443E">'+e(x.p)+' <span style="font-weight:600;color:#8A8078">· '+e(suf)+(nom?' · '+e(nom):'')+'</span></span>'
+        +'<span style="white-space:nowrap;color:'+(dp>0?'#166534':'#9CA3AF')+'">'+(g.total>0?'Hay '+nf(g.total):'Sin stock')+'</span></div>'
+        +g.envases.filter(function(v){ return (v[1]||0)||(v[2]||0)||(v[3]||0); }).map(function(v){ var d2=Math.round(((v[1]||0)-(v[3]||0))*100)/100;
+          return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:.74rem;color:#6B635B;padding:2px 0 0 10px"><span style="word-break:break-all">'+e(v[0])+'</span>'
+            +'<span style="white-space:nowrap"><b style="color:'+((v[1]||0)>0?'#166534':'#9CA3AF')+'">'+nf(v[1])+'</b>'+((v[2]||0)>0?' · <span style="color:#2563EB">entr. '+nf(v[2])+'</span>':'')+' · disp. <b style="color:'+(d2>0?'#166534':(d2<0?'#B91C1C':'#9CA3AF'))+'">'+nf(d2)+'</b></span></div>'; }).join('')
+        +(function(){ var z=g.envases.filter(function(v){ return !((v[1]||0)||(v[2]||0)||(v[3]||0)); }).map(function(v){ return v[0]; }); return z.length?'<div style="font-size:.7rem;color:#A39A8F;padding:2px 0 0 10px">Sin stock: '+e(z.join(', '))+'</div>':''; })()
+        +'</div>'; }).join('')
+    +'</div>';
+}
+// Mete un trozo dentro de la caja de stock (antes de su cierre) para que wkStkRe lo conserve al redibujar
+function _ppMeteEnCaja(box,extra){ if(!extra) return box; var i=box.lastIndexOf('</div>'); return i<0?box+extra:box.slice(0,i)+extra+box.slice(i); }
 // compat: stock del código exacto (por si algo lo usa)
 function stockFor(c){if(!c)return null;c=String(c).trim().toUpperCase();return (WK_STOCK.exact&&WK_STOCK.exact[c])||null;}
 function stockChip(c){
@@ -1797,7 +1835,7 @@ function showStockDetalle(el){
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><strong style="font-size:1.05rem;color:#2A2420">📦 Stock por envase</strong><button onclick="closeStockDetalle()" style="border:none;background:#F0EDE8;border-radius:9px;width:32px;height:32px;cursor:pointer;font-size:1.2rem;color:#6B645C">×</button></div>'
       +'<div style="font-size:.85rem;color:#8A8078;margin-bottom:10px">'+c+' · SAP a '+WK_STOCK.fecha+'</div>'
       +head+rows+totRow
-      +'<div style="font-size:.68rem;color:#A39A8F;margin-top:10px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas</div>'
+      +'<div style="font-size:.68rem;color:#A39A8F;margin-top:10px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas (🚚 fecha según el pedido de compra en SAP)</div>'
       +'</div></div>';
     var d=document.createElement('div');d.id='stk-modal-wrap';d.innerHTML=html;document.body.appendChild(d);
   }catch(e){}
@@ -1866,7 +1904,17 @@ function _ppStockHtml(code){
   if(!SHOW_STOCK&&!WK_SELECCION_OK())return'';
   var g=SHOW_STOCK?stockGrupo(code):null;
   // (24/11/2026, CEO) Sin stock en el resumen (o sin envases con stock): en el pedido salen igual sus envases de SAP, con precio y cantidad
-  if(!g){ if(!WK_SELECCION_OK()) return ''; wkPideEnvases(code); return wkEnvSoloHtml(code); }
+  if(!g){
+    var _pre=SHOW_STOCK?_ppPrepsHtml(code):'';
+    if(!WK_SELECCION_OK()){
+      if(!SHOW_STOCK||!esTripa(code)) return '';
+      // Tripa sin nada en SAP con su código: se dice, y salen sus otras preparaciones si las hay
+      return '<div id="ppStkBox" data-code="'+String(code).replace(/"/g,'&quot;')+'" style="margin:12px 16px 4px;border:1px solid #E6E0D8;border-radius:12px;overflow:hidden">'
+        +'<div style="background:#2E6B42;color:#fff;font-weight:800;font-size:.85rem;padding:9px 13px">📦 Stock por envase · SAP a '+WK_STOCK.fecha+'</div>'
+        +'<div style="padding:8px 13px 11px"><div style="font-size:.8rem;color:#8A8078">'+String(code).replace(/[<>&]/g,'')+': sin stock ni envases en SAP.</div>'+_pre+'</div></div>';
+    }
+    wkPideEnvases(code); return _ppMeteEnCaja(wkEnvSoloHtml(code),_pre?'<div style="padding:0 13px 10px">'+_pre+'</div>':'');
+  }
   function nf(n){return (Math.round((n||0)*100)/100).toLocaleString('es-ES');}
   var GRID='display:grid;grid-template-columns:1.3fr .72fr .72fr .72fr .82fr;gap:6px;align-items:center';
   var head='<div style="'+GRID+';font-size:.6rem;color:#8A8078;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:5px 0;border-bottom:2px solid #EDE8E1">'
@@ -1895,7 +1943,8 @@ function _ppStockHtml(code){
   return '<div id="ppStkBox" data-code="'+String(code).replace(/"/g,'&quot;')+'" style="margin:12px 16px 4px;border:1px solid #E6E0D8;border-radius:12px;overflow:hidden">'
     +'<div style="background:#2E6B42;color:#fff;font-weight:800;font-size:.85rem;padding:9px 13px">📦 Stock por envase · SAP a '+WK_STOCK.fecha+(window.WK_PADRE_ENV&&WK_SELECCION_OK()?'<div style="font-weight:600;font-size:.74rem;opacity:.9;margin-top:2px">Toca un envase para ver su precio y pedirlo</div>':'')+'</div>'
     +'<div style="padding:6px 13px 11px">'+head+rows+totRow
-    +'<div style="font-size:.66rem;color:#A39A8F;margin-top:8px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas</div>'
+    +_ppPrepsHtml(code)
+    +'<div style="font-size:.66rem;color:#A39A8F;margin-top:8px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas (🚚 fecha según el pedido de compra en SAP)</div>'
     +'</div></div>';
 }
 // Carga el resumen de stock desde Firebase (solo si el modo stock está activo)
@@ -1908,7 +1957,8 @@ async function loadStockCatalogo(){
     WK_STOCK.fecha=(f.fecha&&f.fecha.stringValue)||"";
     try{WK_STOCK.exact=JSON.parse((f.exact&&f.exact.stringValue)||"{}");}catch(e){WK_STOCK.exact={};}
     try{WK_STOCK.base=JSON.parse((f.base&&f.base.stringValue)||"{}");}catch(e){WK_STOCK.base={};}
-    WK_STOCK._memo={};
+    try{WK_STOCK.lleg=JSON.parse((f.llegadas&&f.llegadas.stringValue)||"{}");}catch(e){WK_STOCK.lleg={};}   // (28/10) {cod:[[fecha,uds],…]} de los pedidos de compra de SAP (vuelve en v3.66: se perdió en la v3.65)
+    WK_STOCK._memo={}; WK_STOCK._prep={};
     WK_STOCK.cargado=true;
     // Re-render de la vista actual para que aparezcan los chips
     try{ if(typeof rerenderStock==='function') rerenderStock(); }catch(e){}
