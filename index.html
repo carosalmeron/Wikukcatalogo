@@ -1871,7 +1871,11 @@ function _ppStockHtml(code){
   var GRID='display:grid;grid-template-columns:1.3fr .72fr .72fr .72fr .82fr;gap:6px;align-items:center';
   var head='<div style="'+GRID+';font-size:.6rem;color:#8A8078;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:5px 0;border-bottom:2px solid #EDE8E1">'
     +'<span>Envase</span><span style="text-align:right">Stock</span><span style="text-align:right">Entr.</span><span style="text-align:right">Comp.</span><span style="text-align:right">Disp.</span></div>';
-  var rows=g.envases.map(function(e){
+  // (25/11/2026, CEO) En tripas faltaban los envases que SAP tiene dados de alta pero no salen en el resumen de stock: en el pedido se suman a la tabla
+  var _envs=g.envases.slice();
+  if(WK_SELECCION_OK()){ var _D=WK_ENVP[String(code).toUpperCase()]; if(_D&&!_D._pidiendo){ var _ya={}; _envs.forEach(function(x){ _ya[x[0]]=1; });
+    Object.keys(_D).filter(function(k){ return k.charAt(0)!=='_'&&!_ya[k]; }).forEach(function(k){ _envs.push([k,(_D[k]&&_D[k].stock)||0,0,0]); }); } }
+  var rows=_envs.map(function(e){
     var cod=e[0],st=e[1]||0,lg=e[2]||0,cm=e[3]||0,dp=Math.round((st-cm)*100)/100;
     var etq=cod===code?(cod+' · base'):cod;
     var stCol=st>0?'#166534':'#9CA3AF',dpCol=dp>0?'#166534':(dp<0?'#B91C1C':'#9CA3AF');
