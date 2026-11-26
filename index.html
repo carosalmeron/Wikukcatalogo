@@ -393,7 +393,7 @@ tr[data-pp]:hover{background:#faf7f4;}
 
 <div class="entry-screen" id="entryScreen">
   <div class="entry-logo">WI<span>KUK</span></div>
-  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.66</div>
+  <div style="font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;">v3.67</div>
   <div class="entry-tagline" id="lbl-entry-tagline">CATÁLOGO DE PRODUCTOS</div>
   <div style="display:flex;gap:14px;margin-bottom:28px;align-items:center;">
     <button id="lang-es" onclick="setLang('es')" title="Español"
@@ -3824,7 +3824,7 @@ var PREV_PRICES = {"53179":59.14,"53239":68.44,"53244":115.84,"53245":79.03,"532
 
 // ─── Panel de precios v2.39: helpers para datos de tarjeta ───
 function _ppEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function ppData(p){if(CLIENT_MODE)return '';return ' data-pp="1" data-code="'+_ppEsc(p.c)+'" data-name="'+_ppEsc(p.n)+'" data-price="'+_ppEsc(p.p)+'" data-ca="'+_ppEsc(p.ca||'')+'" data-me="'+_ppEsc(p.me||'')+'" data-fmt="'+_ppEsc(p.f||'')+'"';}
+function ppData(p){if(CLIENT_MODE)return ' data-cenv="1" data-code="'+_ppEsc(p.c)+'" data-name="'+_ppEsc(p.n)+'" data-ca="'+_ppEsc(p.ca||'')+'" data-me="'+_ppEsc(p.me||'')+'"';return ' data-pp="1" data-code="'+_ppEsc(p.c)+'" data-name="'+_ppEsc(p.n)+'" data-price="'+_ppEsc(p.p)+'" data-ca="'+_ppEsc(p.ca||'')+'" data-me="'+_ppEsc(p.me||'')+'" data-fmt="'+_ppEsc(p.f||'')+'"';}
 
 function getPriceDiff(code, currentPriceStr) {
   // (v3.45) Prioridad: precio anterior de Firebase; si no, PREV_PRICES local
@@ -6515,6 +6515,53 @@ initApp();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- ─── Panel de precios v2.39 ─── -->
+<!-- (v3.67, 26/11/2026, CEO) Enlace de clientes: al pulsar un artículo, sus envases y sus preparaciones (de SAP). Sin precios ni stock. -->
+<style>
+#cenvOv{position:fixed;inset:0;background:rgba(29,29,27,.35);z-index:2147483000;display:none}
+#cenvSh{position:fixed;left:0;right:0;bottom:0;max-height:85vh;overflow:auto;background:#fff;color:#1D1D1B;border-radius:16px 16px 0 0;z-index:2147483001;display:none;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 24px rgba(0,0,0,.15);max-width:640px;margin:0 auto}
+#cenvSh h3{margin:0 0 2px;font-size:1.05rem}#cenvSh .cm{color:#6b6b6b;font-size:.8rem;margin-bottom:12px}
+#cenvSh .ct{font-weight:700;font-size:.85rem;margin:14px 0 6px}#cenvSh .ce{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border:1px solid #e6e6e6;border-radius:10px;margin-bottom:6px;font-size:.9rem}
+#cenvSh .ce small{color:#6b6b6b}#cenvSh .cp{border:1px solid #e6e6e6;border-radius:12px;padding:10px 12px;margin-bottom:8px}#cenvSh .cp b{font-size:.9rem}
+#cenvSh .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}#cenvSh .chip{background:#f4f4f4;border-radius:999px;padding:3px 10px;font-size:.8rem}
+#cenvSh .cx{position:absolute;right:12px;top:10px;border:0;background:none;font-size:1.4rem;color:#6b6b6b;cursor:pointer}
+[data-cenv]{cursor:pointer}
+</style>
+<div id="cenvOv"></div><div id="cenvSh" role="dialog" aria-modal="true"></div>
+<script>
+(function(){
+  var API='https://crmwikuk.vercel.app/api/sap-factura?cat_envases=', C={};
+  function e(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  var sh=document.getElementById('cenvSh'), ov=document.getElementById('cenvOv');
+  document.body.appendChild(ov); document.body.appendChild(sh); // fuera de cualquier pantalla oculta
+  function cerrar(){sh.style.display='none';ov.style.display='none';}
+  ov.addEventListener('click',cerrar);
+  function envTxt(x){ if(x.base) return 'Unidad suelta'; return (x.envase||x.cod.split('.').pop())+(x.uds?' <small>· '+x.uds.toLocaleString('es-ES')+' uds</small>':''); }
+  function pintar(code,name,ca,me,d){
+    var h='<button class="cx" aria-label="Cerrar">×</button><h3>'+e(name||code)+'</h3><div class="cm">'+e(code)+(ca?' · Calibre '+e(ca):'')+(me?' · '+e(me)+' m':'')+'</div>';
+    if(!d){h+='<div class="cm">Cargando envases…</div>';}
+    else if(d.error){h+='<div class="cm">No se han podido cargar los envases ahora mismo.</div>';}
+    else{
+      var yo=d.propio, envs=yo?yo.envases.filter(function(x){return !x.base;}):[];
+      h+='<div class="ct">📦 Envases en que se sirve</div>';
+      h+= envs.length? envs.map(function(x){return '<div class="ce"><span>'+envTxt(x)+'</span><small>'+e(x.cod)+'</small></div>';}).join('') : '<div class="cm">Se sirve por unidad.</div>';
+      if(d.otras&&d.otras.length){ h+='<div class="ct">🧪 Otras preparaciones</div>'+d.otras.map(function(g){
+        var ee=g.envases.filter(function(x){return !x.base;});
+        return '<div class="cp"><b>'+e(g.nombre)+'</b> <small style="color:#6b6b6b">'+e(g.prep)+'</small>'+(ee.length?'<div class="chips">'+ee.map(function(x){return '<span class="chip">'+envTxt(x)+'</span>';}).join('')+'</div>':'')+'</div>';}).join(''); }
+    }
+    sh.innerHTML=h; sh.querySelector('.cx').addEventListener('click',cerrar);
+  }
+  async function abrir(el){
+    var code=el.getAttribute('data-code'),name=el.getAttribute('data-name'),ca=el.getAttribute('data-ca'),me=el.getAttribute('data-me');
+    sh.style.display='block';ov.style.display='block';sh.scrollTop=0;
+    if(C[code]) return pintar(code,name,ca,me,C[code]);
+    pintar(code,name,ca,me,null);
+    try{var r=await fetch(API+encodeURIComponent(code)),j=await r.json(); if(!j.ok) throw 0; C[code]=j;}catch(x){ C[code]=null; return pintar(code,name,ca,me,{error:1}); }
+    if(sh.style.display==='block') pintar(code,name,ca,me,C[code]);
+  }
+  document.addEventListener('click',function(ev){ if(typeof CLIENT_MODE==='undefined'||!CLIENT_MODE) return; var t=ev.target; if(!t||!t.closest||t.closest('#cenvSh')) return;
+    var el=t.closest('[data-cenv]'); if(el){ ev.preventDefault(); abrir(el);} });
+})();
+</script>
 <div id="ppOverlay"></div>
 <div id="ppSheet" role="dialog" aria-modal="true">
   <div class="pp-handle"></div>
