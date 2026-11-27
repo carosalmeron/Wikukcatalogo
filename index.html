@@ -1943,10 +1943,18 @@ function _ppStockHtml(code){
   return '<div id="ppStkBox" data-code="'+String(code).replace(/"/g,'&quot;')+'" style="margin:12px 16px 4px;border:1px solid #E6E0D8;border-radius:12px;overflow:hidden">'
     +'<div style="background:#2E6B42;color:#fff;font-weight:800;font-size:.85rem;padding:9px 13px">📦 Stock por envase · SAP a '+WK_STOCK.fecha+(window.WK_PADRE_ENV&&WK_SELECCION_OK()?'<div style="font-weight:600;font-size:.74rem;opacity:.9;margin-top:2px">Toca un envase para ver su precio y pedirlo</div>':'')+'</div>'
     +'<div style="padding:6px 13px 11px">'+head+rows+totRow
+    +wkAbiertasHtml(code)
     +_ppPrepsHtml(code)
     +'<div style="font-size:.66rem;color:#A39A8F;margin-top:8px;line-height:1.5">Disp. = Stock − Comprometido · Entr. = entradas previstas (🚚 fecha según el pedido de compra en SAP)</div>'
     +'</div></div>';
 }
+// (27/11/2026, CEO) Se fabrica en la orden del mes: qué queda libre y desde cuándo llegaría (lo publica la planta en stock_sap/abiertas)
+function wkAbiertasHtml(code){ var A=WK_STOCK.ab||{}, c=String(code||'').toUpperCase(); var k=Object.keys(A).filter(function(x){ return x!=='_f'&&(c===x||c.indexOf(x+'.')===0||x.indexOf(c+'.')===0); }).sort(function(a,b){return b.length-a.length;})[0]; if(!k) return '';
+  var L=(A[k]||[]).filter(function(o){return o.libre>0;}); if(!L.length) return '';
+  var M=function(m){ return ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'][Number(String(m).slice(5,7))-1]||m; }, f=function(d){ return d?String(d).slice(8,10)+'/'+String(d).slice(5,7):''; }, fac=c===k?1:Number((A._f||{})[c])||null;
+  return '<div style="margin-top:10px;background:#F3F8FE;border:1px solid #D6E4F5;border-radius:10px;padding:8px 11px;font-size:.8rem;color:#1D1D1B"><b>🏭 Se fabrica en la orden del mes</b>'+(L[0].almN?' · '+L[0].almN:'')
+    +L.slice(0,2).map(function(o){ return '<div style="margin-top:3px"><b>'+M(o.mes)+'</b>: <b>'+(fac?Math.floor(o.libre/fac).toLocaleString('es-ES'):Math.round(o.libre).toLocaleString('es-ES')+' de granel '+k)+'</b> libres · llegarían desde el <b>'+f(o.desde)+'</b></div>'; }).join('')
+    +'<div style="font-size:.7rem;color:#8A8078;margin-top:3px">Solo informa: lo liga y confirma producción.</div></div>'; }
 // Carga el resumen de stock desde Firebase (solo si el modo stock está activo)
 async function loadStockCatalogo(){
   if(!SHOW_STOCK||WK_STOCK.cargado)return;
@@ -1959,6 +1967,7 @@ async function loadStockCatalogo(){
     try{WK_STOCK.base=JSON.parse((f.base&&f.base.stringValue)||"{}");}catch(e){WK_STOCK.base={};}
     try{WK_STOCK.lleg=JSON.parse((f.llegadas&&f.llegadas.stringValue)||"{}");}catch(e){WK_STOCK.lleg={};}   // (28/10) {cod:[[fecha,uds],…]} de los pedidos de compra de SAP (vuelve en v3.66: se perdió en la v3.65)
     WK_STOCK._memo={}; WK_STOCK._prep={};
+    try{ var ra=await fetch(FB_STOCK+"/stock_sap/abiertas"); if(ra.ok){ var da=await ra.json(); WK_STOCK.ab=JSON.parse((da.fields&&da.fields.exact&&da.fields.exact.stringValue)||"{}"); } }catch(e){ WK_STOCK.ab={}; }   // (27/11/2026) órdenes del mes (lo publica la planta)
     WK_STOCK.cargado=true;
     // Re-render de la vista actual para que aparezcan los chips
     try{ if(typeof rerenderStock==='function') rerenderStock(); }catch(e){}
